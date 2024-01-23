@@ -6,7 +6,7 @@ const Layout = () => {
         <div className="w-full h-full overflow-y-auto">
             <Outlet />
         </div>
-        <div className="absolute bottom-0 w-full text-center flex pt-2" style={{background: "var(--background-secondary)"}}>
+        <div className="absolute bottom-0 w-full text-center flex pt-2 bg-secondary">
             <Link to="/scout" className="flex-grow flex flex-col">
                 <span className="material-symbols-outlined">description</span>
                 <span className="text-sm">Scout</span>

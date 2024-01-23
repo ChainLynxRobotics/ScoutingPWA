@@ -24,6 +24,30 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.bg-secondary {
+  background-color: var(--secondary);
+}
+
+.bg-background {
+  background-color: var(--background);
+}
+
+.bg-background-secondary {
+  background-color: var(--background-secondary);
+}
+
+.text-primary {
+  color: var(--text);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
 .material-symbols-outlined {
   font-family: 'Material Icons Outlined';
   font-weight: normal;
