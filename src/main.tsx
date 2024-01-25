@@ -7,13 +7,16 @@ import NoPage from './pages/NoPage';
 import ScoutPage from './pages/ScoutPage';
 import DataPage from './pages/DataPage';
 import SettingsPage from './pages/SettingsPage';
+import IndexPage from './pages/IndexPage';
+
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route index element={<IndexPage />} />
+
         <Route path="/" element={<Layout />}>
-          <Route index element={<ScoutPage />} />
           <Route path="scout" element={<ScoutPage />} />
           <Route path="data" element={<DataPage />} />
           <Route path="settings" element={<SettingsPage />} />
