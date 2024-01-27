@@ -7,6 +7,7 @@ const manifest: Partial<ManifestOptions> = {
   short_name: "FRC Scouting",
   description: "A scouting app made by FRC team 8248 to collect data about FRC matches during competitions",
   theme_color: "#16181C",
+  background_color: "#16181C",
   icons: [
     {
       src: "/icon_64x64.png",

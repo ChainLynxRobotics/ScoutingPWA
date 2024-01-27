@@ -5,6 +5,12 @@ export enum AllianceColor {
     Blue = "blue"
 }
 
+export enum HumanPlayerLocation {
+    None = 0,
+    Source = 1,
+    Amp = 2,
+}
+
 /**
  * The events that can happen during a match.
  * all have a number value that is used to identify them
@@ -56,13 +62,13 @@ export type ScoutingData = {
     }
 
     // Pre//match
-    prematch: {
-        humanPlayerLocation: number,
-        setHumanPlayerLocation: (humanPlayerLocation: number) => void,
+    pre: {
+        humanPlayerLocation: HumanPlayerLocation,
+        setHumanPlayerLocation: (humanPlayerLocation: HumanPlayerLocation) => void,
         preload: boolean,
         setPreload: (preload: boolean) => void,
-        robotLocation: number,
-        setRobotLocation: (robotLocation: number) => void,
+        notes: string,
+        setNotes: (notes: string) => void,
     }
 
 
@@ -104,9 +110,9 @@ export default function ScoutingData(matchId: string, teamNumber: number, allian
 
     // Public variables (returned)
     // Pre
-    const [humanPlayerLocation, setHumanPlayerLocation] = useState<number>(0)
+    const [humanPlayerLocation, setHumanPlayerLocation] = useState<HumanPlayerLocation>(HumanPlayerLocation.None)
     const [preload, setPreload] = useState<boolean>(false)
-    const [robotLocation, setRobotLocation] = useState<number>(0)
+    const [notes, setNotes] = useState<string>("")
     // Match data
     const [matchActive, setMatchActive] = useState<boolean>(false)
     const [inAuto, setInAuto] = useState<boolean>(true) // We start in auto
@@ -189,13 +195,13 @@ export default function ScoutingData(matchId: string, teamNumber: number, allian
             teamNumber,
             allianceColor
         },
-        prematch: {
+        pre: {
             humanPlayerLocation,
             setHumanPlayerLocation,
             preload,
             setPreload,
-            robotLocation,
-            setRobotLocation,
+            notes,
+            setNotes,
         },
         match: {
             startMatch,

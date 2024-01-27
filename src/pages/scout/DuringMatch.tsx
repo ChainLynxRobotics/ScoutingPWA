@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
-import NoMatchAvailable from "./NoMatchavailable";
+import NoMatchAvailable from "./NoMatchAvailable";
 
 
 const DuringMatch = () => {
