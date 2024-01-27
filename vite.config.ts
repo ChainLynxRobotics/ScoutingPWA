@@ -37,7 +37,7 @@ const manifest: Partial<ManifestOptions> = {
   ]
 }
 
-const includeAssets = ['fonts/*.woff2']
+const includeAssets = ['fonts/*.woff2', 'imgs/*.png']
 
 // https://vitejs.dev/config/
 export default defineConfig({
