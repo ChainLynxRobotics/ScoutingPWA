@@ -21,11 +21,26 @@ export default function App() {
   const darkTheme = createTheme({
     palette: {
       mode: 'dark',
+      primary: {
+        main: '#5B7FC5'
+      },
+      secondary: {
+        main: '#696969'
+      },
+      success: {
+        main: '#82ec7a'
+      },
+      warning: {
+        main: '#f7b955'
+      },
+      error: {
+        main: '#f77070'
+      },
     },
   });
   
   // TODO: Remove this when done testing
-  const scoutingData = ScoutingData("2023wasno_q7", 8248, AllianceColor.Blue); 
+  const scoutingData = ScoutingData("2023wasno_q7", 8248, AllianceColor.Red); 
 
   return (
     <ThemeProvider theme={darkTheme}>

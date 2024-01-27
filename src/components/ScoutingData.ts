@@ -16,19 +16,21 @@ export enum HumanPlayerLocation {
  * all have a number value that is used to identify them
  */
 export enum MatchEvent {
-    matchStart = 0, // When the match starts (will always have a timestamp of 0)
-    autoEnd, // When autonomous mode ends and teleop starts
-    matchEnd, // When the match ends, always the last event in the match
+    matchStart, // When the match starts, always at time 0
+    autoEnd, // When auto ends
+    matchEnd, // When the match finishes
     acquireGround, // Ground Pickup
     acquireStation, // Pickup from Source
     acquireFail, // Fail to pickup game piece. Location / type unimportant.
-    scoreHigh, // Speaker.
-    scoreHighBoost, // Speaker while AMPed
-    scoreMid, // Unused
-    scoreMidBoost, // Unused
+    scoreHigh, // Trap
+    scoreHighBoost, // Unused
+    scoreHighFail, // Trap fail
+    scoreMid, // Speaker
+    scoreMidBoost, // Speaker while AMPed
+    scoreMidFail, // Speaker fail
     scoreLow, // AMP score
     scoreLowBoost, // AMP score
-    scoreFail, // Failed to score. Location unimportant.
+    scoreLowFail, // Failed to score.
     climbSuccessTop, // Unused (Traverse last year)
     climbSuccessHigh, // Unused (High last year)
     climbSuccessMid, // Unused (Mid last year)
@@ -90,7 +92,7 @@ export type ScoutingData = {
         setIsAuto: (isAuto: boolean) => void,
         getTime: () => number, // Epoch time relative to start of match
         events: Array<MatchEventData>,
-        addEvent: (event: MatchEventData) => void,
+        addEvent: (event: MatchEvent, time: number) => void,
 
         isBeingDefendedOn: boolean,
         /**
@@ -123,36 +125,31 @@ export default function ScoutingData(matchId: string, teamNumber: number, allian
     const [matchStart, setMatchStart] = useState<number>(0)
 
     const getTime = () => {
+        if (!matchActive) {
+            return 0;
+        }
         return Date.now() - matchStart;
     }
 
-    const addEvent = (event: MatchEventData) => {
-        setEvents([...events, event])
+    const addEvent = (event: MatchEvent, time: number) => {
+        console.log("Recording event "+event+" at time "+time+"ms");
+        setEvents([...events, {event, time}]);
     }
 
     const startMatch = () => {
         setMatchStart(Date.now());
-        addEvent({
-            event: MatchEvent.matchStart,
-            time: 0
-        })
+        addEvent(MatchEvent.matchStart, 0);
         setMatchActive(true);
     }
 
     const endMatch = () => {
         // For all toggles, reset them back to their default state
         if (isBeingDefendedOn) {
-            addEvent({
-                event: MatchEvent.defendedOnEnd,
-                time: getTime()
-            })
+            addEvent(MatchEvent.defendedOnEnd, getTime());
             setIsBeingDefendedOn(false);
         }
 
-        addEvent({
-            event: MatchEvent.matchEnd,
-            time: getTime()
-        })
+        addEvent(MatchEvent.matchEnd, getTime());
         setMatchActive(false);
     }
 
@@ -160,10 +157,7 @@ export default function ScoutingData(matchId: string, teamNumber: number, allian
     const setIsAuto = (inAutoVal: boolean) => {
         // If we are in auto and leaving it, add an autoEnd event
         if (inAuto && !inAutoVal) {
-            addEvent({
-                event: MatchEvent.autoEnd,
-                time: getTime()
-            })
+            addEvent(MatchEvent.autoEnd, getTime());
         } else if (!inAuto && inAutoVal) { 
             // If we are not in auto and entering it (due to misclick or something), remove previous autoEnd events
             setEvents(events.filter((event) => event.event !== MatchEvent.autoEnd));
@@ -175,16 +169,10 @@ export default function ScoutingData(matchId: string, teamNumber: number, allian
     const setIsBeingDefendedOnWithEvents = (isBeingDefendedOnVal: boolean) => {
         // If we are being defended on and were not before, add an isBeingDefendedOnStart event
         if (isBeingDefendedOnVal && !isBeingDefendedOn) {
-            addEvent({
-                event: MatchEvent.defendedOnStart,
-                time: getTime()
-            })
+            addEvent(MatchEvent.defendedOnStart, getTime());
         } else if (!isBeingDefendedOnVal && isBeingDefendedOn) {
             // If we are not being defended on and were before, add an isBeingDefendedOnEnd event
-            addEvent({
-                event: MatchEvent.defendedOnEnd,
-                time: getTime()
-            })
+            addEvent(MatchEvent.defendedOnEnd, getTime());
         }
         setIsBeingDefendedOn(isBeingDefendedOnVal);
     }

@@ -43,7 +43,7 @@ const PreMatch = () => {
                     <MenuItem value={HumanPlayerLocation.Amp}>Amp</MenuItem>
                 </Select>
             </FormControl>
-            <div className="h-4"></div>
+            <div className="h-4"></div> {/* Spacer */}
             <FormGroup>
                 <FormControlLabel 
                     control={<Checkbox id="preload" 
@@ -52,7 +52,7 @@ const PreMatch = () => {
                     label="Note Preloaded" 
                 />
             </FormGroup>
-            <div className="h-4"></div>
+            <div className="h-4"></div> {/* Spacer */}
             <TextField
                 id="notes"
                 label="Extra Notes"
