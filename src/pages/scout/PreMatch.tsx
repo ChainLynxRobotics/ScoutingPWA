@@ -1,15 +1,18 @@
 import InputLabel from "@mui/material/InputLabel/InputLabel";
 import MenuItem from "@mui/material/MenuItem/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select/Select";
-import { HumanPlayerLocation } from "../../components/ScoutingStateData";
-import { useContext } from "react";
+import { AllianceColor, HumanPlayerLocation } from "../../components/ScoutingStateData";
+import { useContext, useEffect } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
 import FormControl from "@mui/material/FormControl/FormControl";
-import { Checkbox, FormControlLabel, FormGroup, TextField } from "@mui/material";
+import { Button, Checkbox, FormControlLabel, FormGroup, TextField } from "@mui/material";
+import { NavLink, useNavigate } from "react-router-dom";
 
 
 const PreMatch = () => {
+
+    const navigate = useNavigate();
 
     const context = useContext(ScoutingContext);
     if (!context) return (<NoMatchAvailable />);
@@ -26,9 +29,36 @@ const PreMatch = () => {
         context.pre.setNotes(event.target.value);
     }
 
+    // Redirect to during match when the match starts
+    useEffect(() => {
+        if (context.match.matchActive) {
+            navigate("/scout/during");
+        }
+    }, [context.match.matchActive]);
+
     return (
+        <>
+        <div className="w-full mb-2 flex">
+            <div className="flex-1 flex justify-start items-center"></div>
+            <h1 className="text-lg m-2 flex-1 flex justify-center items-center">
+                Pre Match
+            </h1>
+            <div className="flex-1 flex justify-end items-center">
+                <NavLink to="/scout/during">
+                    <Button variant="text">
+                        Match
+                        <span className="material-symbols-outlined text-sm">chevron_right</span>
+                    </Button>
+                </NavLink>
+            </div>
+        </div>
         <div className="w-full max-w-xl mx-auto flex flex-col items-center px-4">
-            <h1 className="text-xl text-center my-4">Pre-Match</h1>
+            <h1 className="text-lg font-bold my-2">
+                You are scouting&nbsp;
+                <span className={`font-bold ${context.meta.allianceColor == AllianceColor.Red ? 'text-red-400' : 'text-blue-400'}`}>
+                    {context.meta.teamNumber}
+                </span>
+            </h1>
             <FormControl variant="filled" sx={{ m: 1, minWidth: 224 }}>
                 <InputLabel id="human-player-location-label">
                     {context.meta.teamNumber != 8248 ? `${context.meta.teamNumber}'s Human Player Location` : `Soren's Location`}
@@ -66,6 +96,7 @@ const PreMatch = () => {
                 onChange={handleNotesChange}
             />
         </div>
+        </>
     );
 };
   

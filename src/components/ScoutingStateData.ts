@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { AUTO_DURATION, BOOST_DURATION } from "../constants"
 
 export enum AllianceColor {
     Red = "red",
@@ -87,6 +88,7 @@ export type ScoutingStateData = {
          */
         endMatch: () => void,
         matchActive: boolean,
+        matchStart: number,
         inAuto: boolean,
         /**
          * Note: Will add the autoEnd event if we are leaving auto (or remove it if we are re-entering auto due to misclick)
@@ -117,7 +119,6 @@ export type ScoutingStateData = {
 
 export default function ScoutingStateData(matchId: string, teamNumber: number, allianceColor: AllianceColor): ScoutingStateData {
 
-    // Public variables (returned)
     // Pre
     const [humanPlayerLocation, setHumanPlayerLocation] = useState<HumanPlayerLocation>(HumanPlayerLocation.None)
     const [preload, setPreload] = useState<boolean>(false)
@@ -129,7 +130,6 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
     const [isBeingDefendedOn, setIsBeingDefendedOn] = useState<boolean>(false)
     const [isBoostActive, setIsBoostActive] = useState<boolean>(false)
 
-    // Private variables (not returned)
     const [matchStart, setMatchStart] = useState<number>(0)
 
     const getTime = () => {
@@ -173,6 +173,18 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
         setInAuto(inAutoVal);
     }
 
+    // Automatically disable auto after a certain amount of time
+    useEffect(() => {
+        if (matchStart) {
+            const timeout = setTimeout(() => {
+                if (inAuto) {
+                    setIsAuto(false);
+                }
+            }, AUTO_DURATION * 1000);
+            return () => clearTimeout(timeout);
+        }
+    }, [matchStart]);
+
     // Use our own setIsBeingDefendedOn function so we can add the isBeingDefendedOnStart and isBeingDefendedOnEnd events
     const setIsBeingDefendedOnWithEvents = (isBeingDefendedOnVal: boolean) => {
         // If we are being defended on and were not before, add an isBeingDefendedOnStart event
@@ -185,7 +197,7 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
         setIsBeingDefendedOn(isBeingDefendedOnVal);
     }
 
-    const setBoostActiveWithEvents = (isBoostActiveVal: boolean) => {
+    const setIsBoostActiveWithEvents = (isBoostActiveVal: boolean) => {
         // If we are activating boost and were not before, add a boostStart event
         if (isBoostActiveVal && !isBoostActive) {
             addEvent(MatchEvent.boostStart, getTime());
@@ -195,6 +207,16 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
         }
         setIsBoostActive(isBoostActiveVal);
     }
+
+    // Automatically add the boostEnd event after a certain amount of time
+    useEffect(() => {
+        if (isBoostActive) {
+            const timeout = setTimeout(() => {
+                setIsBoostActiveWithEvents(false);
+            }, BOOST_DURATION * 1000);
+            return () => clearTimeout(timeout);
+        }
+    }, [isBoostActive]);
 
     return {
         meta: {
@@ -214,6 +236,7 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
             startMatch,
             endMatch,
             matchActive,
+            matchStart,
             inAuto,
             setIsAuto,
             getTime,
@@ -222,7 +245,7 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
             isBeingDefendedOn,
             setIsBeingDefendedOn: setIsBeingDefendedOnWithEvents,
             isBoostActive,
-            setIsBoostActive: setBoostActiveWithEvents,
+            setIsBoostActive: setIsBoostActiveWithEvents,
         },
         post: {}
     }
