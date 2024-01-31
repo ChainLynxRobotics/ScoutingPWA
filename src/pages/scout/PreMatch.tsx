@@ -1,7 +1,7 @@
 import InputLabel from "@mui/material/InputLabel/InputLabel";
 import MenuItem from "@mui/material/MenuItem/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select/Select";
-import { HumanPlayerLocation } from "../../components/ScoutingData";
+import { HumanPlayerLocation } from "../../components/ScoutingStateData";
 import { useContext } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
@@ -30,7 +30,9 @@ const PreMatch = () => {
         <div className="w-full max-w-xl mx-auto flex flex-col items-center px-4">
             <h1 className="text-xl text-center my-4">Pre-Match</h1>
             <FormControl variant="filled" sx={{ m: 1, minWidth: 224 }}>
-                <InputLabel id="human-player-location-label">{context.meta.teamNumber}'s Human Player Location</InputLabel>
+                <InputLabel id="human-player-location-label">
+                    {context.meta.teamNumber != 8248 ? `${context.meta.teamNumber}'s Human Player Location` : `Soren's Location`}
+                </InputLabel>
                 <Select
                     labelId="human-player-location-label"
                     id="human-player-location"

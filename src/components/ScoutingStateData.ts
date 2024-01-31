@@ -43,6 +43,8 @@ export enum MatchEvent {
     specialRankingOpportunity, // Trap
     defendedOnStart, // When the robot is being defended on
     defendedOnEnd, // When the robot is no longer being defended on
+    boostStart, // When the amp is active
+    boostEnd, // When the amp is no longer active
 }
 
 export type MatchEventData = {
@@ -55,7 +57,7 @@ export type MatchEventData = {
  * Note: None of these functions will add events to the events array (except for addEvent), 
  * for example setIsBeingDefendedOn(boolean) will not add isBeingDefendedOnStart or isBeingDefendedOnEnd events
  */
-export type ScoutingData = {
+export type ScoutingStateData = {
     // Meta data
     meta: {
         matchId: string,
@@ -99,6 +101,11 @@ export type ScoutingData = {
          * Note: Will add isBeingDefendedOnStart and isBeingDefendedOnEnd events
          */
         setIsBeingDefendedOn: (isBeingDefended: boolean) => void,
+        isBoostActive: boolean,
+        /**
+         * Note: Will add boostStart and boostEnd events, and automatically add the boostEnd event after a certain amount of time
+         */
+        setIsBoostActive: (isBoostActive: boolean) => void,
     }
     
 
@@ -108,7 +115,7 @@ export type ScoutingData = {
 
 }
 
-export default function ScoutingData(matchId: string, teamNumber: number, allianceColor: AllianceColor): ScoutingData {
+export default function ScoutingStateData(matchId: string, teamNumber: number, allianceColor: AllianceColor): ScoutingStateData {
 
     // Public variables (returned)
     // Pre
@@ -120,6 +127,7 @@ export default function ScoutingData(matchId: string, teamNumber: number, allian
     const [inAuto, setInAuto] = useState<boolean>(true) // We start in auto
     const [events, setEvents] = useState<Array<MatchEventData>>([])
     const [isBeingDefendedOn, setIsBeingDefendedOn] = useState<boolean>(false)
+    const [isBoostActive, setIsBoostActive] = useState<boolean>(false)
 
     // Private variables (not returned)
     const [matchStart, setMatchStart] = useState<number>(0)
@@ -177,6 +185,17 @@ export default function ScoutingData(matchId: string, teamNumber: number, allian
         setIsBeingDefendedOn(isBeingDefendedOnVal);
     }
 
+    const setBoostActiveWithEvents = (isBoostActiveVal: boolean) => {
+        // If we are activating boost and were not before, add a boostStart event
+        if (isBoostActiveVal && !isBoostActive) {
+            addEvent(MatchEvent.boostStart, getTime());
+        } else if (!isBoostActiveVal && isBoostActive) {
+            // If we are deactivating boost and were before, add a boostEnd event
+            addEvent(MatchEvent.boostEnd, getTime());
+        }
+        setIsBoostActive(isBoostActiveVal);
+    }
+
     return {
         meta: {
             matchId,
@@ -202,6 +221,8 @@ export default function ScoutingData(matchId: string, teamNumber: number, allian
             addEvent,
             isBeingDefendedOn,
             setIsBeingDefendedOn: setIsBeingDefendedOnWithEvents,
+            isBoostActive,
+            setIsBoostActive: setBoostActiveWithEvents,
         },
         post: {}
     }

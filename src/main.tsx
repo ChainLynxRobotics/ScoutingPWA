@@ -12,7 +12,7 @@ import PreMatch from './pages/scout/PreMatch';
 import DuringMatch from './pages/scout/DuringMatch';
 import PostMatch from './pages/scout/PostMatch';
 import ScoutingContext from './components/context/ScoutingContext';
-import ScoutingData, { AllianceColor } from './components/ScoutingData';
+import ScoutingStateData, { AllianceColor } from './components/ScoutingStateData';
 import createTheme from '@mui/material/styles/createTheme';
 import { ThemeProvider } from '@emotion/react';
 
@@ -40,7 +40,7 @@ export default function App() {
   });
   
   // TODO: Remove this when done testing
-  const scoutingData = ScoutingData("2023wasno_q7", 8248, AllianceColor.Red); 
+  const scoutingData = ScoutingStateData("2023wasno_q7", 8248, AllianceColor.Red); 
 
   return (
     <ThemeProvider theme={darkTheme}>

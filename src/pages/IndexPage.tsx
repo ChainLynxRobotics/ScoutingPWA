@@ -54,10 +54,10 @@ const IndexPage = () => {
             { installPrompt != null ? 
                 <Button variant="contained" onClick={installApp}>Install App</Button>
                 :
-                <></>
+                <Button variant="contained" disabled>Install App</Button>
             }
 
-            <p className="mt-8">On Desktop/Android, you must click the Install Button above. If there is no button, <a href="https://caniuse.com/mdn-api_beforeinstallpromptevent" target="_blank" className="underline">PWAs may not be supported on your browser.</a></p>
+            <p className="mt-8">On Desktop/Android, you must click the Install Button above. If the button is disabled, <a href="https://caniuse.com/mdn-api_beforeinstallpromptevent" target="_blank" className="underline">PWAs may not be supported on your browser.</a></p>
             <p className="mt-4">On iOS, you must click the Share Button &#40;<span className="material-symbols-outlined">ios_share</span>&#41; and tap "Add to Home Screen" to install the app.</p>
 
             { import.meta.env.DEV && /* If we're in dev mode, show a button to skip the install page */

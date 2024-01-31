@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { Outlet } from "react-router-dom";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
-import { AllianceColor } from "../../components/ScoutingData";
+import { AllianceColor } from "../../components/ScoutingStateData";
 
 const ScoutPage = () => {
     
