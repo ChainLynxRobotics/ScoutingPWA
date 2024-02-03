@@ -4,6 +4,7 @@ import NoMatchAvailable from "./NoMatchAvailable";
 import { Button } from "@mui/material";
 import { AllianceColor, MatchEvent } from "../../components/ScoutingStateData";
 import { NavLink } from "react-router-dom";
+import CountDown from "../../components/CountDown";
 
 
 const DuringMatch = () => {
@@ -45,20 +46,25 @@ const DuringMatch = () => {
         context?.match.addEvent(MatchEvent.acquireFail, context.match.getTime());
     }
 
-    function onClimb() {
-        context?.match.addEvent(MatchEvent.climbSuccessLow, context.match.getTime());
-    }
-
-    function onClimbFail() {
-        context?.match.addEvent(MatchEvent.climbFail, context.match.getTime());
-    }
-
     function onTrapScore() {
         context?.match.addEvent(MatchEvent.scoreHigh, context.match.getTime());
     }
 
     function onTrapMiss() {
         context?.match.addEvent(MatchEvent.scoreHighFail, context.match.getTime());
+    }
+
+    function toggleDefendedOn() {
+        context?.match.setIsBeingDefendedOn(!context.match.isBeingDefendedOn);
+    }
+
+    /**
+     * Gets the number of a certain type or types of events that have been saved
+     * @param event - Event(s) to look for
+     * @returns the number of the events that have been recorded
+     */
+    function numOfEvents(...events: MatchEvent[]): number {
+        return context?.match.events.filter(e=>events.includes(e.event)).length || 0;
     }
 
     const isBlue = context.meta.allianceColor == AllianceColor.Blue;
@@ -90,7 +96,7 @@ const DuringMatch = () => {
         </div>
         <div className="w-full max-w-xl mx-auto flex flex-col items-center px-4">
             
-            <div className="max-w-md relative my-10">
+            <div className="max-w-md relative my-10 whitespace-nowrap">
                 <img src={`/imgs/crescendo_field_render_${context.meta.allianceColor}.png`} 
                     alt="Crescendo Field Render" className={`w-full ${rotateField ? '-scale-100' : ''}`} />
                 
@@ -101,35 +107,64 @@ const DuringMatch = () => {
                 </button>
                 {/* Amp scoring buttons */}
                 <div className="absolute -translate-y-1/2 -translate-x-1/2 flex gap-2" style={{top: !reverseY ? '-20px' : 'calc(100% + 20px)', left: !reverseX ? '66%' : '34%'}}>
-                    <Button variant="contained" color="success" size="small" disabled={isDisabled} onClick={onAmpScore}>Score</Button>
-                    <Button variant="contained" color="error" size="small" disabled={isDisabled} onClick={onAmpMiss}>Miss</Button>
+                    <Button variant="contained" color="success" size="small" disabled={isDisabled} onClick={onAmpScore}>
+                        Score ({numOfEvents(MatchEvent.scoreLow, MatchEvent.scoreLowBoost)})
+                    </Button>
+                    <Button variant="contained" color="error" size="small" disabled={isDisabled} onClick={onAmpMiss}>
+                        Miss ({numOfEvents(MatchEvent.scoreLowFail)})
+                    </Button>
                 </div>
                 {/* Amp boost button */}
                 <div className="absolute -translate-y-1/2 -translate-x-1/2 flex" style={{top: !reverseY ? '38px' : 'calc(100% - 38px)', left: !reverseX ? '66%' : '34%'}}>
-                    <Button variant="contained" color="warning" size="small" disabled={isDisabled} onClick={onAmpBoost}>Boost</Button>
+                    <Button variant="contained" color="warning" size="small" disabled={isDisabled} onClick={onAmpBoost} className={context.match.isBoostActive ? 'glow-warning' : ''}>
+                        Boost 
+                        {context.match.isBoostActive && 
+                            <span className="text-xs">
+                                &nbsp;(<CountDown end={context.match.matchStart + context.match.boostEnd} />)
+                            </span>
+                        }
+                    </Button>
                 </div>
                 {/* Speaker scoring buttons */}
                 <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-2" style={{top: !reverseY ? '34%' : '66%', left: !reverseX ? 'calc(100% - 24px)' : '24px'}}>
-                    <Button variant="contained" color="success" size="small" disabled={isDisabled} onClick={onSpeakerScore}>Score</Button>
-                    <Button variant="contained" color="error" size="small" disabled={isDisabled} onClick={onSpeakerMiss}>Miss</Button>
+                    <Button variant="contained" color="success" size="small" disabled={isDisabled} onClick={onSpeakerScore}>
+                        Score ({numOfEvents(MatchEvent.scoreMid)})
+                    </Button>
+                    <Button variant="contained" color="error" size="small" disabled={isDisabled} onClick={onSpeakerMiss}>
+                        Miss ({numOfEvents(MatchEvent.scoreMidFail)})
+                    </Button>
                 </div>
                 {/* Ring pickup buttons */}
                 <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-2 whitespace-nowrap items-center" style={{top: !reverseY ? 'calc(100% - 0px)' : '0px', left: !reverseX ? '50%' : '50%'}}>
                     <div className="flex gap-2" style={{flexDirection: !rotateField ? 'unset' : 'row-reverse'}}>
-                        <Button variant="contained" color="primary" size="small" disabled={isDisabled} onClick={onSourcePickup}>Source Pickup</Button>
-                        <Button variant="contained" color="secondary" size="small" disabled={isDisabled} onClick={onGroundPickup}>Ground Pickup</Button>
+                        <Button variant="contained" color="primary" size="small" disabled={isDisabled} onClick={onSourcePickup}>
+                            Source Pickup ({numOfEvents(MatchEvent.acquireStation)})
+                        </Button>
+                        <Button variant="contained" color="secondary" size="small" disabled={isDisabled} onClick={onGroundPickup}>
+                            Ground Pickup ({numOfEvents(MatchEvent.acquireGround)})
+                        </Button>
                     </div>
-                    <Button variant="contained" color="error" size="small" disabled={isDisabled} onClick={onPickupFail}>Pickup fail</Button>
+                    <Button variant="contained" color="error" size="small" disabled={isDisabled} onClick={onPickupFail}>
+                        Pickup fail ({numOfEvents(MatchEvent.acquireFail)})
+                    </Button>
                 </div>
                 {/* Climb & Trap buttons */}
                 <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-2 items-center" style={{top: !reverseY ? '50%' : '50%', left: !reverseX ? '35%' : '65%'}}>
                     <div className="flex gap-2">
-                        <Button variant="contained" color="primary" size="small" disabled={isDisabled} onClick={onClimb}>Climb</Button>
-                        <Button variant="contained" color="error" size="small" disabled={isDisabled} onClick={onClimbFail}>Climb Fail</Button>
+                        <Button variant="contained" color="success" size="small" disabled={isDisabled} onClick={onTrapScore}>
+                            Trap Score ({numOfEvents(MatchEvent.scoreHigh)})
+                        </Button>
+                        <Button variant="contained" color="error" size="small" disabled={isDisabled} onClick={onTrapMiss}>
+                            Trap Miss ({numOfEvents(MatchEvent.scoreHighFail)})
+                        </Button>
                     </div>
+                </div>
+                {/* Is being defended on buttons */}
+                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-2 items-center" style={{top: !reverseY ? '25%' : '75%', left: !reverseX ? '25%' : '75%'}}>
                     <div className="flex gap-2">
-                        <Button variant="contained" color="success" size="small" disabled={isDisabled} onClick={onTrapScore}>Score</Button>
-                        <Button variant="contained" color="error" size="small" disabled={isDisabled} onClick={onTrapMiss}>Miss</Button>
+                        <Button variant="contained" color="primary" size="small" disabled={isDisabled} onClick={toggleDefendedOn} className={context.match.isBeingDefendedOn ? 'glow-primary' : ''}>
+                            Is being defended
+                        </Button>
                     </div>
                 </div>
             </div>

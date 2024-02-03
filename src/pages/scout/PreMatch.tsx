@@ -2,7 +2,7 @@ import InputLabel from "@mui/material/InputLabel/InputLabel";
 import MenuItem from "@mui/material/MenuItem/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select/Select";
 import { AllianceColor, HumanPlayerLocation } from "../../components/ScoutingStateData";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
 import FormControl from "@mui/material/FormControl/FormControl";
@@ -30,8 +30,9 @@ const PreMatch = () => {
     }
 
     // Redirect to during match when the match starts
+    const wasMatchActive = useRef(context.match.matchActive);
     useEffect(() => {
-        if (context.match.matchActive) {
+        if (context.match.matchActive && !wasMatchActive.current) {
             navigate("/scout/during");
         }
     }, [context.match.matchActive]);
