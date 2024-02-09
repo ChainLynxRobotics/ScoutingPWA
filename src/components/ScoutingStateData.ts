@@ -40,12 +40,11 @@ export enum MatchEvent {
     rankingPointAchieved, // Score based ranking point has been achieved. MELODY.
     specialAuto, // Has completed Auto challenge. This is crossing a line.
     specialBoost, // Activated Boost (This year this is amplification)
+    specialBoostEnd, // Boost has ended
     specialCoop, // Completed Coop challenge
     specialRankingOpportunity, // Trap
     defendedOnStart, // When the robot is being defended on
     defendedOnEnd, // When the robot is no longer being defended on
-    boostStart, // When the amp is active
-    boostEnd, // When the amp is no longer active
 }
 
 export type MatchEventData = {
@@ -108,7 +107,12 @@ export type ScoutingStateData = {
          * Note: Will add boostStart and boostEnd events, and automatically add the boostEnd event after a certain amount of time
          */
         setIsBoostActive: (isBoostActive: boolean) => void,
-        boostEnd: number
+        boostEnd: number,
+        /**
+         * Note: This will add the specialCoop event when set to true and remove the event from the timeline if set to false
+         */
+        setAttemptedCooperation: (attemptedCooperation: boolean) => void,
+        attemptedCooperation: boolean
     }
     
 
@@ -130,6 +134,7 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
     const [events, setEvents] = useState<Array<MatchEventData>>([])
     const [isBeingDefendedOn, setIsBeingDefendedOn] = useState<boolean>(false)
     const [isBoostActive, setIsBoostActive] = useState<boolean>(false)
+    const [attemptedCooperation, setAttemptedCooperation] = useState<boolean>(false)
 
     const [matchStart, setMatchStart] = useState<number>(0)
     const [boostEnd, setBoostEnd] = useState<number>(0);
@@ -202,12 +207,28 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
     const setIsBoostActiveWithEvents = (isBoostActiveVal: boolean) => {
         // If we are activating boost and were not before, add a boostStart event
         if (isBoostActiveVal && !isBoostActive) {
-            addEvent(MatchEvent.boostStart, getTime());
+            addEvent(MatchEvent.specialBoost, getTime());
         } else if (!isBoostActiveVal && isBoostActive) {
             // If we are deactivating boost and were before, add a boostEnd event
-            addEvent(MatchEvent.boostEnd, getTime());
+            addEvent(MatchEvent.specialBoostEnd, getTime());
         }
         setIsBoostActive(isBoostActiveVal);
+    }
+
+    // Because the cooperation can only happen once per match, this code allows it to work with a checkbox and
+    // add an event when checked, but remove that event if it gets unchecked
+    const setAttemptedCooperationWithEvents = (attemptedCooperation: boolean) => {
+        if (events.filter(e=>e.event==MatchEvent.specialCoop).length > 0) {
+            if (!attemptedCooperation) {
+                setEvents(events.filter(e=>e.event!=MatchEvent.specialCoop));
+                setAttemptedCooperation(false);
+            } else console.warn("Attempted to add specialCoop event when it already exists")
+        } else {
+            if (attemptedCooperation) {
+                addEvent(MatchEvent.specialCoop, getTime())
+                setAttemptedCooperation(true);
+            } else console.warn("Attempted to remove specialCoop event when it doesn't exist")
+        }
     }
 
     // Automatically add the boostEnd event after a certain amount of time
@@ -250,7 +271,9 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
             setIsBeingDefendedOn: setIsBeingDefendedOnWithEvents,
             isBoostActive,
             setIsBoostActive: setIsBoostActiveWithEvents,
-            boostEnd
+            boostEnd,
+            attemptedCooperation,
+            setAttemptedCooperation: setAttemptedCooperationWithEvents,
         },
         post: {}
     }

@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
-import { Button } from "@mui/material";
+import { Button, Checkbox, FormControlLabel } from "@mui/material";
 import { AllianceColor, MatchEvent } from "../../components/ScoutingStateData";
 import { NavLink } from "react-router-dom";
 import CountDown from "../../components/CountDown";
@@ -56,6 +56,10 @@ const DuringMatch = () => {
 
     function toggleDefendedOn() {
         context?.match.setIsBeingDefendedOn(!context.match.isBeingDefendedOn);
+    }
+
+    function toggleAttemptedCooperation() {
+        context?.match.setAttemptedCooperation(!context.match.attemptedCooperation);
     }
 
     /**
@@ -168,6 +172,9 @@ const DuringMatch = () => {
                     </div>
                 </div>
             </div>
+
+            <FormControlLabel label="Attempted to Cooperate" 
+                control={<Checkbox checked={context.match.attemptedCooperation} onClick={toggleAttemptedCooperation} disabled={isDisabled}/>} />
         </div>
         </>
     );
