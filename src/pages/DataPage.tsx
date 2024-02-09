@@ -24,10 +24,10 @@ const DataPage = () => {
         games.push(
             <div className="mx-5 my-2">
                 <Card variant="outlined">
-                    <div className="p-2 block">
+                    <div className="flex items-center p-2">
                         <span className="text-xl">Match {game.matchNum} - Team {game.teamNum}</span>
                         <IconButton>
-                            <MoreIcon/>
+                            <span className="material-symbols-outlined">more_vert</span>
                         </IconButton>
                     </div>
                 </Card>
@@ -41,64 +41,26 @@ const DataPage = () => {
             {games}
         </div>
 
-        <div className="absolute bottom-20 left-0 right-0 flex justify-center">
+        <div className="absolute bottom-20 left-0 right-0 flex justify-center items-center">
             <Stack direction="row" spacing={1} justifyContent="center">
-                <Chip icon={<ShareIcon />} label="Share" onClick={() => {}} />
-                <Chip icon={<CollectIcon />} label="Collect" onClick={() => {}} />
-                <Chip icon={<ExportIcon />} label="Export" onClick={() => {}} />
+                <Chip color="primary" label="Share" onClick={() => {}}
+                    icon={<span className="material-symbols-outlined">qr_code_2</span>}  />
+                <Chip label="Collect" onClick={() => {}} 
+                    icon={<span className="material-symbols-outlined">photo_camera</span>} />
+                <Chip label="Export" onClick={() => {}} 
+                    icon={<span className="material-symbols-outlined">download</span>}/>
             </Stack>
-            {/* Tyler please help me center these */}
-            <div className="float-right"> {/* help why isn't this doing anything */}
-                <Tooltip title="Idk what this is supposed to do 🤷">
-                    <IconButton>
-                        <InfoIcon />
-                    </IconButton>
-                </Tooltip>
-            </div>
+            <Tooltip title={<span className="text-md">One device is designated as the 'host' device. 
+                If you ARE the host, click the Collect button and scan other qr codes. 
+                If you are NOT the host device, click on Share to generate qr codes containing match data for the host to scan.</span>}>
+                <IconButton>
+                    <span className="material-symbols-outlined">info</span>
+                </IconButton>
+            </Tooltip>
         </div>
     </div>
     );
-  };
-
-const ShareIcon = () => {
-    return (
-        <span className="material-symbols-outlined">
-        qr_code_2
-        </span>
-    )
-}
-
-const CollectIcon = () => {
-    return (
-        <span className="material-symbols-outlined">
-        photo_camera
-        </span>
-    )
-}
-
-const ExportIcon = () => {
-    return (
-        <span className="material-symbols-outlined">
-        download
-        </span>
-    )
-}
-
-const InfoIcon = () => {
-    return (
-        <span className="material-symbols-outlined">
-            info
-        </span>
-    )
-}
-
-const MoreIcon = () => {
-    return (
-        <span className="material-symbols-outlined">
-            more_vert
-        </span>
-    )
-}
+};
   
-  export default DataPage;
+export default DataPage;
   
