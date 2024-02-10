@@ -10,6 +10,8 @@ import { ClimbLocation } from "../../components/ScoutingStateData";
 import MenuItem from "@mui/material/MenuItem/MenuItem";
 import Rating from "@mui/material/Rating/Rating";
 import TextField from "@mui/material/TextField/TextField";
+import EventLog from "../../components/EventLog";
+import Alert from "@mui/material/Alert/Alert";
 
 
 const PostMatch = () => {
@@ -27,6 +29,10 @@ const PostMatch = () => {
         4: 'Good+',
         4.5: 'Excellent',
         5: 'Excellent+',
+    }
+
+    function handleNotesChange(event: React.ChangeEvent<HTMLInputElement>) {
+        context?.pre.setNotes(event.target.value);
     }
 
     if(!context) {
@@ -49,7 +55,15 @@ const PostMatch = () => {
             <div className="flex-1 flex justify-end items-center"></div>
         </div>
         <div className="w-full max-w-xl mx-auto flex flex-col items-left px-4 gap-4">
-            <FormControl>
+
+            {context.match.matchActive &&
+                <Alert severity="warning" sx={{mb: "12px"}}>
+                    <div className="text-lg mb-1"><b>Match Still Active!</b></div>
+                    <div><button onClick={context.match.endMatch}><u>Click Here</u></button> or in the top right corner to stop the timer!</div>
+                </Alert>
+            }
+
+            <FormControl sx={{maxWidth: "256px"}}>
                 <InputLabel>Climb location</InputLabel>
                 <Select id="climb-location" label="Climb location" variant="outlined">
                     <MenuItem value={ClimbLocation.None}>None</MenuItem>
@@ -59,21 +73,21 @@ const PostMatch = () => {
                 </Select>
             </FormControl>
             <div className="flex flex-row items-center gap-1">
-                <span>Defense:</span>
+                <span className="text-lg">Defense:</span>
                 <Rating
                     name="defense-quality"
                     value={context.post.defense}
-                    onChange={(event, newValue) => {
+                    onChange={(_e, newValue) => {
                         if(newValue !== null) context.post.setDefense(newValue);
                     }}
-                    onChangeActive={(event, newHover) => {
+                    onChangeActive={(_e, newHover) => {
                         setDefenseHover(newHover);
                     }}
                     precision={0.5}
                 ></Rating>
                 <span>{ratings[defenseHover !== -1 ? defenseHover : context.post.defense]}</span>
             </div>
-            <FormControl>
+            <FormControl sx={{maxWidth: "256px"}}>
                 <InputLabel>Human player notes scored</InputLabel>
                 <Select id="human-player-notes" label="Human player notes scored" variant="outlined">
                     <MenuItem value={0}>0</MenuItem>
@@ -83,13 +97,20 @@ const PostMatch = () => {
                 </Select>
             </FormControl>
             <TextField
-                id="failure"
-                label="Robot failure"
-                helperText="Leave blank if robot did not fail."
-                variant="outlined"
+                id="notes"
+                label="Extra Notes"
                 multiline
-                minRows={3}
-            ></TextField>
+                rows={6}
+                fullWidth
+                value={context.pre.notes}
+                onChange={handleNotesChange}
+            />
+
+            <div className="mt-8 mb-2 w-full h-1 bg-background-secondary"></div>
+            <div className="flex flex-col items-center">
+                <h3 className="text-xl mb-2">Event Log</h3>
+                <EventLog />
+            </div>
         </div>
         </>
     );

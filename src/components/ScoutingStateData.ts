@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { AUTO_DURATION, BOOST_DURATION } from "../constants"
 
 export enum AllianceColor {
@@ -54,9 +54,23 @@ export enum MatchEvent {
     defendedOnEnd, // When the robot is no longer being defended on
 }
 
-export const NonRemoveableEvents = [MatchEvent.matchStart, MatchEvent.matchEnd, MatchEvent.autoEnd];
+export const NonRemovableEvents = [
+    MatchEvent.matchStart, 
+    MatchEvent.matchEnd, 
+    MatchEvent.autoEnd
+];
+
+export const NonEditableEvents = [
+    MatchEvent.matchStart,
+    // Unused events (so they don't show up in the edit dialog)
+    MatchEvent.scoreHighBoost,
+    MatchEvent.climbSuccessTop,
+    MatchEvent.climbSuccessHigh,
+    MatchEvent.climbSuccessMid,
+];
 
 export type MatchEventData = {
+    id: number, // A unique identifier for the event, automatically incremented
     event: MatchEvent,
     time: number
 }
@@ -105,7 +119,9 @@ export type ScoutingStateData = {
         getTime: () => number, // Epoch time relative to start of match
         events: Array<MatchEventData>,
         addEvent: (event: MatchEvent, time: number) => void,
-        removeEventByIndex: (index: number) => void,
+        getEventById: (id: number) => MatchEventData | undefined,
+        editEventById: (id: number, event: MatchEvent, time: number) => void,
+        removeEventById: (id: number) => void,
 
         isBeingDefendedOn: boolean,
         /**
@@ -148,6 +164,7 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
     // Match data
     const [matchActive, setMatchActive] = useState<boolean>(false)
     const [inAuto, setInAuto] = useState<boolean>(true) // We start in auto
+    const eventCounter = useRef(0);
     const [events, setEvents] = useState<Array<MatchEventData>>([])
     const [isBeingDefendedOn, setIsBeingDefendedOn] = useState<boolean>(false)
     const [isBoostActive, setIsBoostActive] = useState<boolean>(false)
@@ -171,16 +188,41 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
     }
 
     const addEvent = (event: MatchEvent, time: number) => {
-        setEvents([...events, {event, time}]);
-        console.log("Recording event "+MatchEvent[event]+" at time "+time+"ms", events);
+        setEvents([...events, {id: eventCounter.current, event, time}]);
+        console.log("Recording event "+MatchEvent[event]+" at time "+time+"ms with id "+eventCounter.current, events);
+        eventCounter.current++;
     }
 
-    const removeEventByIndex = (index: number) => {
-        if (NonRemoveableEvents.includes(events[index].event)) {
-            console.warn("Attempted to remove non-removable event "+MatchEvent[events[index].event]);
+    const getEventById = (id: number) => {
+        return events.find((event) => event.id === id);
+    }
+
+    const editEventById = (id: number, event: MatchEvent, time: number) => {
+        var eventIndex = events.findIndex((event) => event.id === id);
+        if (eventIndex === -1) {
+            console.warn("Attempted to edit event that doesn't exist");
             return;
         }
-        setEvents(events.filter((_, i) => i !== index));
+        if (NonEditableEvents.includes(events[eventIndex].event)) {
+            console.warn("Attempted to edit non-editable event "+MatchEvent[events[eventIndex].event]);
+            return;
+        }
+        var newEvents = [...events];
+        newEvents[eventIndex] = {id, event, time};
+        setEvents(newEvents);
+    }
+
+    const removeEventById = (id: number) => {
+        var event = getEventById(id);
+        if (!event) {
+            console.warn("Attempted to remove event that doesn't exist");
+            return;
+        }
+        if (NonRemovableEvents.includes(event.event)) {
+            console.warn("Attempted to remove non-removable event "+MatchEvent[event.event]);
+            return;
+        }
+        setEvents(events.filter((event) => event.id !== id));
     }
 
     const startMatch = () => {
@@ -301,7 +343,9 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
             getTime,
             events,
             addEvent,
-            removeEventByIndex,
+            getEventById,
+            editEventById,
+            removeEventById,
             isBeingDefendedOn,
             setIsBeingDefendedOn: setIsBeingDefendedOnWithEvents,
             isBoostActive,

@@ -60,7 +60,7 @@ const PreMatch = () => {
                     {context.meta.teamNumber}
                 </span>
             </h1>
-            <FormControl variant="filled" sx={{ m: 1, minWidth: 224 }}>
+            <FormControl sx={{ m: 1, minWidth: 224 }}>
                 <InputLabel id="human-player-location-label">
                     {context.meta.teamNumber != 8248 ? `${context.meta.teamNumber}'s Human Player Location` : `Soren's Location`}
                 </InputLabel>
@@ -91,7 +91,6 @@ const PreMatch = () => {
                 label="Extra Notes"
                 multiline
                 rows={6}
-                variant="filled"
                 fullWidth
                 value={context.pre.notes}
                 onChange={handleNotesChange}
