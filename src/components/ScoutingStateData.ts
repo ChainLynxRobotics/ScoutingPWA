@@ -12,6 +12,13 @@ export enum HumanPlayerLocation {
     Amp = 2,
 }
 
+export enum ClimbLocation {
+    None = 0,
+    Middle = 1,
+    Source = 2,
+    Amp = 3,
+}
+
 /**
  * The events that can happen during a match.
  * all have a number value that is used to identify them
@@ -46,6 +53,8 @@ export enum MatchEvent {
     defendedOnStart, // When the robot is being defended on
     defendedOnEnd, // When the robot is no longer being defended on
 }
+
+export const NonRemoveableEvents = [MatchEvent.matchStart, MatchEvent.matchEnd, MatchEvent.autoEnd];
 
 export type MatchEventData = {
     event: MatchEvent,
@@ -96,6 +105,7 @@ export type ScoutingStateData = {
         getTime: () => number, // Epoch time relative to start of match
         events: Array<MatchEventData>,
         addEvent: (event: MatchEvent, time: number) => void,
+        removeEventByIndex: (index: number) => void,
 
         isBeingDefendedOn: boolean,
         /**
@@ -117,7 +127,14 @@ export type ScoutingStateData = {
     
 
     post: {
-        // TODO: Add post match data
+        climbLocation: ClimbLocation,
+        setClimbLocation: (climbLocation: ClimbLocation) => void,
+        defense: number,
+        setDefense: (defense: number) => void,
+        humanPlayerPerformance: number,
+        setHumanPlayerPerformance: (humanPlayerPerformance: number) => void,
+        robotFailure: string,
+        setRobotFailure: (robotFailure: string) => void,
     }
 
 }
@@ -139,6 +156,13 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
     const [matchStart, setMatchStart] = useState<number>(0)
     const [boostEnd, setBoostEnd] = useState<number>(0);
 
+    // post-match
+
+    const [climbLocation, setClimbLocation] = useState<ClimbLocation>(ClimbLocation.None);
+    const [defense, setDefense] = useState<number>(2.5);
+    const [humanPlayerPerformance, setHumanPlayerPerformance] = useState<number>(2.5);
+    const [robotFailure, setRobotFailure] = useState<string>('');
+
     const getTime = () => {
         if (!matchActive) {
             return 0;
@@ -148,7 +172,15 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
 
     const addEvent = (event: MatchEvent, time: number) => {
         setEvents([...events, {event, time}]);
-        console.log("Recording event "+event+" at time "+time+"ms", events);
+        console.log("Recording event "+MatchEvent[event]+" at time "+time+"ms", events);
+    }
+
+    const removeEventByIndex = (index: number) => {
+        if (NonRemoveableEvents.includes(events[index].event)) {
+            console.warn("Attempted to remove non-removable event "+MatchEvent[events[index].event]);
+            return;
+        }
+        setEvents(events.filter((_, i) => i !== index));
     }
 
     const startMatch = () => {
@@ -213,6 +245,7 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
             addEvent(MatchEvent.specialBoostEnd, getTime());
         }
         setIsBoostActive(isBoostActiveVal);
+        setBoostEnd(getTime() + BOOST_DURATION * 1000);
     }
 
     // Because the cooperation can only happen once per match, this code allows it to work with a checkbox and
@@ -233,15 +266,16 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
 
     // Automatically add the boostEnd event after a certain amount of time
     useEffect(() => {
-        if (isBoostActive) {
+        if (boostEnd && Date.now() < matchStart + boostEnd) {
             const timeout = setTimeout(() => {
-                setBoostEnd(0);
-                setIsBoostActiveWithEvents(false);
-            }, BOOST_DURATION * 1000);
-            setBoostEnd(getTime() + BOOST_DURATION * 1000)
+                if (isBoostActive) {
+                    setIsBoostActive(false);
+                    setBoostEnd(0);
+                }
+            }, matchStart + boostEnd - Date.now());
             return () => clearTimeout(timeout);
         }
-    }, [isBoostActive]);
+    }, [boostEnd, events]);
 
     return {
         meta: {
@@ -267,6 +301,7 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
             getTime,
             events,
             addEvent,
+            removeEventByIndex,
             isBeingDefendedOn,
             setIsBeingDefendedOn: setIsBeingDefendedOnWithEvents,
             isBoostActive,
@@ -275,6 +310,15 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
             attemptedCooperation,
             setAttemptedCooperation: setAttemptedCooperationWithEvents,
         },
-        post: {}
+        post: {
+            climbLocation,
+            setClimbLocation,
+            defense,
+            setDefense,
+            humanPlayerPerformance,
+            setHumanPlayerPerformance,
+            robotFailure,
+            setRobotFailure,
+        },
     }
 }

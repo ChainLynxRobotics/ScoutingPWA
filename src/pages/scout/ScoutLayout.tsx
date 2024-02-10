@@ -56,7 +56,7 @@ const ScoutPage = () => {
                 </h1>
             </div>
             <Outlet />
-            <div className="w-full mt-16 text-center">
+            <div className="w-full mt-16 pb-16 text-center">
                 <span className="text-sm text-secondary">Match Id: <code>{context.meta.matchId}</code></span>
             </div>
         </div>
