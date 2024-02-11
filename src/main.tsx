@@ -12,9 +12,10 @@ import PreMatch from './pages/scout/PreMatch';
 import DuringMatch from './pages/scout/DuringMatch';
 import PostMatch from './pages/scout/PostMatch';
 import ScoutingContext from './components/context/ScoutingContext';
-import ScoutingStateData, { AllianceColor } from './components/ScoutingStateData';
 import createTheme from '@mui/material/styles/createTheme';
 import { ThemeProvider } from '@emotion/react';
+import ScoutingStateData from './components/ScoutingStateData';
+import AllianceColor from './enums/AllianceColor';
 
 export default function App() {
 

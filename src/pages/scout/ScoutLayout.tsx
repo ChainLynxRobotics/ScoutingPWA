@@ -2,9 +2,9 @@ import { useContext } from "react";
 import { Outlet } from "react-router-dom";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
-import { AllianceColor } from "../../components/ScoutingStateData";
 import { Button } from "@mui/material";
 import CountUp from "../../components/CountUp";
+import AllianceColor from "../../enums/AllianceColor";
 
 const ScoutPage = () => {
     

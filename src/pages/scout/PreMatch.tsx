@@ -1,13 +1,14 @@
 import InputLabel from "@mui/material/InputLabel/InputLabel";
 import MenuItem from "@mui/material/MenuItem/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select/Select";
-import { AllianceColor, HumanPlayerLocation } from "../../components/ScoutingStateData";
 import { useContext, useEffect, useRef } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
 import FormControl from "@mui/material/FormControl/FormControl";
 import { Button, Checkbox, FormControlLabel, FormGroup, TextField } from "@mui/material";
 import { NavLink, useNavigate } from "react-router-dom";
+import HumanPlayerLocation from "../../enums/HumanPlayerLocation";
+import AllianceColor from "../../enums/AllianceColor";
 
 
 const PreMatch = () => {

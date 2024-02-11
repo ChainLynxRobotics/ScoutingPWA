@@ -2,10 +2,11 @@ import { useContext, useState } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
 import { Alert, Button, Checkbox, FormControlLabel } from "@mui/material";
-import { AllianceColor, MatchEvent } from "../../components/ScoutingStateData";
 import { NavLink } from "react-router-dom";
 import CountDown from "../../components/CountDown";
 import EventLog from "../../components/EventLog";
+import MatchEvent from "../../enums/MatchEvent";
+import AllianceColor from "../../enums/AllianceColor";
 
 
 const DuringMatch = () => {
@@ -186,7 +187,7 @@ const DuringMatch = () => {
             <div className="mt-8 mb-2 w-full h-1 bg-background-secondary"></div>
             <div className="flex flex-col items-center">
                 <h3 className="text-xl">Event Log</h3>
-                <p className="mb-4 text-secondary">You can edit events later in the post-match page</p>
+                <p className="mb-4 text-secondary">You can also edit events later in the post-match page</p>
                 <EventLog />
             </div>
         </div>

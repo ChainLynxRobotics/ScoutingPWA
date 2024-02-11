@@ -1,10 +1,10 @@
 import MenuItem from "@mui/material/MenuItem/MenuItem";
 import Select from "@mui/material/Select/Select";
 import TextField from "@mui/material/TextField/TextField";
-import { AllianceColor } from "../components/ScoutingStateData";
 import FormControl from "@mui/material/FormControl/FormControl";
 import InputLabel from "@mui/material/InputLabel/InputLabel";
 import Button from "@mui/material/Button/Button";
+import AllianceColor from "../enums/AllianceColor";
 
 const SettingsPage = () => {
     return (

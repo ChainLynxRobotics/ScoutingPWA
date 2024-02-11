@@ -6,12 +6,13 @@ import NoMatchAvailable from "./NoMatchAvailable";
 import InputLabel from "@mui/material/InputLabel/InputLabel";
 import FormControl from "@mui/material/FormControl/FormControl";
 import Select from "@mui/material/Select/Select";
-import { ClimbLocation } from "../../components/ScoutingStateData";
 import MenuItem from "@mui/material/MenuItem/MenuItem";
 import Rating from "@mui/material/Rating/Rating";
 import TextField from "@mui/material/TextField/TextField";
 import EventLog from "../../components/EventLog";
 import Alert from "@mui/material/Alert/Alert";
+import FormControlLabel from "@mui/material/FormControlLabel/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox/Checkbox";
 
 
 const PostMatch = () => {
@@ -63,15 +64,8 @@ const PostMatch = () => {
                 </Alert>
             }
 
-            <FormControl sx={{maxWidth: "256px"}}>
-                <InputLabel>Climb location</InputLabel>
-                <Select id="climb-location" label="Climb location" variant="outlined">
-                    <MenuItem value={ClimbLocation.None}>None</MenuItem>
-                    <MenuItem value={ClimbLocation.Middle}>Middle</MenuItem>
-                    <MenuItem value={ClimbLocation.Source}>Source</MenuItem>
-                    <MenuItem value={ClimbLocation.Amp}>Amp</MenuItem>
-                </Select>
-            </FormControl>
+            <FormControlLabel label="Successfully climbed?" 
+                control={<Checkbox checked={context.post.climb} onClick={()=>context.post.setClimb(!context.post.climb)}/>} />
             <div className="flex flex-row items-center gap-1">
                 <span className="text-lg">Defense:</span>
                 <Rating
@@ -89,7 +83,13 @@ const PostMatch = () => {
             </div>
             <FormControl sx={{maxWidth: "256px"}}>
                 <InputLabel>Human player notes scored</InputLabel>
-                <Select id="human-player-notes" label="Human player notes scored" variant="outlined">
+                <Select 
+                    id="human-player-notes" 
+                    label="Human player notes scored" 
+                    variant="outlined"
+                    value={context.post.humanPlayerPerformance}
+                    onChange={(e) => context.post.setHumanPlayerPerformance(e.target.value as number)}
+                >
                     <MenuItem value={0}>0</MenuItem>
                     <MenuItem value={1}>1</MenuItem>
                     <MenuItem value={2}>2</MenuItem>

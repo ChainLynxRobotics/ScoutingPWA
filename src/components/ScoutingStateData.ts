@@ -1,160 +1,19 @@
 import { useEffect, useRef, useState } from "react"
 import { AUTO_DURATION, BOOST_DURATION } from "../constants"
-
-export enum AllianceColor {
-    Red = "red",
-    Blue = "blue"
-}
-
-export enum HumanPlayerLocation {
-    None = 0,
-    Source = 1,
-    Amp = 2,
-}
-
-export enum ClimbLocation {
-    None = 0,
-    Middle = 1,
-    Source = 2,
-    Amp = 3,
-}
+import MatchEvent, { NonEditableEvents, NonRemovableEvents } from "../enums/MatchEvent";
+import AllianceColor from "../enums/AllianceColor";
+import HumanPlayerLocation from "../enums/HumanPlayerLocation";
 
 /**
- * The events that can happen during a match.
- * all have a number value that is used to identify them
+ * This function is used to create a new ScoutingStateData object, which is used to store/update all the data that is collected during a match.
+ * This basically acts as a state object, but with a lot of extra functionality to make it easier to work with the data.
+ * 
+ * @param matchId - The match id that this data is for, will be used to identify the match in the database later
+ * @param teamNumber - The team number that this data is for
+ * @param allianceColor - The alliance color (used mostly for display, but still required) that this data is for
+ * 
+ * @returns - A ScoutingStateData object that should be used in a context provider to allow access to the data throughout the app
  */
-export enum MatchEvent {
-    matchStart, // When the match starts, always at time 0
-    autoEnd, // When auto ends
-    matchEnd, // When the match finishes
-    acquireGround, // Ground Pickup
-    acquireStation, // Pickup from Source
-    acquireFail, // Fail to pickup game piece. Location / type unimportant.
-    scoreHigh, // Trap
-    scoreHighBoost, // Unused
-    scoreHighFail, // Trap fail
-    scoreMid, // Speaker
-    scoreMidBoost, // Speaker while AMPed
-    scoreMidFail, // Speaker fail
-    scoreLow, // AMP score
-    scoreLowBoost, // AMP score
-    scoreLowFail, // Failed to score.
-    climbSuccessTop, // Unused (Traverse last year)
-    climbSuccessHigh, // Unused (High last year)
-    climbSuccessMid, // Unused (Mid last year)
-    climbSuccessLow, // Successfully climbed this year.
-    climbFail, // Failed to climb, or fell off climb after climbing.
-    rankingPointAchieved, // Score based ranking point has been achieved. MELODY.
-    specialAuto, // Has completed Auto challenge. This is crossing a line.
-    specialBoost, // Activated Boost (This year this is amplification)
-    specialBoostEnd, // Boost has ended
-    specialCoop, // Completed Coop challenge
-    specialRankingOpportunity, // Trap
-    defendedOnStart, // When the robot is being defended on
-    defendedOnEnd, // When the robot is no longer being defended on
-}
-
-export const NonRemovableEvents = [
-    MatchEvent.matchStart, 
-    MatchEvent.matchEnd, 
-    MatchEvent.autoEnd
-];
-
-export const NonEditableEvents = [
-    MatchEvent.matchStart,
-    // Unused events (so they don't show up in the edit dialog)
-    MatchEvent.scoreHighBoost,
-    MatchEvent.climbSuccessTop,
-    MatchEvent.climbSuccessHigh,
-    MatchEvent.climbSuccessMid,
-];
-
-export type MatchEventData = {
-    id: number, // A unique identifier for the event, automatically incremented
-    event: MatchEvent,
-    time: number
-}
-
-/**
- * Contains all the data that is collected during a match
- * Note: None of these functions will add events to the events array (except for addEvent), 
- * for example setIsBeingDefendedOn(boolean) will not add isBeingDefendedOnStart or isBeingDefendedOnEnd events
- */
-export type ScoutingStateData = {
-    // Meta data
-    meta: {
-        matchId: string,
-        teamNumber: number,
-        allianceColor: AllianceColor,
-    }
-
-    // Pre//match
-    pre: {
-        humanPlayerLocation: HumanPlayerLocation,
-        setHumanPlayerLocation: (humanPlayerLocation: HumanPlayerLocation) => void,
-        preload: boolean,
-        setPreload: (preload: boolean) => void,
-        notes: string,
-        setNotes: (notes: string) => void,
-    }
-
-
-    // Events
-    match: {
-        /**
-         * Note: Will add startMatch event
-         */
-        startMatch: () => void,
-        /**
-         * Note: Will add endMatch event
-         */
-        endMatch: () => void,
-        matchActive: boolean,
-        matchStart: number,
-        inAuto: boolean,
-        /**
-         * Note: Will add the autoEnd event if we are leaving auto (or remove it if we are re-entering auto due to misclick)
-         */
-        setIsAuto: (isAuto: boolean) => void,
-        getTime: () => number, // Epoch time relative to start of match
-        events: Array<MatchEventData>,
-        addEvent: (event: MatchEvent, time: number) => void,
-        getEventById: (id: number) => MatchEventData | undefined,
-        editEventById: (id: number, event: MatchEvent, time: number) => void,
-        removeEventById: (id: number) => void,
-
-        isBeingDefendedOn: boolean,
-        /**
-         * Note: Will add isBeingDefendedOnStart and isBeingDefendedOnEnd events
-         */
-        setIsBeingDefendedOn: (isBeingDefended: boolean) => void,
-        isBoostActive: boolean,
-        /**
-         * Note: Will add boostStart and boostEnd events, and automatically add the boostEnd event after a certain amount of time
-         */
-        setIsBoostActive: (isBoostActive: boolean) => void,
-        boostEnd: number,
-        /**
-         * Note: This will add the specialCoop event when set to true and remove the event from the timeline if set to false
-         */
-        setAttemptedCooperation: (attemptedCooperation: boolean) => void,
-        attemptedCooperation: boolean
-    }
-    
-
-    post: {
-        climbLocation: ClimbLocation,
-        setClimbLocation: (climbLocation: ClimbLocation) => void,
-        defense: number,
-        setDefense: (defense: number) => void,
-        humanPlayerPerformance: number,
-        setHumanPlayerPerformance: (humanPlayerPerformance: number) => void,
-        robotFailure: string,
-        setRobotFailure: (robotFailure: string) => void,
-    }
-
-}
-
 export default function ScoutingStateData(matchId: string, teamNumber: number, allianceColor: AllianceColor): ScoutingStateData {
 
     // Pre
@@ -165,7 +24,7 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
     const [matchActive, setMatchActive] = useState<boolean>(false)
     const [inAuto, setInAuto] = useState<boolean>(true) // We start in auto
     const eventCounter = useRef(0);
-    const [events, setEvents] = useState<Array<MatchEventData>>([])
+    const [events, setEvents] = useState<Array<ScoutingStateEventData>>([])
     const [isBeingDefendedOn, setIsBeingDefendedOn] = useState<boolean>(false)
     const [isBoostActive, setIsBoostActive] = useState<boolean>(false)
     const [attemptedCooperation, setAttemptedCooperation] = useState<boolean>(false)
@@ -173,12 +32,10 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
     const [matchStart, setMatchStart] = useState<number>(0)
     const [boostEnd, setBoostEnd] = useState<number>(0);
 
-    // post-match
-
-    const [climbLocation, setClimbLocation] = useState<ClimbLocation>(ClimbLocation.None);
+    // Post Match
+    const [climb, setClimb] = useState<boolean>(false);
     const [defense, setDefense] = useState<number>(2.5);
-    const [humanPlayerPerformance, setHumanPlayerPerformance] = useState<number>(2.5);
-    const [robotFailure, setRobotFailure] = useState<string>('');
+    const [humanPlayerPerformance, setHumanPlayerPerformance] = useState<number>(0);
 
     const getTime = () => {
         if (!matchActive) {
@@ -355,14 +212,102 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
             setAttemptedCooperation: setAttemptedCooperationWithEvents,
         },
         post: {
-            climbLocation,
-            setClimbLocation,
+            climb,
+            setClimb,
             defense,
             setDefense,
             humanPlayerPerformance,
             setHumanPlayerPerformance,
-            robotFailure,
-            setRobotFailure,
         },
     }
+}
+
+
+// The following types are used in the above function's return type
+
+/**
+ * Contains all the data that is collected during a match
+ * Note: None of these functions will add events to the events array (except for addEvent), 
+ * for example setIsBeingDefendedOn(boolean) will not add isBeingDefendedOnStart or isBeingDefendedOnEnd events
+ */
+export type ScoutingStateData = {
+    // Meta data
+    meta: {
+        matchId: string,
+        teamNumber: number,
+        allianceColor: AllianceColor,
+    }
+
+    // Pre//match
+    pre: {
+        humanPlayerLocation: HumanPlayerLocation,
+        setHumanPlayerLocation: (humanPlayerLocation: HumanPlayerLocation) => void,
+        preload: boolean,
+        setPreload: (preload: boolean) => void,
+        notes: string,
+        setNotes: (notes: string) => void,
+    }
+
+
+    // Events
+    match: {
+        /**
+         * Note: Will add startMatch event
+         */
+        startMatch: () => void,
+        /**
+         * Note: Will add endMatch event
+         */
+        endMatch: () => void,
+        matchActive: boolean,
+        matchStart: number,
+        inAuto: boolean,
+        /**
+         * Note: Will add the autoEnd event if we are leaving auto (or remove it if we are re-entering auto due to misclick)
+         */
+        setIsAuto: (isAuto: boolean) => void,
+        getTime: () => number, // Epoch time relative to start of match
+        events: Array<ScoutingStateEventData>,
+        addEvent: (event: MatchEvent, time: number) => void,
+        getEventById: (id: number) => ScoutingStateEventData | undefined,
+        editEventById: (id: number, event: MatchEvent, time: number) => void,
+        removeEventById: (id: number) => void,
+
+        isBeingDefendedOn: boolean,
+        /**
+         * Note: Will add isBeingDefendedOnStart and isBeingDefendedOnEnd events
+         */
+        setIsBeingDefendedOn: (isBeingDefended: boolean) => void,
+        isBoostActive: boolean,
+        /**
+         * Note: Will add boostStart and boostEnd events, and automatically add the boostEnd event after a certain amount of time
+         */
+        setIsBoostActive: (isBoostActive: boolean) => void,
+        boostEnd: number,
+        /**
+         * Note: This will add the specialCoop event when set to true and remove the event from the timeline if set to false
+         */
+        setAttemptedCooperation: (attemptedCooperation: boolean) => void,
+        attemptedCooperation: boolean
+    }
+    
+
+    post: {
+        climb: boolean,
+        setClimb: (climbLocation: boolean) => void,
+        defense: number,
+        setDefense: (defense: number) => void,
+        humanPlayerPerformance: number,
+        setHumanPlayerPerformance: (humanPlayerPerformance: number) => void,
+    }
+
+}
+
+/**
+ * Used to represent an event and correlated data that happens during a match
+ */
+export type ScoutingStateEventData = {
+    id: number, // A unique identifier for the event, automatically incremented
+    event: MatchEvent,
+    time: number
 }
