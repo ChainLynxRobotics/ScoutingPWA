@@ -1,5 +1,10 @@
 // Constants that are used throughout the application
 
+/**
+ * The competition id, used to identify the competition in the blue alliance API
+ * ### REMEMBER TO CHANGE THIS FOR EACH COMPETITION ### (however it can be overridden on the settings page)
+ */
+export const DEFAULT_COMPETITION_ID = "2024wasno";
 
 /** 
  * The number of seconds in a match

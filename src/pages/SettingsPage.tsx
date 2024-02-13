@@ -4,42 +4,90 @@ import TextField from "@mui/material/TextField/TextField";
 import FormControl from "@mui/material/FormControl/FormControl";
 import InputLabel from "@mui/material/InputLabel/InputLabel";
 import Button from "@mui/material/Button/Button";
-import AllianceColor from "../enums/AllianceColor";
+import ErrorPage from "./ErrorPage";
+import { useContext } from "react";
+import SettingsContext from "../components/context/SettingsContext";
+import FormHelperText from "@mui/material/FormHelperText/FormHelperText";
+import MatchSchedule from "../components/MatchSchedule";
+import Tooltip from "@mui/material/Tooltip/Tooltip";
+import IconButton from "@mui/material/IconButton/IconButton";
 
 const SettingsPage = () => {
+
+    const settings = useContext(SettingsContext);
+    if (!settings) return (<ErrorPage msg="Settings context not found?!?!?!" />)
+
+    function nextMatch() {
+        settings?.setCurrentMatchIndex(Math.min(settings.currentMatchIndex+1, settings.matches.length-1));
+    }
+
+    function previousMatch() {
+        settings?.setCurrentMatchIndex(Math.max(settings.currentMatchIndex-1, 0));
+    }
+
     return (
-    <div className="w-full h-full flex items-center justify-center">
-        <div className="flex flex-col gap-4 px-4">
-            <h1 className="text-xl">Settings</h1>
-            <FormControl>
-                <InputLabel>Client ID</InputLabel>
-                <Select id="client-id" label="Client ID">
-                    <MenuItem value={0}>1</MenuItem>
-                    <MenuItem value={1}>2</MenuItem>
-                    <MenuItem value={2}>3</MenuItem>
-                    <MenuItem value={3}>4</MenuItem>
-                    <MenuItem value={4}>5</MenuItem>
-                    <MenuItem value={5}>6</MenuItem>
-                </Select>
-            </FormControl>
-            <div className="text-secondary">Make sure each scouting client has a unique ID.</div>
-            <h1 className="text-xl">Schedule</h1>
-            <div className="flex flex-wrap gap-4">
-                <Button variant="contained" startIcon={<span className="material-symbols-outlined">qr_code_scanner</span>}>Scan</Button>
-                <Button variant="contained" color="secondary" startIcon={<span className="material-symbols-outlined">download</span>}>Download</Button>
+    <div className="w-full h-full flex flex-col items-center gap-4 px-4">
+        <h1 className="text-xl font-bold mt-4">Settings</h1>
+        <FormControl sx={{maxWidth: "256px"}}>
+            <InputLabel>Client ID</InputLabel>
+            <Select id="client-id" label="Client ID" value={settings.clientId+""} onChange={(e)=>settings.setClientId(parseInt(e.target.value))}>
+                <MenuItem value={"0"}>1</MenuItem>
+                <MenuItem value={"1"}>2</MenuItem>
+                <MenuItem value={"2"}>3</MenuItem>
+                <MenuItem value={"3"}>4</MenuItem>
+                <MenuItem value={"4"}>5</MenuItem>
+                <MenuItem value={"5"}>6</MenuItem>
+            </Select>
+            <FormHelperText>Make sure each scouting client has a unique ID, as this is used to determine what team you scout each match.</FormHelperText>
+        </FormControl>
+        <FormControl sx={{maxWidth: "256px"}}>
+            <TextField 
+                id="competition-id" 
+                label="Competition ID" 
+                value={settings.competitionId} 
+                onChange={(e)=>settings.setCompetitionId(e.target.value)} 
+                variant="outlined"
+            />
+            <FormHelperText>Make sure this matches the blue alliance url and everybody else's devices!</FormHelperText>
+        </FormControl>
+        
+        <h1 className="text-xl">Schedule</h1>
+        <div className="flex flex-wrap gap-4">
+            <Button variant="contained" startIcon={<span className="material-symbols-outlined">photo_camera</span>}>Scan</Button>
+            <Button variant="contained" color="secondary" startIcon={<span className="material-symbols-outlined">qr_code_2</span>}>Share</Button>
+            <Tooltip title={<ul className="text-md list-disc pl-2">
+                    <li>One device is designated as the 'host' device.</li>
+                    <li>If you ARE the host, click the download button below to get a copy from blue alliance, then click "Share" to generate qr codes for other devices to scan.</li>
+                    <li>If you are NOT the host device, click on "Scan" to get the schedule from the host device.</li>
+                </ul>}>
+                <IconButton>
+                    <span className="material-symbols-outlined">info</span>
+                </IconButton>
+            </Tooltip>
+        </div>
+        <div className="flex flex-col items-center w-full">
+            <div className="flex items-center gap-2 mb-2">
+                <div>Current Match: </div>
+                <Button 
+                    variant="outlined" 
+                    color="secondary" 
+                    size="small" 
+                    onClick={previousMatch} 
+                    startIcon={<span className="material-symbols-outlined">keyboard_double_arrow_up</span>}
+                >
+                    Previous
+                </Button>
+                <Button 
+                    variant="outlined" 
+                    color="primary" 
+                    size="small" 
+                    onClick={nextMatch} 
+                    startIcon={<span className="material-symbols-outlined">keyboard_double_arrow_down</span>}
+                >
+                    Next
+                </Button>
             </div>
-            <h1 className="text-xl">Next match information</h1>
-            <div className="text-secondary">This information updates automatically based on schedule information, but can be overridden if necessary.</div>
-            <TextField id="match-id" label="Match ID" variant="outlined"></TextField>
-            <TextField id="team-number" label="Team #" variant="outlined"></TextField>
-            <FormControl>
-                <InputLabel>Alliance</InputLabel>
-                <Select id="team-alliance" label="Alliance" variant="outlined">
-                    <MenuItem value={AllianceColor.Red}>Red</MenuItem>
-                    <MenuItem value={AllianceColor.Blue}>Blue</MenuItem>
-                </Select>
-            </FormControl>
-            <div>Competition ID: qwertyuiopasdfghjklzxcvbnm</div>
+            <MatchSchedule />
         </div>
     </div>
     );

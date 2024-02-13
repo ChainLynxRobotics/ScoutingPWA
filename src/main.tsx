@@ -16,6 +16,9 @@ import createTheme from '@mui/material/styles/createTheme';
 import { ThemeProvider } from '@emotion/react';
 import ScoutingStateData from './components/ScoutingStateData';
 import AllianceColor from './enums/AllianceColor';
+import SettingsContext from './components/context/SettingsContext';
+import SettingsStateData from './components/SettingsStateData';
+import { DEFAULT_COMPETITION_ID } from './constants';
 
 export default function App() {
 
@@ -39,32 +42,36 @@ export default function App() {
       },
     },
   });
+
+  const settingsData = SettingsStateData(DEFAULT_COMPETITION_ID);
   
   // TODO: Remove this when done testing
   const scoutingData = ScoutingStateData("2023wasno_q7", 8248, AllianceColor.Red); 
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <ScoutingContext.Provider value={scoutingData}>
-        <BrowserRouter>
-          <Routes>
-            <Route index element={<IndexPage />} />
+      <SettingsContext.Provider value={settingsData}>
+        <ScoutingContext.Provider value={scoutingData}>
+          <BrowserRouter>
+            <Routes>
+              <Route index element={<IndexPage />} />
 
-            <Route path="/" element={<Layout />}>
-              <Route path="scout" element={<ScoutPage />}>
-                <Route index element={<PreMatch />} />
-                <Route path="during" element={<DuringMatch />} />
-                <Route path="post" element={<PostMatch />} />
+              <Route path="/" element={<Layout />}>
+                <Route path="scout" element={<ScoutPage />}>
+                  <Route index element={<PreMatch />} />
+                  <Route path="during" element={<DuringMatch />} />
+                  <Route path="post" element={<PostMatch />} />
+                  <Route path="*" element={<NoPage />} />
+                </Route>
+                <Route path="data" element={<DataPage />} />
+                <Route path="settings" element={<SettingsPage />} />
                 <Route path="*" element={<NoPage />} />
               </Route>
-              <Route path="data" element={<DataPage />} />
-              <Route path="settings" element={<SettingsPage />} />
               <Route path="*" element={<NoPage />} />
-            </Route>
-            <Route path="*" element={<NoPage />} />
-          </Routes>
-        </BrowserRouter>
-      </ScoutingContext.Provider>
+            </Routes>
+          </BrowserRouter>
+        </ScoutingContext.Provider>
+      </SettingsContext.Provider>
     </ThemeProvider>
   );
 }

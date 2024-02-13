@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
  * 
  * @returns - A pair containing the value and a function to set the value (just like useState)
  */
-export default function useLocalStorageState<T>(defaultValue: T, key: string) {
+export default function useLocalStorageState<T>(defaultValue: T, key: string): [T, React.Dispatch<React.SetStateAction<T>>] {
     
     const [value, setValue] = useState<T>(() => {
         const storageValue = window.localStorage.getItem(key);

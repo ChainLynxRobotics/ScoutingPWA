@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
 import { Alert, Button, Checkbox, FormControlLabel } from "@mui/material";
@@ -7,14 +7,15 @@ import CountDown from "../../components/CountDown";
 import EventLog from "../../components/EventLog";
 import MatchEvent from "../../enums/MatchEvent";
 import AllianceColor from "../../enums/AllianceColor";
+import SettingsContext from "../../components/context/SettingsContext";
 
 
 const DuringMatch = () => {
 
+    const settings = useContext(SettingsContext);
+
     const context = useContext(ScoutingContext);
     if (!context) return (<NoMatchAvailable />);
-
-    const [rotateField, setRotateField] = useState(false); // TODO: This should prob go in settings
 
     function onAmpScore() {
         context?.match.addEvent(MatchEvent.scoreLow, context.match.getTime());
@@ -73,6 +74,7 @@ const DuringMatch = () => {
         return context?.match.events.filter(e=>events.includes(e.event)).length || 0;
     }
 
+    const rotateField = settings?.fieldRotated || false;
     const isBlue = context.meta.allianceColor == AllianceColor.Blue;
     const reverseX = ( rotateField && !isBlue ) || ( !rotateField && isBlue );
     const reverseY = rotateField;
@@ -113,7 +115,7 @@ const DuringMatch = () => {
                     alt="Crescendo Field Render" className={`w-full ${rotateField ? '-scale-100' : ''}`} />
                 
                 {/* Allows the field to be rotated depending on the pov of the scouter */}
-                <button onClick={()=>setRotateField(!rotateField)}
+                <button onClick={()=>settings?.setFieldRotated(!rotateField)}
                         className={`absolute top-0 bg-black bg-opacity-75 right-0 rounded-bl-lg`}>
                     <span className="material-symbols-outlined m-2">360</span>
                 </button>
