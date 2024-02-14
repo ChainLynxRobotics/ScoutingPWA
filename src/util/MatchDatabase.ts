@@ -5,7 +5,11 @@ interface MatchDatabaseSchema extends DBSchema {
     matches: {
         key: number;
         value: MatchData;
-        indexes: { 'by-team': number; 'by-matchId': string };
+        indexes: {
+            'by-team': number;
+            'by-matchId': string;
+            'by-both': [number, string];
+        };
     };
     events: {
         key: number;
@@ -15,7 +19,11 @@ interface MatchDatabaseSchema extends DBSchema {
             event: number;
             time: number;
         }
-        indexes: { 'by-team': number; 'by-matchId': string };
+        indexes: { 
+            'by-team': number; 
+            'by-matchId': string;
+            'by-both': [number, string];
+        };
     };
 }
 
@@ -37,12 +45,14 @@ async function tryOpenDatabase() {
             });
             matchStore.createIndex('by-team', 'teamNumber');
             matchStore.createIndex('by-matchId', 'matchId');
+            matchStore.createIndex('by-both', ['teamNumber', 'matchId']);
 
             const eventStore = db.createObjectStore('events', {
                 autoIncrement: true,
             });
             eventStore.createIndex('by-team', 'teamNumber');
             eventStore.createIndex('by-matchId', 'matchId');
+            eventStore.createIndex('by-both', ['teamNumber', 'matchId']);
         },
         terminated() {
             dbCache = null;
@@ -93,6 +103,14 @@ async function getAllMatches() {
 }
 
 /**
+ * Retrieves all the events from the database (does not include matches)
+ */
+async function getAllEvents() {
+    const db = await tryOpenDatabase();
+    return db.getAll('events');
+}
+
+/**
  * Gets all the matches for a given team number
  * 
  * @param teamNumber - The 4 digit team number to get the matches for
@@ -112,5 +130,5 @@ async function getMatchesByTeam(teamNumber: number) {
  */
 async function getEventsByMatch(matchId: string, teamNumber: number) {
     const db = await tryOpenDatabase();
-    return db.getAllFromIndex('events', 'by-matchId', matchId);
+    return db.getAllFromIndex('matches', 'by-both', [teamNumber, matchId]);
 }
