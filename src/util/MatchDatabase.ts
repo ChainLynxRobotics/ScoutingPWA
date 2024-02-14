@@ -132,3 +132,11 @@ async function getEventsByMatch(matchId: string, teamNumber: number) {
     const db = await tryOpenDatabase();
     return db.getAllFromIndex('matches', 'by-both', [teamNumber, matchId]);
 }
+
+export default {
+    saveToDatabase,
+    getAllMatches,
+    getAllEvents,
+    getMatchesByTeam,
+    getEventsByMatch
+}
