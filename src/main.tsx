@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './index.css'
 import Layout from './pages/Layout'
 import NoPage from './pages/NoPage';
@@ -19,7 +19,6 @@ import AllianceColor from './enums/AllianceColor';
 import SettingsContext from './components/context/SettingsContext';
 import SettingsStateData from './components/SettingsStateData';
 import { DEFAULT_COMPETITION_ID } from './constants';
-import QrCodePage from './pages/QrCodePage';
 
 export default function App() {
 
@@ -64,14 +63,10 @@ export default function App() {
                   <Route path="post" element={<PostMatch />} />
                   <Route path="*" element={<NoPage />} />
                 </Route>
-                <Route path="data" element={<Outlet />}>
-                <Route index element={<DataPage />} />
-                <Route path="qrcode" element={<QrCodePage />} />
-                <Route path="*" element={<NoPage />} />
-              </Route>
+                <Route path="data" element={<DataPage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="*" element={<NoPage />} />
-              </Route>
+                </Route>
               <Route path="*" element={<NoPage />} />
             </Routes>
           </BrowserRouter>
