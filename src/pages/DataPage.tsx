@@ -43,8 +43,14 @@ const DataPage = () => {
 
         <div className="absolute bottom-20 left-0 right-0 flex justify-center items-center">
             <Stack direction="row" spacing={1} justifyContent="center">
-                <Chip color="primary" label="Share" onClick={() => {}}
-                    icon={<span className="material-symbols-outlined">qr_code_2</span>}  />
+                <Chip
+                    color="primary"
+                    label="Share"
+                    component="a"
+                    href="data/qrcode"
+                    clickable
+                    icon={<span className="material-symbols-outlined">qr_code_2</span>}
+                />
                 <Chip label="Collect" onClick={() => {}} 
                     icon={<span className="material-symbols-outlined">photo_camera</span>} />
                 <Chip label="Export" onClick={() => {}} 
