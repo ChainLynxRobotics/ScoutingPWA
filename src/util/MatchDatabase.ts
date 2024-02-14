@@ -1,5 +1,5 @@
 import { DBSchema, IDBPDatabase, openDB } from "idb";
-import { MatchData, MatchEvents } from "../types/MatchData";
+import { MatchData, MatchEventData } from "../types/MatchData";
 
 interface MatchDatabaseSchema extends DBSchema {
     matches: {
@@ -13,12 +13,7 @@ interface MatchDatabaseSchema extends DBSchema {
     };
     events: {
         key: number;
-        value: {
-            matchId: string;
-            teamNumber: number;
-            event: number;
-            time: number;
-        }
+        value: MatchEventData;
         indexes: { 
             'by-team': number; 
             'by-matchId': string;
@@ -45,7 +40,7 @@ async function tryOpenDatabase() {
             });
             matchStore.createIndex('by-team', 'teamNumber');
             matchStore.createIndex('by-matchId', 'matchId');
-            matchStore.createIndex('by-both', ['teamNumber', 'matchId']);
+            matchStore.createIndex('by-both', ['teamNumber', 'matchId'], { unique: true });
 
             const eventStore = db.createObjectStore('events', {
                 autoIncrement: true,
@@ -71,22 +66,41 @@ async function tryOpenDatabase() {
  * @param matchData - The data to save to the match data store
  * @param matchEvents - The data to save to the match events store
  */
-async function saveToDatabase(matchData: MatchData, matchEvents: MatchEvents) {
+async function saveToDatabase(matchData: MatchData, matchEvents: MatchEventData[]) {
     const db = await tryOpenDatabase();
     await db.put('matches', matchData);
     
     const tx = db.transaction('events', 'readwrite');
     await Promise.all(
         [
-            matchEvents.map(event => 
-                tx.store.add(
-                    { 
-                        ...event, 
-                        matchId: matchData.matchId, 
-                        teamNumber: matchData.teamNumber 
-                    }
-                )
-            ),
+            ...matchEvents.map(event => tx.store.add(event)),
+            tx.done
+        ]
+    );
+}
+
+/**
+ * Imports data from another source into the database, ignores matches that are already in the database
+ * 
+ * @param matches - List of matches to import
+ * @param events - List of events to import
+ */
+async function importData(matches: MatchData[], events: MatchEventData[]) {
+    const db = await tryOpenDatabase();
+
+    const originalMatches = await getAllMatches();
+
+    const tx = db.transaction(['matches', 'events'], 'readwrite');
+    const matchStore = tx.objectStore('matches');
+    const eventStore = tx.objectStore('events');
+    await Promise.all(
+        [
+            ...matches.filter(match=>(
+                !originalMatches.find(m=>match.matchId === m.matchId && match.teamNumber === m.teamNumber) // Filter out matches that are already in the database
+            )).map(match => matchStore.add(match)),
+            ...events.filter(match=>(
+                !originalMatches.find(m=>match.matchId === m.matchId && match.teamNumber === m.teamNumber)
+            )).map(event => eventStore.add(event)),
             tx.done
         ]
     );
@@ -135,6 +149,7 @@ async function getEventsByMatch(matchId: string, teamNumber: number) {
 
 export default {
     saveToDatabase,
+    importData,
     getAllMatches,
     getAllEvents,
     getMatchesByTeam,
