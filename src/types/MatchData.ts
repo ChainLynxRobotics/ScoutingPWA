@@ -21,9 +21,9 @@ export type MatchData = {
     notes: string;
 }
 
-export type MatchEvents = EventData[];
-
-export type EventData = {
+export type MatchEventData = {
+    matchId: string;
+    teamNumber: number;
     event: MatchEvent;
     time: number;
-}
+};
