@@ -1,57 +1,76 @@
 import { Button, Card, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Tooltip } from "@mui/material";
-import { ReactElement, useContext, useState } from "react";
+import { useRef, useState } from "react";
 import QRCode from "react-qr-code";
-import ScoutingContext from "../components/context/ScoutingContext";
+import MatchDatabase from "../util/MatchDatabase";
+import QrCodeType from "../enums/QrCodeType";
+import { MatchData } from "../types/MatchData";
+import { QrScanner } from "@yudiel/react-qr-scanner";
+import { gzip, ungzip } from 'node-gzip';
+
+function base64ToBytes(base64: string) {
+    const binString = atob(base64);
+    return stringToBytes(binString);
+}
+
+function stringToBytes(string: string) {
+    return Uint8Array.from(string, (m) => m.codePointAt(0)!!);
+}
+
+function bytesToBase64(bytes: Uint8Array) {
+    const binString = String.fromCodePoint(...bytes);
+    return btoa(binString);
+}
 
 const DataPage = () => {
-    const context = useContext(ScoutingContext);
-    let games: Array<ReactElement> = [];
-    [
-        {
-            matchNum: 1,
-            teamNum: "8248",
-        },
-        {
-            matchNum: 2,
-            teamNum: "2930",
-        },
-        {
-            matchNum: 3,
-            teamNum: "4682",
-        },
-        {
-            matchNum: 4,
-            teamNum: "2910",
-        },
-    ].forEach((game) => {
-        games.push(
-            <div className="mx-5 my-2">
-                <Card variant="outlined">
-                    <div className="flex items-center p-2">
-                        <span className="text-xl">Match {game.matchNum} - Team {game.teamNum}</span>
-                        <IconButton>
-                            <span className="material-symbols-outlined">more_vert</span>
-                        </IconButton>
-                    </div>
-                </Card>
-            </div>
-        )
+    async function getQrCodeData() {
+        return {
+            "type": QrCodeType.MatchData,
+            "matches": await MatchDatabase.getAllMatches(),
+            "events": await MatchDatabase.getAllEvents(),
+        }
+    }
+
+    const qrData = useRef<any>("");
+    const [games, setGames] = useState<MatchData[]|undefined>(undefined);
+    MatchDatabase.getAllMatches().then((matches) => {
+        setGames(matches);
     });
     const [qrOpen, setQrOpen] = useState(false);
+    const [scannerOpen, setScannerOpen] = useState(false);
     return (
     <div className="w-full h-full block justify-center relative">
         <h1 className="text-xl text-center mb-4 pt-4 font-bold">Saved Games</h1>
         <div className="h-min block">
-            {games}
+            {games?.map((game) => {
+            return (
+                <div className="mx-5 my-2">
+                    <Card variant="outlined">
+                        <div className="flex items-center p-2">
+                            <span className="text-xl">Match {game.matchId} - Team {game.teamNumber}</span>
+                            <IconButton>
+                                <span className="material-symbols-outlined">more_vert</span>
+                            </IconButton>
+                        </div>
+                    </Card>
+                </div>
+            )
+        })}
         </div>
 
         <div className="absolute bottom-20 left-0 right-0 flex justify-center items-center">
             <Stack direction="row" spacing={1} justifyContent="center">
-                <Chip label="Share" onClick={() => {
+                <Chip label="Share" onClick={async () => {
+                    let rawData = await getQrCodeData();
+                    let json_data = JSON.stringify(rawData);
+                    // let data_bytes = await gzip(json_data);
+                    // let encoded_data = bytesToBase64(data_bytes);
+                    qrData.current = json_data;
                     setQrOpen(true);
-                }} 
+                }}
                     icon={<span className="material-symbols-outlined">qr_code_2</span>} />
-                <Chip label="Collect" onClick={() => {}} 
+                <Chip label="Collect" onClick={() => {
+                    setScannerOpen(true);
+                }} 
                     icon={<span className="material-symbols-outlined">photo_camera</span>} />
                 <Chip label="Export" onClick={() => {}} 
                     icon={<span className="material-symbols-outlined">download</span>}/>
@@ -76,11 +95,37 @@ const DataPage = () => {
                 <DialogContent>
                     <p className="text-xl font-bold m-5"></p>
                     <div className="p-2 bg-white w-max m-auto">
-                        <QRCode value={JSON.stringify(context)} style={{ width: "100%"}} />
+                        <QRCode value={JSON.stringify(qrData.current)} style={{ width: "100%"}} />
                     </div>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => {setQrOpen(false)}}>Close</Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog
+                open={scannerOpen}
+                onClose={() => {setScannerOpen(false)}}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+                fullWidth
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Press the share button on another device to import results"}
+                </DialogTitle>
+                <DialogContent>
+                <QrScanner
+                    onDecode={async (result) => {
+                        // let compressed_bytes = base64ToBytes(result);
+                        // let data_bytes = await ungzip(compressed_bytes);
+                        // let json_data = bytesToBase64(data_bytes);
+                        let real_data = JSON.parse(result);
+                        console.log(real_data);
+                    }}
+                    onError={(error) => console.log(error?.message) }
+                />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => {setScannerOpen(false)}}>Close</Button>
                 </DialogActions>
             </Dialog>
         </div>
