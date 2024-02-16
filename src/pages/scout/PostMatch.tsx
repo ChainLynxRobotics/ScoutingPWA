@@ -106,6 +106,18 @@ const PostMatch = () => {
                 onChange={handleNotesChange}
             />
 
+            <div className="w-full flex justify-center mt-4">
+                <Button 
+                    variant="contained" 
+                    color="success" 
+                    size="large" 
+                    onClick={context.post.submit} 
+                    disabled={!(context.match.matchStart > 0 && !context.match.matchActive)}
+                >
+                    Submit
+                </Button>
+            </div>
+
             <div className="mt-8 mb-2 w-full h-1 bg-background-secondary"></div>
             <div className="flex flex-col items-center">
                 <h3 className="text-xl mb-2">Event Log</h3>

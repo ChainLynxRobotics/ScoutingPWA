@@ -43,7 +43,7 @@ const DataPage = () => {
         <div className="h-min block">
             {games?.map((game) => {
             return (
-                <div className="mx-5 my-2">
+                <div className="mx-5 my-2" key={game.matchId+"-"+game.teamNumber}>
                     <Card variant="outlined">
                         <div className="flex items-center p-2">
                             <span className="text-xl">Match {game.matchId} - Team {game.teamNumber}</span>

@@ -1,9 +1,12 @@
-import { ReactElement, useEffect, useRef, useState } from "react"
+import { ReactElement, useContext, useEffect, useRef, useState } from "react"
 import { AUTO_DURATION, BOOST_DURATION } from "../../constants"
 import MatchEvent, { NonEditableEvents, NonRemovableEvents } from "../../enums/MatchEvent";
 import AllianceColor from "../../enums/AllianceColor";
 import HumanPlayerLocation from "../../enums/HumanPlayerLocation";
 import ScoutingContext from "./ScoutingContext";
+import MatchDatabase from "../../util/MatchDatabase";
+import CurrentMatchContext from "./CurrentMatchContext";
+import { useNavigate } from "react-router-dom";
 
 /**
  * This function is used to create a new ScoutingStateData object, which is used to store/update all the data that is collected during a match.
@@ -16,6 +19,8 @@ import ScoutingContext from "./ScoutingContext";
  * @returns - A ScoutingStateData object that should be used in a context provider to allow access to the data throughout the app
  */
 export default function ScoutingContextProvider({children, matchId, teamNumber, allianceColor}: {children: ReactElement, matchId: string, teamNumber: number, allianceColor: AllianceColor}) {
+    const navigate = useNavigate();
+    const currentMatchContext = useContext(CurrentMatchContext);
 
     // Pre
     const [humanPlayerLocation, setHumanPlayerLocation] = useState<HumanPlayerLocation>(HumanPlayerLocation.None)
@@ -177,6 +182,40 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
         }
     }, [boostEnd, events]);
 
+    const submit = async () => {
+        await MatchDatabase.saveToDatabase({
+            matchId,
+            teamNumber,
+            allianceColor,
+            pre: {
+                humanPlayerLocation,
+                preload,
+            },
+            match: {
+                attemptedCooperation,
+            },
+            post: {
+                climb,
+                defense,
+                humanPlayerPerformance
+            },
+            notes,
+
+        },
+            events.map(e=>{
+                return {
+                    matchId,
+                    teamNumber,
+                    event: e.event,
+                    time: e.time
+                }
+            
+            })
+        );
+        currentMatchContext?.incrementAndUpdate();
+        navigate("/scout");
+    }
+
     const contextData = {
         meta: {
             matchId,
@@ -219,6 +258,7 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
             setDefense,
             humanPlayerPerformance,
             setHumanPlayerPerformance,
+            submit
         },
     }
 
@@ -306,6 +346,7 @@ export type ScoutingContextType = {
         setDefense: (defense: number) => void,
         humanPlayerPerformance: number,
         setHumanPlayerPerformance: (humanPlayerPerformance: number) => void,
+        submit: () => void
     }
 
 }

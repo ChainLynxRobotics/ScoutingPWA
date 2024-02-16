@@ -42,9 +42,10 @@ export default function App() {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <SettingsContextProvider defaultCompetitionId={DEFAULT_COMPETITION_ID}>
-        <CurrentMatchContextProvider>
-          <BrowserRouter>
+      <BrowserRouter>
+        <SettingsContextProvider defaultCompetitionId={DEFAULT_COMPETITION_ID}>
+          <CurrentMatchContextProvider>
+            
             <Routes>
               <Route index element={<IndexPage />} />
 
@@ -61,9 +62,10 @@ export default function App() {
               </Route>
               <Route path="*" element={<NoPage />} />
             </Routes>
-          </BrowserRouter>
-        </CurrentMatchContextProvider>
-      </SettingsContextProvider>
+            
+          </CurrentMatchContextProvider>
+        </SettingsContextProvider>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }

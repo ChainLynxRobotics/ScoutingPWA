@@ -16,13 +16,14 @@ export default function CurrentMatchContextProvider({children}: {children: React
     const [scoutingData, setScoutingData] = useState<{matchId: string, teamNumber: number, allianceColor: AllianceColor} | undefined>(undefined);
 
     const [hasUpdate, setHasUpdate] = useState(false);
+    const [updateNextRender, setUpdateNextRender] = useState(true); // Update on page load
 
     /**
      * Updates the current match being scouting, may clear any in-progress data. 
      * This function should be called after prompting to user to update after changing schedules settings.
      */
     const update = (): void => {
-        if (settings.matches.length == 0) {
+        if (settings.matches.length == 0 || settings.currentMatchIndex >= settings.matches.length) {
             console.error("No matches to scout");
             setScoutingData(undefined);
             return;
@@ -41,6 +42,12 @@ export default function CurrentMatchContextProvider({children}: {children: React
             allianceColor: color
         });
         setHasUpdate(false);
+        
+    }
+
+    const incrementAndUpdate = () => {
+        settings.setCurrentMatchIndex(settings.currentMatchIndex + 1);
+        setUpdateNextRender(true);
     }
 
     useEffect(() => {
@@ -48,15 +55,17 @@ export default function CurrentMatchContextProvider({children}: {children: React
     }, [settings.currentMatchIndex, settings.clientId, settings.matches]);
 
     useEffect(() => {
+        if (!updateNextRender) return;
         update();
-    }, []);
+        setUpdateNextRender(false);
+    }, [updateNextRender]);
 
     return (
-        <CurrentMatchContext.Provider value={{setHasUpdate, hasUpdate, update}}>
+        <CurrentMatchContext.Provider value={{setHasUpdate, hasUpdate, update, incrementAndUpdate}}>
             <ConditionalWrapper 
                 condition={scoutingData} 
                 wrapper={(children) => 
-                <ScoutingContextProvider 
+                <ScoutingContextProvider key={scoutingData?.matchId || '' + "-" + scoutingData?.teamNumber || 0}
                     matchId={scoutingData?.matchId || ''} 
                     teamNumber={scoutingData?.teamNumber || 0}
                     allianceColor={scoutingData?.allianceColor || AllianceColor.Red}
