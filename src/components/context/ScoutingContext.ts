@@ -1,6 +1,6 @@
 import { createContext } from "react";
-import { ScoutingStateData } from "../ScoutingStateData";
+import { ScoutingContextType } from "./ScoutingContextProvider";
 
-const ScoutingContext = createContext<ScoutingStateData|undefined>(undefined);
+const ScoutingContext = createContext<ScoutingContextType|undefined>(undefined);
 
 export default ScoutingContext;

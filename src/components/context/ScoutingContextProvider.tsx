@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react"
-import { AUTO_DURATION, BOOST_DURATION } from "../constants"
-import MatchEvent, { NonEditableEvents, NonRemovableEvents } from "../enums/MatchEvent";
-import AllianceColor from "../enums/AllianceColor";
-import HumanPlayerLocation from "../enums/HumanPlayerLocation";
+import { ReactElement, useEffect, useRef, useState } from "react"
+import { AUTO_DURATION, BOOST_DURATION } from "../../constants"
+import MatchEvent, { NonEditableEvents, NonRemovableEvents } from "../../enums/MatchEvent";
+import AllianceColor from "../../enums/AllianceColor";
+import HumanPlayerLocation from "../../enums/HumanPlayerLocation";
+import ScoutingContext from "./ScoutingContext";
 
 /**
  * This function is used to create a new ScoutingStateData object, which is used to store/update all the data that is collected during a match.
@@ -14,7 +15,7 @@ import HumanPlayerLocation from "../enums/HumanPlayerLocation";
  * 
  * @returns - A ScoutingStateData object that should be used in a context provider to allow access to the data throughout the app
  */
-export default function ScoutingStateData(matchId: string, teamNumber: number, allianceColor: AllianceColor): ScoutingStateData {
+export default function ScoutingContextProvider({children, matchId, teamNumber, allianceColor}: {children: ReactElement, matchId: string, teamNumber: number, allianceColor: AllianceColor}) {
 
     // Pre
     const [humanPlayerLocation, setHumanPlayerLocation] = useState<HumanPlayerLocation>(HumanPlayerLocation.None)
@@ -24,7 +25,7 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
     const [matchActive, setMatchActive] = useState<boolean>(false)
     const [inAuto, setInAuto] = useState<boolean>(true) // We start in auto
     const eventCounter = useRef(0);
-    const [events, setEvents] = useState<Array<ScoutingStateEventData>>([])
+    const [events, setEvents] = useState<Array<ScoutingContextEventData>>([])
     const [isBeingDefendedOn, setIsBeingDefendedOn] = useState<boolean>(false)
     const [isBoostActive, setIsBoostActive] = useState<boolean>(false)
     const [attemptedCooperation, setAttemptedCooperation] = useState<boolean>(false)
@@ -176,7 +177,7 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
         }
     }, [boostEnd, events]);
 
-    return {
+    const contextData = {
         meta: {
             matchId,
             teamNumber,
@@ -220,17 +221,23 @@ export default function ScoutingStateData(matchId: string, teamNumber: number, a
             setHumanPlayerPerformance,
         },
     }
+
+    return (
+        <ScoutingContext.Provider value={contextData}>
+            {children}
+        </ScoutingContext.Provider>
+    );
 }
 
 
-// The following types are used in the above function's return type
+// The following types are used in the ScoutingContext value
 
 /**
  * Contains all the data that is collected during a match
  * Note: None of these functions will add events to the events array (except for addEvent), 
  * for example setIsBeingDefendedOn(boolean) will not add isBeingDefendedOnStart or isBeingDefendedOnEnd events
  */
-export type ScoutingStateData = {
+export type ScoutingContextType = {
     // Meta data
     meta: {
         matchId: string,
@@ -267,9 +274,9 @@ export type ScoutingStateData = {
          */
         setIsAuto: (isAuto: boolean) => void,
         getTime: () => number, // Epoch time relative to start of match
-        events: Array<ScoutingStateEventData>,
+        events: Array<ScoutingContextEventData>,
         addEvent: (event: MatchEvent, time: number) => void,
-        getEventById: (id: number) => ScoutingStateEventData | undefined,
+        getEventById: (id: number) => ScoutingContextEventData | undefined,
         editEventById: (id: number, event: MatchEvent, time: number) => void,
         removeEventById: (id: number) => void,
 
@@ -306,7 +313,7 @@ export type ScoutingStateData = {
 /**
  * Used to represent an event and correlated data that happens during a match
  */
-export type ScoutingStateEventData = {
+export type ScoutingContextEventData = {
     id: number, // A unique identifier for the event, automatically incremented
     event: MatchEvent,
     time: number

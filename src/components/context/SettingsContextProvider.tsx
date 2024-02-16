@@ -1,7 +1,9 @@
-import useLocalStorageState from "../util/localStorageState";
+import { ReactElement } from "react";
+import useLocalStorageState from "../../util/localStorageState";
+import SettingsContext from "./SettingsContext";
 
 
-export default function SettingsStateData(defaultCompetitionId: string): SettingsStateData {
+export default function SettingsContextProvider({defaultCompetitionId, children}: {defaultCompetitionId: string, children: ReactElement}) {
 
     const [competitionId, setCompetitionId] = useLocalStorageState<string>(defaultCompetitionId, "competitionId");
     const [clientId, setClientId] = useLocalStorageState<number>(0, "clientId"); // From 0-5
@@ -43,7 +45,7 @@ export default function SettingsStateData(defaultCompetitionId: string): Setting
         }
     }
 
-    return {
+    const value = {
         competitionId,
         setCompetitionId,
         clientId,
@@ -59,7 +61,15 @@ export default function SettingsStateData(defaultCompetitionId: string): Setting
         moveMatchUp,
         moveMatchDown
     }
+
+    return (
+        <SettingsContext.Provider value={value}>
+            {children}
+        </SettingsContext.Provider>
+    );
 }
+
+// The following types are used to define the value of the SettingsContext.Provider
 
 export type SettingsStateData = {
     competitionId: string;

@@ -11,47 +11,39 @@ import IndexPage from './pages/IndexPage';
 import PreMatch from './pages/scout/PreMatch';
 import DuringMatch from './pages/scout/DuringMatch';
 import PostMatch from './pages/scout/PostMatch';
-import ScoutingContext from './components/context/ScoutingContext';
 import createTheme from '@mui/material/styles/createTheme';
 import { ThemeProvider } from '@emotion/react';
-import ScoutingStateData from './components/ScoutingStateData';
-import AllianceColor from './enums/AllianceColor';
-import SettingsContext from './components/context/SettingsContext';
-import SettingsStateData from './components/SettingsStateData';
 import { DEFAULT_COMPETITION_ID } from './constants';
+import SettingsContextProvider from './components/context/SettingsContextProvider';
+import CurrentMatchContextProvider from './components/context/CurrentMatchContextProvider';
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#5B7FC5'
+    },
+    secondary: {
+      main: '#696969'
+    },
+    success: {
+      main: '#82ec7a'
+    },
+    warning: {
+      main: '#f7b955'
+    },
+    error: {
+      main: '#f77070'
+    },
+  },
+});
 
 export default function App() {
 
-  const darkTheme = createTheme({
-    palette: {
-      mode: 'dark',
-      primary: {
-        main: '#5B7FC5'
-      },
-      secondary: {
-        main: '#696969'
-      },
-      success: {
-        main: '#82ec7a'
-      },
-      warning: {
-        main: '#f7b955'
-      },
-      error: {
-        main: '#f77070'
-      },
-    },
-  });
-
-  const settingsData = SettingsStateData(DEFAULT_COMPETITION_ID);
-  
-  // TODO: Remove this when done testing
-  const scoutingData = ScoutingStateData("2023wasno_q7", 8248, AllianceColor.Red); 
-
   return (
     <ThemeProvider theme={darkTheme}>
-      <SettingsContext.Provider value={settingsData}>
-        <ScoutingContext.Provider value={scoutingData}>
+      <SettingsContextProvider defaultCompetitionId={DEFAULT_COMPETITION_ID}>
+        <CurrentMatchContextProvider>
           <BrowserRouter>
             <Routes>
               <Route index element={<IndexPage />} />
@@ -66,12 +58,12 @@ export default function App() {
                 <Route path="data" element={<DataPage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="*" element={<NoPage />} />
-                </Route>
+              </Route>
               <Route path="*" element={<NoPage />} />
             </Routes>
           </BrowserRouter>
-        </ScoutingContext.Provider>
-      </SettingsContext.Provider>
+        </CurrentMatchContextProvider>
+      </SettingsContextProvider>
     </ThemeProvider>
   );
 }
