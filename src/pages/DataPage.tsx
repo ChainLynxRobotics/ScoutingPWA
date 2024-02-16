@@ -1,42 +1,49 @@
 import { Button, Card, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Tooltip } from "@mui/material";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import QRCode from "react-qr-code";
 import MatchDatabase from "../util/MatchDatabase";
 import QrCodeType from "../enums/QrCodeType";
 import { MatchData } from "../types/MatchData";
 import { QrScanner } from "@yudiel/react-qr-scanner";
-import { gzip, ungzip } from 'node-gzip';
-
-function base64ToBytes(base64: string) {
-    const binString = atob(base64);
-    return stringToBytes(binString);
-}
-
-function stringToBytes(string: string) {
-    return Uint8Array.from(string, (m) => m.codePointAt(0)!!);
-}
-
-function bytesToBase64(bytes: Uint8Array) {
-    const binString = String.fromCodePoint(...bytes);
-    return btoa(binString);
-}
+import { compressToBase64Gzip, decompressFromBase64Gzip } from "../util/stringCompression";
 
 const DataPage = () => {
-    async function getQrCodeData() {
-        return {
+    
+    const qrData = useRef<any>("");
+    const [games, setGames] = useState<MatchData[]|undefined>(undefined);
+    const [qrOpen, setQrOpen] = useState(false);
+    const [scannerOpen, setScannerOpen] = useState(false);
+
+    useEffect(() => {
+        MatchDatabase.getAllMatches().then((matches) => {
+            setGames(matches);
+        });
+    }, []);
+
+    async function generateQrCode() {
+        const strData = JSON.stringify({
             "type": QrCodeType.MatchData,
             "matches": await MatchDatabase.getAllMatches(),
             "events": await MatchDatabase.getAllEvents(),
+        })
+        const compressed = await compressToBase64Gzip(strData);
+        qrData.current = compressed;
+        setQrOpen(true);
+    }
+
+    async function decodeQrCode(data: string) {
+        try {
+            console.log("Read: ", data)
+            const json_data = JSON.parse(await decompressFromBase64Gzip(data));
+            if (json_data.type !== QrCodeType.MatchData)
+                throw new Error("QR Code does not contain match data");
+            await MatchDatabase.importData(json_data.matches, json_data.events);
+        } catch (e) {
+            console.error("Error decoding qr code", e);
+            alert("Error decoding qr code: " + e);
         }
     }
 
-    const qrData = useRef<any>("");
-    const [games, setGames] = useState<MatchData[]|undefined>(undefined);
-    MatchDatabase.getAllMatches().then((matches) => {
-        setGames(matches);
-    });
-    const [qrOpen, setQrOpen] = useState(false);
-    const [scannerOpen, setScannerOpen] = useState(false);
     return (
     <div className="w-full h-full block justify-center relative">
         <h1 className="text-xl text-center mb-4 pt-4 font-bold">Saved Games</h1>
@@ -59,18 +66,9 @@ const DataPage = () => {
 
         <div className="absolute bottom-20 left-0 right-0 flex justify-center items-center">
             <Stack direction="row" spacing={1} justifyContent="center">
-                <Chip label="Share" onClick={async () => {
-                    let rawData = await getQrCodeData();
-                    let json_data = JSON.stringify(rawData);
-                    // let data_bytes = await gzip(json_data);
-                    // let encoded_data = bytesToBase64(data_bytes);
-                    qrData.current = json_data;
-                    setQrOpen(true);
-                }}
+                <Chip label="Share" onClick={generateQrCode}
                     icon={<span className="material-symbols-outlined">qr_code_2</span>} />
-                <Chip label="Collect" onClick={() => {
-                    setScannerOpen(true);
-                }} 
+                <Chip label="Collect" onClick={() => setScannerOpen(true)} 
                     icon={<span className="material-symbols-outlined">photo_camera</span>} />
                 <Chip label="Export" onClick={() => {}} 
                     icon={<span className="material-symbols-outlined">download</span>}/>
@@ -94,8 +92,8 @@ const DataPage = () => {
                 </DialogTitle>
                 <DialogContent>
                     <p className="text-xl font-bold m-5"></p>
-                    <div className="p-2 bg-white w-max m-auto">
-                        <QRCode value={JSON.stringify(qrData.current)} style={{ width: "100%"}} />
+                    <div className="p-2 bg-white w-full max-w-md m-auto">
+                        <QRCode value={qrData.current} style={{ width: "100%", maxWidth: "100%", height: "auto"}} />
                     </div>
                 </DialogContent>
                 <DialogActions>
@@ -113,16 +111,10 @@ const DataPage = () => {
                     {"Press the share button on another device to import results"}
                 </DialogTitle>
                 <DialogContent>
-                <QrScanner
-                    onDecode={async (result) => {
-                        // let compressed_bytes = base64ToBytes(result);
-                        // let data_bytes = await ungzip(compressed_bytes);
-                        // let json_data = bytesToBase64(data_bytes);
-                        let real_data = JSON.parse(result);
-                        console.log(real_data);
-                    }}
-                    onError={(error) => console.log(error?.message) }
-                />
+                    <QrScanner
+                        onDecode={decodeQrCode}
+                        onError={(error) => console.log(error?.message) }
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => {setScannerOpen(false)}}>Close</Button>
