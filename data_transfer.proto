@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+message DataTransfer {
+    QrCodeType qr_type = 1;
+    repeated MatchData matches = 2;
+    repeated MatchEventData events = 3;
+}
+
+message MatchEventData {
+    string match_id = 1;
+    int32 team_number = 2;
+    int32 event = 3;
+    int64 time = 4;
+}
+
+message MatchData {
+    string match_id = 1;
+    int32 team_number = 2;
+    AllianceColor alliance_color = 3;
+    PreMatchData pre = 4;
+    DuringMatchData match = 5;
+    PostMatchData post = 6;
+    string notes = 7;
+}
+
+message PreMatchData {
+    HumanPlayerLocation human_player_location = 1;
+    bool preload = 2;
+}
+
+message DuringMatchData {
+    bool attempted_cooperation = 1;
+}
+
+message PostMatchData {
+    bool climb = 1;
+    float defense = 2;
+    int32 human_player_performance = 3;
+}
+
+enum QrCodeType {
+    MatchDataType = 0;
+    ScheduleType = 1;
+}
+
+enum AllianceColor {
+    Red = 0;
+    Blue = 1;
+}
+
+enum HumanPlayerLocation {
+    None = 0;
+    Source = 1;
+    Amp = 2;
+}

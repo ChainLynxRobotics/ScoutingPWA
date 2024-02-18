@@ -2,10 +2,11 @@ import { Button, Card, Chip, Dialog, DialogActions, DialogContent, DialogTitle, 
 import { useEffect, useRef, useState } from "react";
 import QRCode from "react-qr-code";
 import MatchDatabase from "../util/MatchDatabase";
-import QrCodeType from "../enums/QrCodeType";
 import { MatchData } from "../types/MatchData";
 import { QrScanner } from "@yudiel/react-qr-scanner";
-import { compressToBase64Gzip, decompressFromBase64Gzip } from "../util/stringCompression";
+import { compressMessageToBase64Gzip, decompressMessageFromBase64Gzip } from "../util/stringCompression";
+import protobuf from "protobufjs";
+import { convertEnumsToStrings } from "../util/protoAdapter";
 
 const DataPage = () => {
     
@@ -21,12 +22,26 @@ const DataPage = () => {
     }, []);
 
     async function generateQrCode() {
-        const strData = JSON.stringify({
-            "type": QrCodeType.MatchData,
-            "matches": await MatchDatabase.getAllMatches(),
-            "events": await MatchDatabase.getAllEvents(),
-        })
-        const compressed = await compressToBase64Gzip(strData);
+        const protos = await protobuf.load("data_transfer.proto");
+        var DataTransfer = protos.lookupType("DataTransfer");
+        const events = await MatchDatabase.getAllEvents();
+        console.log(events);
+        const data = {
+            "qrType": 0,
+            "matches": convertEnumsToStrings(await MatchDatabase.getAllMatches()),
+            "events": events,
+        };
+        var errMsg = DataTransfer.verify(data);
+        if (errMsg)
+            throw Error(errMsg);
+        const protoData = DataTransfer.create(data);
+        // const strData = JSON.stringify({
+        //     "type": QrCodeType.MatchData,
+        //     "matches": await MatchDatabase.getAllMatches(),
+        //     "events": await MatchDatabase.getAllEvents(),
+        // })
+        console.log("proto data", protoData);
+        const compressed = await compressMessageToBase64Gzip(protoData, DataTransfer);
         qrData.current = compressed;
         setQrOpen(true);
     }
@@ -34,10 +49,15 @@ const DataPage = () => {
     async function decodeQrCode(data: string) {
         try {
             console.log("Read: ", data)
-            const json_data = JSON.parse(await decompressFromBase64Gzip(data));
-            if (json_data.type !== QrCodeType.MatchData)
+            const protos = await protobuf.load("data_transfer.proto");
+            var DataTransfer = protos.lookupType("DataTransfer");
+            const message = await decompressMessageFromBase64Gzip(data, DataTransfer);
+            const object = DataTransfer.toObject(message, {enums: String});
+            console.log(object);
+            // const json_data = JSON.parse(await decompressFromBase64Gzip(data));
+            if (object.qrType !== "MatchDataType")
                 throw new Error("QR Code does not contain match data");
-            await MatchDatabase.importData(json_data.matches, json_data.events);
+            await MatchDatabase.importData(object.matches, object.events);
         } catch (e) {
             console.error("Error decoding qr code", e);
             alert("Error decoding qr code: " + e);
