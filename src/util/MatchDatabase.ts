@@ -147,11 +147,30 @@ async function getEventsByMatch(matchId: string, teamNumber: number) {
     return db.getAllFromIndex('matches', 'by-both', [teamNumber, matchId]);
 }
 
+async function deleteMatch(matchId: string, teamNumber: number) {
+    const db = await tryOpenDatabase();
+    
+    const matchKeys = await db.getAllKeysFromIndex('matches', 'by-both', [teamNumber, matchId]);
+    const eventKeys = await db.getAllKeysFromIndex('events', 'by-both', [teamNumber, matchId])
+    
+    const tx = db.transaction(['matches', 'events'], 'readwrite');
+    const matchStore = tx.objectStore('matches');
+    const eventStore = tx.objectStore('events');
+    await Promise.all(
+        [
+            ...matchKeys.map(key => matchStore.delete(key)),
+            ...eventKeys.map(key => eventStore.delete(key)),
+            tx.done
+        ]
+    );
+}
+
 export default {
     saveToDatabase,
     importData,
     getAllMatches,
     getAllEvents,
     getMatchesByTeam,
-    getEventsByMatch
+    getEventsByMatch,
+    deleteMatch
 }

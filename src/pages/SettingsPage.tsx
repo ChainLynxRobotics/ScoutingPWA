@@ -132,8 +132,12 @@ const SettingsPage = () => {
                 Share Schedule
             </DialogTitle>
             <DialogContent>
-                <p className="text-center">Scan the following QR code(s) on another device to copy the schedule data</p>
-                <QRCodeList />
+                <div className="w-full flex flex-col items-center">
+                    <div className="w-full max-w-md">
+                        <p className="text-center">Scan the following QR code(s) on copy this schedule onto other devices</p>
+                        <QRCodeList />
+                    </div>
+                </div>
             </DialogContent>
             <DialogActions>
                 <Button onClick={() => {setQrOpen(false)}}>Close</Button>
