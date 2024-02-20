@@ -2,8 +2,8 @@
  * Enum for 
  */
 enum QrCodeType {
-    MatchData = "match_data",
-    Schedule = "schedule"
+    MatchData = 0,
+    Schedule = 1
 }
 
 export default QrCodeType;

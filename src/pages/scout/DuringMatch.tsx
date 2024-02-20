@@ -111,7 +111,7 @@ const DuringMatch = () => {
             }
             
             <div className="max-w-md relative my-10 whitespace-nowrap">
-                <img src={`/imgs/crescendo_field_render_${context.meta.allianceColor}.png`} 
+                <img src={`/imgs/crescendo_field_render_${context.meta.allianceColor == AllianceColor.Red ? "red" : "blue"}.png`} 
                     alt="Crescendo Field Render" className={`w-full ${rotateField ? '-scale-100' : ''}`} />
                 
                 {/* Allows the field to be rotated depending on the pov of the scouter */}
