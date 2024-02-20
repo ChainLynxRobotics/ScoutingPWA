@@ -4,7 +4,15 @@ message DataTransfer {
     QrCodeType qr_type = 1;
     repeated MatchData matches = 2;
     repeated MatchEventData events = 3;
+    repeated ScheduledMatch schedule = 4;
 }
+
+enum QrCodeType {
+    MatchDataType = 0;
+    ScheduleType = 1;
+}
+
+
 
 message MatchEventData {
     string match_id = 1;
@@ -38,11 +46,6 @@ message PostMatchData {
     int32 human_player_performance = 3;
 }
 
-enum QrCodeType {
-    MatchDataType = 0;
-    ScheduleType = 1;
-}
-
 enum AllianceColor {
     Red = 0;
     Blue = 1;
@@ -52,4 +55,16 @@ enum HumanPlayerLocation {
     None = 0;
     Source = 1;
     Amp = 2;
+}
+
+
+
+message ScheduledMatch {
+    string matchId = 1;
+    int32 blue1 = 2;
+    int32 blue2 = 3;
+    int32 blue3 = 4;
+    int32 red1 = 5;
+    int32 red2 = 6;
+    int32 red3 = 7;
 }

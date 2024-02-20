@@ -5,17 +5,29 @@ import FormControl from "@mui/material/FormControl/FormControl";
 import InputLabel from "@mui/material/InputLabel/InputLabel";
 import Button from "@mui/material/Button/Button";
 import ErrorPage from "./ErrorPage";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import SettingsContext from "../components/context/SettingsContext";
 import FormHelperText from "@mui/material/FormHelperText/FormHelperText";
 import MatchSchedule from "../components/MatchSchedule";
 import Tooltip from "@mui/material/Tooltip/Tooltip";
 import IconButton from "@mui/material/IconButton/IconButton";
+import QrCodeDataTransfer from "../components/QrCodeDataTransfer";
+import QrCodeType from "../enums/QrCodeType";
+import Dialog from "@mui/material/Dialog/Dialog";
+import DialogTitle from "@mui/material/DialogTitle/DialogTitle";
+import DialogContent from "@mui/material/DialogContent/DialogContent";
+import DialogActions from "@mui/material/DialogActions/DialogActions";
 
 const SettingsPage = () => {
 
     const settings = useContext(SettingsContext);
     if (!settings) return (<ErrorPage msg="Settings context not found?!?!?!" />)
+
+    // QR code sending and receiving
+    const { generateQrCodes, QRCodeList, QRCodeScanner } = QrCodeDataTransfer(onQrData);
+    const [qrOpen, setQrOpen] = useState(false);
+    const [scannerOpen, setScannerOpen] = useState(false);
+
 
     function nextMatch() {
         settings?.setCurrentMatchIndex(Math.min(settings.currentMatchIndex+1, settings.matches.length-1));
@@ -23,6 +35,24 @@ const SettingsPage = () => {
 
     function previousMatch() {
         settings?.setCurrentMatchIndex(Math.max(settings.currentMatchIndex-1, 0));
+    }
+
+
+    const openQrCodes = () => {
+        if (!settings) return;
+        const data = {
+            "qrType": QrCodeType.Schedule,
+            "schedule": settings.matches
+        };
+        generateQrCodes(data);
+        setQrOpen(true);
+    }
+
+    function onQrData(data: any) {
+        if (data.qrType !== QrCodeType.Schedule) throw new Error("QR Codes do not contain schedule data");
+        if (!settings) return;
+        settings.setMatches(data.schedule);
+        setScannerOpen(false);
     }
 
     return (
@@ -53,8 +83,8 @@ const SettingsPage = () => {
         
         <h1 className="text-xl">Schedule</h1>
         <div className="flex flex-wrap gap-4">
-            <Button variant="contained" startIcon={<span className="material-symbols-outlined">photo_camera</span>}>Scan</Button>
-            <Button variant="contained" color="secondary" startIcon={<span className="material-symbols-outlined">qr_code_2</span>}>Share</Button>
+            <Button variant="contained" onClick={()=>setScannerOpen(true)} startIcon={<span className="material-symbols-outlined">photo_camera</span>}>Scan</Button>
+            <Button variant="contained" color="secondary" onClick={openQrCodes} startIcon={<span className="material-symbols-outlined">qr_code_2</span>}>Share</Button>
             <Tooltip title={<ul className="text-md list-disc pl-2">
                     <li>One device is designated as the 'host' device.</li>
                     <li>If you ARE the host, click the download button below to get a copy from blue alliance, then click "Share" to generate qr codes for other devices to scan.</li>
@@ -89,6 +119,48 @@ const SettingsPage = () => {
             </div>
             <MatchSchedule />
         </div>
+
+        
+        {/* Share match popup */}
+        <Dialog
+            open={qrOpen}
+            onClose={() => {setQrOpen(false)}}
+            aria-labelledby="share-dialog-title"
+            fullScreen
+        >
+            <DialogTitle id="share-dialog-title">
+                Share Schedule
+            </DialogTitle>
+            <DialogContent>
+                <p className="text-center">Scan the following QR code(s) on another device to copy the schedule data</p>
+                <QRCodeList />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => {setQrOpen(false)}}>Close</Button>
+            </DialogActions>
+        </Dialog>
+
+        {/* Scan schedule popup */}
+        <Dialog
+            open={scannerOpen}
+            onClose={() => {setScannerOpen(false)}}
+            aria-labelledby="scan-dialog-title"
+            fullScreen
+        >
+            <DialogTitle id="scan-dialog-title">
+                Collect Schedule Data
+            </DialogTitle>
+            <DialogContent>
+                <div className="w-full flex flex-col items-center">
+                    <div className="w-full max-w-md">
+                        <QRCodeScanner />
+                    </div>
+                </div>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => {setScannerOpen(false)}}>Close</Button>
+            </DialogActions>
+        </Dialog>
     </div>
     );
 };

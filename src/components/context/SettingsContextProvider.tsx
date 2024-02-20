@@ -53,6 +53,7 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
         fieldRotated,
         setFieldRotated,
         matches,
+        setMatches,
         currentMatchIndex,
         setCurrentMatchIndex,
         addMatch,
@@ -80,6 +81,7 @@ export type SettingsStateData = {
     setFieldRotated: (fieldRotated: boolean) => void;
 
     matches: ScheduledMatch[];
+    setMatches: (matches: ScheduledMatch[]) => void;
     currentMatchIndex: number;
     setCurrentMatchIndex: (nextMatch: number) => void;
     addMatch: (match: ScheduledMatch) => void;

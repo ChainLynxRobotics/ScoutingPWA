@@ -1,24 +1,16 @@
 import { Button, Card, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Tooltip } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
-import QRCode from "react-qr-code";
+import { useEffect, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchData } from "../types/MatchData";
-import { QrScanner } from "@yudiel/react-qr-scanner";
-import { compressMessageToBase64Gzip, decompressMessageFromBase64Gzip } from "../util/stringCompression";
-import protobuf from "protobufjs";
 import QrCodeType from "../enums/QrCodeType";
-
-const QR_CHUNK_SIZE = 512;
-const QR_PROTOCOL_REGEX = /^scoutingdata:(\d+)\/(\d+):(.+)$/;
+import QrCodeDataTransfer from "../components/QrCodeDataTransfer";
 
 const DataPage = () => {
-    
-    const outQrData = useRef<string[]>([]);
-    const inQrData = useRef<string[]>([]);
-    const [inQrStatus, setInQrStatus] = useState<{count: number, total: number}>({count: 0, total: 0});
-    const isDecoding = useRef(false);
+
+    const { generateQrCodes, QRCodeList, QRCodeScanner } = QrCodeDataTransfer(onData);
 
     const [games, setGames] = useState<MatchData[]|undefined>(undefined);
+
     const [qrOpen, setQrOpen] = useState(false);
     const [scannerOpen, setScannerOpen] = useState(false);
 
@@ -28,10 +20,7 @@ const DataPage = () => {
         });
     }, []);
 
-    async function generateQrCode() {
-        const protos = await protobuf.load("/protobuf/data_transfer.proto");
-        var DataTransfer = protos.lookupType("DataTransfer");
-
+    async function openQrData() {
         const events = await MatchDatabase.getAllEvents();
         const matches = await MatchDatabase.getAllMatches();
         const data = {
@@ -40,67 +29,21 @@ const DataPage = () => {
             "events": events,
         };
 
-        var errMsg = DataTransfer.verify(data);
-        if (errMsg) throw Error(errMsg);
-
-        const protoData = DataTransfer.create(data);
-        const compressed = await compressMessageToBase64Gzip(protoData, DataTransfer);
-        console.log("Compressed Length: ", compressed.length, "Chunks: ", Math.ceil(compressed.length / 1000));
-        for (let i = 0; i < Math.ceil(compressed.length / QR_CHUNK_SIZE); i++) { // Breaks up the data into QR_CHUNK_SIZE character chunks
-            // Store the chunk with its index and total chunks in the qr data array
-            outQrData.current[i] = 'scoutingdata:'+(i+1)+'/'+outQrData.current.length+':'+compressed.slice(i*QR_CHUNK_SIZE, (i+1)*QR_CHUNK_SIZE);
-        }
+        await generateQrCodes(data);
+        
         setQrOpen(true);
     }
 
     // Decodes a fully assembled qr code and imports the match data
-    async function decodeQrCode(data: string) {
-        console.log("Decoding: ", data);
-        const protos = await protobuf.load("/protobuf/data_transfer.proto");
-        var DataTransfer = protos.lookupType("DataTransfer");
-
-        const message = await decompressMessageFromBase64Gzip(data, DataTransfer);
-        const object = DataTransfer.toObject(message);
-        console.log(object);
-
-        if (object.qrType !== QrCodeType.MatchData) throw new Error("QR Code does not contain match data");
+    async function onData(data: any) {
+        if (data.qrType !== QrCodeType.MatchData) throw new Error("QR Codes do not contain match data");
         
-        await MatchDatabase.importData(object.matches, object.events);
+        await MatchDatabase.importData(data.matches, data.events);
+
         setScannerOpen(false);
         MatchDatabase.getAllMatches().then((matches) => {
             setGames(matches);
         });
-    }
-
-    // Decodes a single qr code, must start with "scoutingdata:"
-    function decodeQrCodeChunk(data: string) {
-        if (isDecoding.current) return;
-        isDecoding.current = true;
-        try {
-            console.log("Read: ", data);
-            var regexData = QR_PROTOCOL_REGEX.exec(data); // The regex to match the qr code protocol
-            if (regexData === null) throw new Error("Invalid QR Code Data");
-            const chunk = parseInt(regexData[1]); // The chunk number (1 indexed)
-            const totalChunks = parseInt(regexData[2]); // The total number of chunks
-            if (totalChunks !== inQrData.current.length) {
-                // If the total chunks has changed (such as scanning something new), reset the array
-                inQrData.current = new Array(totalChunks).fill("");
-            }
-
-            inQrData.current[chunk-1] = regexData[3];
-            setInQrStatus({count: inQrData.current.filter(v=>v!=="").length, total: totalChunks});
-
-            if (inQrData.current.filter(v=>v!=="").length === totalChunks) {
-                // If we have all the chunks, decode the qr code
-                decodeQrCode(inQrData.current.join(""));
-                inQrData.current = [];
-                setInQrStatus({count: 0, total: 0});
-            }
-        } catch (e) {
-            console.error("Error decoding qr code", e);
-            alert(e);
-        }
-        isDecoding.current = false;
     }
 
     return (
@@ -125,7 +68,7 @@ const DataPage = () => {
 
         <div className="absolute bottom-20 left-0 right-0 flex justify-center items-center">
             <Stack direction="row" spacing={1} justifyContent="center">
-                <Chip label="Share" onClick={generateQrCode}
+                <Chip label="Share" onClick={openQrData}
                     icon={<span className="material-symbols-outlined">qr_code_2</span>} />
                 <Chip label="Collect" onClick={() => setScannerOpen(true)} 
                     icon={<span className="material-symbols-outlined">photo_camera</span>} />
@@ -151,17 +94,7 @@ const DataPage = () => {
                 </DialogTitle>
                 <DialogContent>
                     <p className="text-center">Scan the following QR code(s) on another device to import match data</p>
-                    <div className="flex flex-col w-full items-center">
-                        {outQrData.current.map((qr, index) => {
-                            return <div className="mt-4 w-full" key={index}>
-                                <p className="mb-2 text-lg text-center">Chunk {index+1}/{outQrData.current.length}</p>
-                                <QRCode 
-                                    value={qr} 
-                                    style={{ width: "100%", maxWidth: "100%", height: "auto", border: "5px solid white"}} 
-                                />
-                            </div>
-                        })}
-                    </div>
+                    <QRCodeList />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => {setQrOpen(false)}}>Close</Button>
@@ -178,13 +111,9 @@ const DataPage = () => {
                     Collect Match Data
                 </DialogTitle>
                 <DialogContent>
-                    <div className="w-full max-w-lg">
-                        <QrScanner
-                            onDecode={decodeQrCodeChunk}
-                            onError={(error) => console.log(error?.message) }
-                        />
-                        <div className="w-full mt-4 text-xl text-center">
-                            Read <code>{inQrStatus.count}/{inQrStatus.total || '?'}</code> chunks
+                    <div className="w-full flex flex-col items-center">
+                        <div className="w-full max-w-md">
+                            <QRCodeScanner />
                         </div>
                     </div>
                 </DialogContent>
