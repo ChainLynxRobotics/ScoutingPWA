@@ -16,6 +16,7 @@ import { ThemeProvider } from '@emotion/react';
 import { DEFAULT_COMPETITION_ID } from './constants';
 import SettingsContextProvider from './components/context/SettingsContextProvider';
 import CurrentMatchContextProvider from './components/context/CurrentMatchContextProvider';
+import ReloadPrompt from './components/ReloadPrompt';
 
 const darkTheme = createTheme({
   palette: {
@@ -66,6 +67,7 @@ export default function App() {
           </CurrentMatchContextProvider>
         </SettingsContextProvider>
       </BrowserRouter>
+      <ReloadPrompt />
     </ThemeProvider>
   );
 }

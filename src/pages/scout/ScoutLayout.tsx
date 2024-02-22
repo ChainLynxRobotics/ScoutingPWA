@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
@@ -6,11 +6,21 @@ import { Alert, Button } from "@mui/material";
 import CountUp from "../../components/CountUp";
 import AllianceColor from "../../enums/AllianceColor";
 import CurrentMatchContext from "../../components/context/CurrentMatchContext";
+import SettingsContext from "../../components/context/SettingsContext";
 
 const ScoutPage = () => {
     
+    const settings = useContext(SettingsContext);
+    if (settings === undefined) throw new Error("SettingsContext not found");
+    
     const currentMatchContext = useContext(CurrentMatchContext);
     const context = useContext(ScoutingContext);
+
+    useEffect(() => {
+        if (currentMatchContext?.hasUpdate) {
+            setWarningDismissed(false);
+        }
+    }, [currentMatchContext?.hasUpdate]);
 
     const [warningDismissed, setWarningDismissed] = useState(false);
 
@@ -67,7 +77,7 @@ const ScoutPage = () => {
             :
                 <NoMatchAvailable />
             }
-            {currentMatchContext?.hasUpdate &&
+            {currentMatchContext?.hasUpdate && !(settings.matches.length == 0 || settings.currentMatchIndex >= settings.matches.length) &&
                 <div className={"fixed bottom-16 right-0 pr-2 transition-transform "+(warningDismissed ? 'translate-x-[90%]' : '')} onClick={()=>setWarningDismissed(false)}>
                     <Alert severity="warning" className="w-full max-w-lg mx-auto" onClose={(e)=>{setWarningDismissed(true);e.stopPropagation();}}>
                         <div className="mb-1">The schedule has been updated, click to update button below to reflect your changes here, but be warned it will delete any scouting that is in-progress.</div>

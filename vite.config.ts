@@ -38,9 +38,19 @@ const manifest: Partial<ManifestOptions> = {
   ]
 }
 
-const includeAssets = ['fonts/*.woff2', 'imgs/*.png']
+const includeAssets = ['index.html', '*.{js,css,html}', '**/*.{js,css,html}', 'fonts/*.woff2', 'imgs/*.png', 'protobuf/*.proto']
+const ignoreAssets = ['**/*.map', 'imgs/crescendo_field_render_full.png']
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), VitePWA({manifest, minify: false, includeAssets})],
+  plugins: [react(), VitePWA({
+    registerType: 'prompt',
+    manifest, 
+    minify: false, 
+    includeAssets, 
+    workbox: {
+      globPatterns: includeAssets, 
+      globIgnores: ignoreAssets
+    }
+  })],
 })

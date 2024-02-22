@@ -14,9 +14,10 @@ const IndexPage = () => {
         // If the app is already installed, redirect to the scout page, checking every second
         const handler = () => {
             if (window.matchMedia('(display-mode: standalone)').matches) {
-                navigate('/scout');
+                location.href = '/scout'; // Use location.href instead of navigate() to force a full page reload
             }
         }
+        handler(); // Check immediately
         const id = window.setInterval(handler, 1000);
         return () => window.clearInterval(id);
     }, []);
@@ -34,7 +35,7 @@ const IndexPage = () => {
     useEffect(() => {
         // This event fires when the user has installed the app, so we can redirect to the scout page
         const handler = () => {
-            navigate('/scout');
+            location.href = '/scout'; // Use location.href instead of navigate() to force a full page reload
         }
         window.addEventListener('appinstalled', handler);
         return () => window.removeEventListener('appinstalled', handler);
