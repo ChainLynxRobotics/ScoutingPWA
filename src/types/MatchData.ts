@@ -2,6 +2,11 @@ import AllianceColor from "../enums/AllianceColor";
 import HumanPlayerLocation from "../enums/HumanPlayerLocation";
 import MatchEvent from "../enums/MatchEvent";
 
+export type MatchIdentifier = {
+    matchId: string;
+    teamNumber: number;
+}
+
 export type MatchData = {
     matchId: string;
     teamNumber: number;

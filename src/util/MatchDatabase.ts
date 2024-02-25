@@ -1,5 +1,5 @@
 import { DBSchema, IDBPDatabase, openDB } from "idb";
-import { MatchData, MatchEventData } from "../types/MatchData";
+import { MatchData, MatchEventData, MatchIdentifier } from "../types/MatchData";
 
 interface MatchDatabaseSchema extends DBSchema {
     matches: {
@@ -88,7 +88,7 @@ async function saveToDatabase(matchData: MatchData, matchEvents: MatchEventData[
 async function importData(matches: MatchData[], events: MatchEventData[]) {
     const db = await tryOpenDatabase();
 
-    const originalMatches = await getAllMatches();
+    const originalMatches = await getAllMatchIdentifiers();
 
     const tx = db.transaction(['matches', 'events'], 'readwrite');
     const matchStore = tx.objectStore('matches');
@@ -122,6 +122,22 @@ async function getAllMatches() {
 async function getAllEvents() {
     const db = await tryOpenDatabase();
     return db.getAll('events');
+}
+
+/**
+ * Retrieves a list off all the match identifiers in the database
+ */
+async function getAllMatchIdentifiers() {
+    const db = await tryOpenDatabase();
+    const tx = db.transaction(['matches'], 'readonly');
+    const index = await tx.objectStore('matches').index('by-both');
+
+    const matches: MatchIdentifier[] = [];
+    for await (const cursor of index.iterate()) {
+        matches.push({matchId: cursor.value.matchId, teamNumber: cursor.value.teamNumber});
+    }
+    await tx.done;
+    return matches;
 }
 
 /**
@@ -170,6 +186,7 @@ export default {
     importData,
     getAllMatches,
     getAllEvents,
+    getAllMatchIdentifiers,
     getMatchesByTeam,
     getEventsByMatch,
     deleteMatch

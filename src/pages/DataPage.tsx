@@ -11,15 +11,16 @@ const DataPage = () => {
 
     const { generateQrCodes, QRCodeList, QRCodeScanner } = QrCodeDataTransfer(onData);
 
-    const [games, setGames] = useState<MatchData[]|undefined>(undefined);
+    const [matches, setMatches] = useState<MatchData[]|undefined>(undefined);
     const [toDelete, setToDelete] = useState<MatchData|undefined>(undefined);
+    //const [unselectedMatches, setUnselectedMatches] = useLocalStorageState<MatchIdentifier[]>([], "unselectedMatches");
 
     const [qrOpen, setQrOpen] = useState(false);
     const [scannerOpen, setScannerOpen] = useState(false);
 
     async function updateMatches() {
         const matches = await MatchDatabase.getAllMatches();
-        setGames(matches);
+        setMatches(matches);
     }
 
     useEffect(() => {
@@ -59,11 +60,11 @@ const DataPage = () => {
     }
 
     async function exportData() {
-        if (games?.length === 0) return alert("No data to export");
-        const matches = await MatchDatabase.getAllMatches();
-        const events = await MatchDatabase.getAllEvents();
+        if (matches?.length === 0) return alert("No data to export");
+        const _matches = await MatchDatabase.getAllMatches();
+        const _events = await MatchDatabase.getAllEvents();
 
-        MatchDataIO.downloadDataAsZip(matches, events);
+        MatchDataIO.downloadDataAsZip(_matches, _events);
     }
 
     const fileUpload = useRef<HTMLInputElement>(null);
@@ -81,9 +82,9 @@ const DataPage = () => {
 
     return (
     <div className="w-full h-full block justify-center relative">
-        <h1 className="text-xl text-center mb-4 pt-4 font-bold">Saved Games</h1>
+        <h1 className="text-xl text-center mb-4 pt-4 font-bold">Saved matches</h1>
         <div className="h-min block">
-            {games?.map((game) => {
+            {matches?.map((game) => {
             return (
                 <div className="mx-5 my-2" key={game.matchId+"-"+game.teamNumber}>
                     <Card variant="outlined">
