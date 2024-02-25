@@ -51,7 +51,7 @@ async function importDataFromZip(file: File) {
     const matchData = JSON.parse(await rawMatchData.async("string"));
     console.log(matchData);
 
-    var rawEventData = zip.file("raw/MatchEventData.json");
+    var rawEventData = zip.file("raw/MatchEvents.json");
     if (!rawEventData) throw new Error("Could not find match data in zip folder!");
     const events = JSON.parse(await rawEventData.async("string"));
     console.log(events);

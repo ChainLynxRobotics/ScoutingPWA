@@ -1,5 +1,5 @@
 import { Button, Card, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Tooltip } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchData } from "../types/MatchData";
 import QrCodeType from "../enums/QrCodeType";
@@ -17,10 +17,13 @@ const DataPage = () => {
     const [qrOpen, setQrOpen] = useState(false);
     const [scannerOpen, setScannerOpen] = useState(false);
 
+    async function updateMatches() {
+        const matches = await MatchDatabase.getAllMatches();
+        setGames(matches);
+    }
+
     useEffect(() => {
-        MatchDatabase.getAllMatches().then((matches) => {
-            setGames(matches);
-        });
+        updateMatches();
     }, []);
 
     async function openQrData() {
@@ -44,27 +47,37 @@ const DataPage = () => {
         await MatchDatabase.importData(data.matches, data.events);
 
         setScannerOpen(false);
-        MatchDatabase.getAllMatches().then((matches) => {
-            setGames(matches);
-        });
+        updateMatches();
     }
 
     async function deleteMatch() {
         if (toDelete) {
             await MatchDatabase.deleteMatch(toDelete.matchId, toDelete.teamNumber);
-            MatchDatabase.getAllMatches().then((matches) => {
-                setGames(matches);
-            });
+            updateMatches();
             setToDelete(undefined);
         }
     }
 
-    async function downloadData() {
+    async function exportData() {
+        if (games?.length === 0) return alert("No data to export");
         const matches = await MatchDatabase.getAllMatches();
         const events = await MatchDatabase.getAllEvents();
 
         MatchDataIO.downloadDataAsZip(matches, events);
     }
+
+    const fileUpload = useRef<HTMLInputElement>(null);
+
+    async function importData() {
+        console.log("Importing data");
+        if (fileUpload.current?.files?.length === 0) return;
+        const file = fileUpload.current?.files?.item(0);
+        if (!file) return;
+
+        await MatchDataIO.importDataFromZip(file);
+        updateMatches();
+    }
+
 
     return (
     <div className="w-full h-full block justify-center relative">
@@ -92,9 +105,12 @@ const DataPage = () => {
                     icon={<span className="material-symbols-outlined">qr_code_2</span>} />
                 <Chip label="Collect" onClick={() => setScannerOpen(true)} 
                     icon={<span className="material-symbols-outlined">photo_camera</span>} />
-                <Chip label="Export" onClick={downloadData} 
+                <Chip label="Export" onClick={exportData} 
                     icon={<span className="material-symbols-outlined">download</span>}/>
+                <Chip label="Import" onClick={()=>fileUpload.current?.click()} 
+                    icon={<span className="material-symbols-outlined">upload</span>}/>
             </Stack>
+            <input type="file" ref={fileUpload} id="data-import" accept=".zip" style={{display: "none"}} onChange={importData} />
             <Tooltip title={<span className="text-md">One device is designated as the 'host' device. 
                 If you ARE the host, click the Collect button and scan other qr codes. 
                 If you are NOT the host device, click on Share to generate qr codes containing match data for the host to scan.</span>}>
