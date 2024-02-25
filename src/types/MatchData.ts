@@ -6,18 +6,15 @@ export type MatchData = {
     matchId: string;
     teamNumber: number;
     allianceColor: AllianceColor;
-    pre: {
-        humanPlayerLocation: HumanPlayerLocation;
-        preload: boolean;
-    };
-    match: {
-        attemptedCooperation: boolean;
-    };
-    post: {
-        climb: boolean;
-        defense: number;
-        humanPlayerPerformance: number;
-    }
+    // pre
+    humanPlayerLocation: HumanPlayerLocation;
+    preload: boolean;
+    // during match
+    attemptedCooperation: boolean;
+    // post
+    climb: boolean;
+    defense: number;
+    humanPlayerPerformance: number;
     notes: string;
 }
 

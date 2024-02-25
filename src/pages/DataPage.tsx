@@ -5,6 +5,7 @@ import { MatchData } from "../types/MatchData";
 import QrCodeType from "../enums/QrCodeType";
 import QrCodeDataTransfer from "../components/QrCodeDataTransfer";
 import AllianceColor from "../enums/AllianceColor";
+import MatchDataIO from "../util/MatchDataIO";
 
 const DataPage = () => {
 
@@ -58,6 +59,13 @@ const DataPage = () => {
         }
     }
 
+    async function downloadData() {
+        const matches = await MatchDatabase.getAllMatches();
+        const events = await MatchDatabase.getAllEvents();
+
+        MatchDataIO.downloadDataAsZip(matches, events);
+    }
+
     return (
     <div className="w-full h-full block justify-center relative">
         <h1 className="text-xl text-center mb-4 pt-4 font-bold">Saved Games</h1>
@@ -84,7 +92,7 @@ const DataPage = () => {
                     icon={<span className="material-symbols-outlined">qr_code_2</span>} />
                 <Chip label="Collect" onClick={() => setScannerOpen(true)} 
                     icon={<span className="material-symbols-outlined">photo_camera</span>} />
-                <Chip label="Export" onClick={() => {}} 
+                <Chip label="Export" onClick={downloadData} 
                     icon={<span className="material-symbols-outlined">download</span>}/>
             </Stack>
             <Tooltip title={<span className="text-md">One device is designated as the 'host' device. 

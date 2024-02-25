@@ -183,25 +183,19 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
     }, [boostEnd, events]);
 
     const submit = async () => {
-        await MatchDatabase.saveToDatabase({
-            matchId,
-            teamNumber,
-            allianceColor,
-            pre: {
+        await MatchDatabase.saveToDatabase(
+            {
+                matchId,
+                teamNumber,
+                allianceColor,
                 humanPlayerLocation,
                 preload,
-            },
-            match: {
                 attemptedCooperation,
-            },
-            post: {
                 climb,
                 defense,
-                humanPlayerPerformance
+                humanPlayerPerformance,
+                notes,
             },
-            notes,
-
-        },
             events.map(e=>{
                 return {
                     matchId,
