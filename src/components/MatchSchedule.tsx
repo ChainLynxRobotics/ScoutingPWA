@@ -119,9 +119,9 @@ const MatchSchedule = () => {
                 <tbody>
                     {settings.matches.map((match, i)=>(
                         <tr key={match.matchId} className={`mb-1 ${i % 2 == 1 ? 'bg-white bg-opacity-5' : ''} ${settings.currentMatchIndex == i ? 'border-2 border-yellow-300' : ''}`}>
-                            <td scope="row">{match.matchId}</td>
-                            <td>
-                                <div className="grid grid-cols-3 mx-2">
+                            <td scope="row" className="px-2">{match.matchId}</td>
+                            <td className="w-full">
+                                <div className="grid grid-cols-3">
                                     <span className="bg-blue-500 bg-opacity-25">{match.blue1}</span>
                                     <span className="bg-blue-500 bg-opacity-25">{match.blue2}</span>
                                     <span className="bg-blue-500 bg-opacity-25">{match.blue3}</span>
@@ -130,7 +130,7 @@ const MatchSchedule = () => {
                                     <span className="bg-red-500 bg-opacity-25">{match.red3}</span>
                                 </div>
                             </td>
-                            <td className="w-min">
+                            <td className="w-min whitespace-nowrap">
                                 <IconButton color="primary" onClick={()=>setMatchToEdit(match.matchId)}>
                                     <span className="material-symbols-outlined">edit</span>
                                 </IconButton>

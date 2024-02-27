@@ -1,5 +1,5 @@
 import { ReactElement, useContext, useEffect, useRef, useState } from "react"
-import { AUTO_DURATION, BOOST_DURATION } from "../../constants"
+import { AUTO_DURATION, BOOST_DURATION, MATCH_DURATION } from "../../constants"
 import MatchEvent, { NonEditableEvents, NonRemovableEvents } from "../../enums/MatchEvent";
 import AllianceColor from "../../enums/AllianceColor";
 import HumanPlayerLocation from "../../enums/HumanPlayerLocation";
@@ -40,7 +40,7 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
 
     // Post Match
     const [climb, setClimb] = useState<boolean>(false);
-    const [defense, setDefense] = useState<number>(2.5);
+    const [defense, setDefense] = useState<number>(3);
     const [humanPlayerPerformance, setHumanPlayerPerformance] = useState<number>(0);
 
     const getTime = () => {
@@ -100,6 +100,10 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
             addEvent(MatchEvent.defendedOnEnd, getTime());
             setIsBeingDefendedOn(false);
         }
+        if (isBoostActive) {
+            addEvent(MatchEvent.specialBoostEnd, getTime());
+            setIsBoostActive(false);
+        }
 
         addEvent(MatchEvent.matchEnd, getTime());
         setMatchActive(false);
@@ -125,6 +129,18 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
                     setIsAuto(false);
                 }
             }, matchStart + AUTO_DURATION * 1000 - Date.now());
+            return () => clearTimeout(timeout);
+        }
+    }, [matchStart, events]);
+
+    // Automatically end the match after a certain amount of time
+    useEffect(() => {
+        if (matchStart && Date.now() < matchStart + MATCH_DURATION * 1000) {
+            const timeout = setTimeout(() => {
+                if (matchActive) {
+                    endMatch();
+                }
+            }, matchStart + MATCH_DURATION * 1000 - Date.now());
             return () => clearTimeout(timeout);
         }
     }, [matchStart, events]);

@@ -1,4 +1,4 @@
-import { Button, Card, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Tooltip } from "@mui/material";
+import { Button, Card, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchData } from "../types/MatchData";
@@ -17,6 +17,8 @@ const DataPage = () => {
 
     const [qrOpen, setQrOpen] = useState(false);
     const [scannerOpen, setScannerOpen] = useState(false);
+
+    const [infoOpen, setInfoOpen] = useState(false);
 
     async function updateMatches() {
         const matches = await MatchDatabase.getAllMatches();
@@ -100,9 +102,9 @@ const DataPage = () => {
             })}
         </div>
 
-        <div className="absolute bottom-20 left-0 right-0 flex justify-center items-center">
-            <Stack direction="row" spacing={1} justifyContent="center">
-                <Chip label="Share" onClick={openQrData}
+        <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center">
+            <div className="flex flex-wrap gap-2 justify-center items-center">
+                <Chip label="Share" onClick={openQrData} color="primary"
                     icon={<span className="material-symbols-outlined">qr_code_2</span>} />
                 <Chip label="Collect" onClick={() => setScannerOpen(true)} 
                     icon={<span className="material-symbols-outlined">photo_camera</span>} />
@@ -110,90 +112,108 @@ const DataPage = () => {
                     icon={<span className="material-symbols-outlined">download</span>}/>
                 <Chip label="Import" onClick={()=>fileUpload.current?.click()} 
                     icon={<span className="material-symbols-outlined">upload</span>}/>
-            </Stack>
-            <input type="file" ref={fileUpload} id="data-import" accept=".zip" style={{display: "none"}} onChange={importData} />
-            <Tooltip title={<span className="text-md">One device is designated as the 'host' device. 
-                If you ARE the host, click the Collect button and scan other qr codes. 
-                If you are NOT the host device, click on Share to generate qr codes containing match data for the host to scan.</span>}>
-                <IconButton>
+                <input type="file" ref={fileUpload} id="data-import" accept=".zip" style={{display: "none"}} onChange={importData} />
+                
+                <IconButton onClick={()=>setInfoOpen(true)}>
                     <span className="material-symbols-outlined">info</span>
                 </IconButton>
-            </Tooltip>
-
-            {/* Share match data popup */}
-            <Dialog
-                open={qrOpen}
-                onClose={() => {setQrOpen(false)}}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-                fullScreen
-            >
-                <DialogTitle id="alert-dialog-title">
-                    Share Match Data
-                </DialogTitle>
-                <DialogContent>
-                    <div className="w-full flex flex-col items-center">
-                        <div className="w-full max-w-md">
-                            <p className="text-center">Scan the following QR code(s) on another device to import match data</p>
-                            <QRCodeList />
-                        </div>
-                    </div>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => {setQrOpen(false)}}>Close</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Scan data popup */}
-            <Dialog
-                open={scannerOpen}
-                onClose={() => {setScannerOpen(false)}}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-                fullScreen
-            >
-                <DialogTitle id="alert-dialog-title">
-                    Collect Match Data
-                </DialogTitle>
-                <DialogContent>
-                    <div className="w-full flex flex-col items-center">
-                        <div className="w-full max-w-md">
-                            <QRCodeScanner />
-                        </div>
-                    </div>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => {setScannerOpen(false)}}>Close</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Confirm delete data popup */}
-            <Dialog 
-                open={toDelete !== undefined} 
-                onClose={()=>setToDelete(undefined)}
-                aria-labelledby="delete-dialog-title"
-                fullWidth
-                maxWidth="sm"
-            >
-                <DialogTitle id="delete-dialog-title">Are you sure you would like to delete this match data?</DialogTitle>
-                <DialogContent>
-                    <div className="flex flex-col">
-                        <div>MatchID: {toDelete?.matchId}</div>
-                        <div>Team #: {toDelete?.teamNumber}</div>
-                        <div>Alliance Color: {AllianceColor[toDelete?.allianceColor||0]}</div>
-                        <div>
-                            <div>Notes:</div>
-                            <div className="italic pl-2">{toDelete?.notes}</div>
-                        </div>
-                    </div>
-                    <div className="mt-4 text-secondary">This action cannot be undone</div>
-                </DialogContent>
-                <DialogActions>
-                    <Button color="inherit" onClick={()=>setToDelete(undefined)}>Cancel</Button>
-                    <Button color="error" onClick={deleteMatch} autoFocus>Delete</Button>
-                </DialogActions>
-            </Dialog>
+            </div>
         </div>
+
+        {/* Info popup */}
+        <Dialog 
+            open={infoOpen} 
+            onClose={()=>setInfoOpen(false)}
+            aria-labelledby="info-dialog-title"
+            maxWidth="sm"
+        >
+            <DialogTitle id="info-dialog-title">Information</DialogTitle>
+            <DialogContent>
+                <ul className="text-md list-disc pl-2">
+                    <li>One device is designated as the 'host' device.</li>
+                    <li>If you ARE NOT the host device, click on Share to generate qr codes containing match data for the host to scan.</li>
+                    <li>If you ARE the host, click the Collect button and scan other qr codes.</li>
+                    <li>Exporting and importing data allows you to backup and restore match data for in between competition days, or for an alternate way of transferring data to others.</li>
+                </ul>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={()=>setInfoOpen(false)}>Close</Button>
+            </DialogActions>
+        </Dialog>
+
+        {/* Share match data popup */}
+        <Dialog
+            open={qrOpen}
+            onClose={() => {setQrOpen(false)}}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+            fullScreen
+        >
+            <DialogTitle id="alert-dialog-title">
+                Share Match Data
+            </DialogTitle>
+            <DialogContent>
+                <div className="w-full flex flex-col items-center">
+                    <div className="w-full max-w-md">
+                        <p className="text-center">Scan the following QR code(s) on another device to import match data</p>
+                        <QRCodeList />
+                    </div>
+                </div>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => {setQrOpen(false)}}>Close</Button>
+            </DialogActions>
+        </Dialog>
+
+        {/* Scan data popup */}
+        <Dialog
+            open={scannerOpen}
+            onClose={() => {setScannerOpen(false)}}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+            fullScreen
+        >
+            <DialogTitle id="alert-dialog-title">
+                Collect Match Data
+            </DialogTitle>
+            <DialogContent>
+                <div className="w-full flex flex-col items-center">
+                    <div className="w-full max-w-md">
+                        <QRCodeScanner />
+                    </div>
+                </div>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => {setScannerOpen(false)}}>Close</Button>
+            </DialogActions>
+        </Dialog>
+
+        {/* Confirm delete data popup */}
+        <Dialog 
+            open={toDelete !== undefined} 
+            onClose={()=>setToDelete(undefined)}
+            aria-labelledby="delete-dialog-title"
+            fullWidth
+            maxWidth="sm"
+        >
+            <DialogTitle id="delete-dialog-title">Are you sure you would like to delete this match data?</DialogTitle>
+            <DialogContent>
+                <div className="flex flex-col">
+                    <div>MatchID: {toDelete?.matchId}</div>
+                    <div>Team #: {toDelete?.teamNumber}</div>
+                    <div>Alliance Color: {AllianceColor[toDelete?.allianceColor||0]}</div>
+                    <div>
+                        <div>Notes:</div>
+                        <div className="italic pl-2">{toDelete?.notes}</div>
+                    </div>
+                </div>
+                <div className="mt-4 text-secondary">This action cannot be undone</div>
+            </DialogContent>
+            <DialogActions>
+                <Button color="inherit" onClick={()=>setToDelete(undefined)}>Cancel</Button>
+                <Button color="error" onClick={deleteMatch} autoFocus>Delete</Button>
+            </DialogActions>
+        </Dialog>
     </div>
     );
 };

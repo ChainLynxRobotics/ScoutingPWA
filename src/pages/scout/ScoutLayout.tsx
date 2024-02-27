@@ -57,7 +57,10 @@ const ScoutPage = () => {
                                 (context.match.inAuto ?
                                     <span className="">Auto <button className="text-sm text-secondary" onClick={skipAuto}>&#40;skip&#41;</button></span>
                                     :
-                                    <span className="">Teleop <button className="text-sm text-secondary" onClick={endMatch}>&#40;end&#41;</button></span>
+                                    <div className="flex gap-2">
+                                        <span>Teleop</span>
+                                        <Button variant="contained" size="small" color="error" onClick={endMatch}>end</Button>
+                                    </div>
                                 )
                                 :
                                 (context.match.matchStart ?

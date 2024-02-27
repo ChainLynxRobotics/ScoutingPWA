@@ -120,7 +120,7 @@ const DuringMatch = () => {
                     <span className="material-symbols-outlined m-2">360</span>
                 </button>
                 {/* Amp scoring buttons */}
-                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex gap-2" style={{top: !reverseY ? '-20px' : 'calc(100% + 20px)', left: !reverseX ? '66%' : '34%'}}>
+                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex gap-3" style={{top: !reverseY ? '-20px' : 'calc(100% + 20px)', left: !reverseX ? '66%' : '34%'}}>
                     <Button variant="contained" color="success" size="small" disabled={isDisabled} onClick={onAmpScore}>
                         Score ({numOfEvents(MatchEvent.scoreLow, MatchEvent.scoreLowBoost)})
                     </Button>
@@ -140,7 +140,7 @@ const DuringMatch = () => {
                     </Button>
                 </div>
                 {/* Speaker scoring buttons */}
-                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-2" style={{top: !reverseY ? '34%' : '66%', left: !reverseX ? 'calc(100% - 24px)' : '24px'}}>
+                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-3" style={{top: !reverseY ? '34%' : '66%', left: !reverseX ? 'calc(100% - 32px)' : '32px'}}>
                     <Button variant="contained" color="success" size="small" disabled={isDisabled} onClick={onSpeakerScore}>
                         Score ({numOfEvents(MatchEvent.scoreMid)})
                     </Button>
@@ -149,7 +149,7 @@ const DuringMatch = () => {
                     </Button>
                 </div>
                 {/* Ring pickup buttons */}
-                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-2 whitespace-nowrap items-center" style={{top: !reverseY ? 'calc(100% - 0px)' : '0px', left: !reverseX ? '50%' : '50%'}}>
+                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-3 whitespace-nowrap items-center" style={{top: !reverseY ? 'calc(100% - 0px)' : '0px', left: !reverseX ? '50%' : '50%'}}>
                     <div className="flex gap-2" style={{flexDirection: !rotateField ? 'unset' : 'row-reverse'}}>
                         <Button variant="contained" color="primary" size="small" disabled={isDisabled} onClick={onSourcePickup}>
                             Source Pickup ({numOfEvents(MatchEvent.acquireStation)})
@@ -163,8 +163,8 @@ const DuringMatch = () => {
                     </Button>
                 </div>
                 {/* Climb & Trap buttons */}
-                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-2 items-center" style={{top: !reverseY ? '50%' : '50%', left: !reverseX ? '35%' : '65%'}}>
-                    <div className="flex gap-2">
+                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-3 items-center" style={{top: !reverseY ? '50%' : '50%', left: !reverseX ? '35%' : '65%'}}>
+                    <div className="flex gap-3">
                         <Button variant="contained" color="success" size="small" disabled={isDisabled} onClick={onTrapScore}>
                             Trap Score ({numOfEvents(MatchEvent.scoreHigh)})
                         </Button>
@@ -174,7 +174,7 @@ const DuringMatch = () => {
                     </div>
                 </div>
                 {/* Is being defended on buttons */}
-                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-2 items-center" style={{top: !reverseY ? '25%' : '75%', left: !reverseX ? '25%' : '75%'}}>
+                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-3 items-center" style={{top: !reverseY ? '25%' : '75%', left: !reverseX ? '25%' : '75%'}}>
                     <div className="flex gap-2">
                         <Button variant="contained" color="primary" size="small" disabled={isDisabled} onClick={toggleDefendedOn} className={context.match.isBeingDefendedOn ? 'glow-primary' : ''}>
                             Is being defended

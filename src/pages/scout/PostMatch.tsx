@@ -20,16 +20,11 @@ const PostMatch = () => {
     const [defenseHover, setDefenseHover] = useState<number>(-1);
 
     const ratings: { [index: number]: string } = {
-        0.5: 'Useless',
-        1: 'Useless+',
-        1.5: 'Poor',
-        2: 'Poor+',
-        2.5: 'Ok',
-        3: 'Ok+',
-        3.5: 'Good',
-        4: 'Good+',
-        4.5: 'Excellent',
-        5: 'Excellent+',
+        1: 'Useless :(',
+        2: 'Poor',
+        3: 'Ok',
+        4: 'Good',
+        5: 'Excellent',
     }
 
     function handleNotesChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -77,7 +72,7 @@ const PostMatch = () => {
                     onChangeActive={(_e, newHover) => {
                         setDefenseHover(newHover);
                     }}
-                    precision={0.5}
+                    precision={1}
                 ></Rating>
                 <span>{ratings[defenseHover !== -1 ? defenseHover : context.post.defense]}</span>
             </div>

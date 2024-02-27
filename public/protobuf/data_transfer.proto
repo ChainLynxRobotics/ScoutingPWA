@@ -5,6 +5,7 @@ message DataTransfer {
     repeated MatchData matches = 2;
     repeated MatchEventData events = 3;
     repeated ScheduledMatch schedule = 4;
+    optional ScheduleData scheduleData = 5;
 }
 
 enum QrCodeType {
@@ -67,4 +68,9 @@ message ScheduledMatch {
     int32 red1 = 5;
     int32 red2 = 6;
     int32 red3 = 7;
+}
+
+message ScheduleData {
+    bool fieldRotated = 1;
+    string competitionId = 2;
 }

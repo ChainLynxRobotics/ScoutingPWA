@@ -1,22 +1,10 @@
-import MenuItem from "@mui/material/MenuItem/MenuItem";
-import Select from "@mui/material/Select/Select";
-import TextField from "@mui/material/TextField/TextField";
-import FormControl from "@mui/material/FormControl/FormControl";
-import InputLabel from "@mui/material/InputLabel/InputLabel";
-import Button from "@mui/material/Button/Button";
 import ErrorPage from "./ErrorPage";
 import { useContext, useState } from "react";
 import SettingsContext from "../components/context/SettingsContext";
-import FormHelperText from "@mui/material/FormHelperText/FormHelperText";
 import MatchSchedule from "../components/MatchSchedule";
-import Tooltip from "@mui/material/Tooltip/Tooltip";
-import IconButton from "@mui/material/IconButton/IconButton";
 import QrCodeDataTransfer from "../components/QrCodeDataTransfer";
 import QrCodeType from "../enums/QrCodeType";
-import Dialog from "@mui/material/Dialog/Dialog";
-import DialogTitle from "@mui/material/DialogTitle/DialogTitle";
-import DialogContent from "@mui/material/DialogContent/DialogContent";
-import DialogActions from "@mui/material/DialogActions/DialogActions";
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormHelperText, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 
 const SettingsPage = () => {
 
@@ -27,6 +15,8 @@ const SettingsPage = () => {
     const { generateQrCodes, QRCodeList, QRCodeScanner } = QrCodeDataTransfer(onQrData);
     const [qrOpen, setQrOpen] = useState(false);
     const [scannerOpen, setScannerOpen] = useState(false);
+
+    const [infoOpen, setInfoOpen] = useState(false);
 
 
     function nextMatch() {
@@ -42,7 +32,11 @@ const SettingsPage = () => {
         if (!settings) return;
         const data = {
             "qrType": QrCodeType.Schedule,
-            "schedule": settings.matches
+            "schedule": settings.matches,
+            "scheduleData": {
+                "fieldRotated": settings.fieldRotated,
+                "competitionId": settings.competitionId
+            }
         };
         generateQrCodes(data);
         setQrOpen(true);
@@ -52,13 +46,18 @@ const SettingsPage = () => {
         if (data.qrType !== QrCodeType.Schedule) throw new Error("QR Codes do not contain schedule data");
         if (!settings) return;
         settings.setMatches(data.schedule);
+        const scheduleData = data.scheduleData;
+        if (scheduleData) {
+            settings.setFieldRotated(scheduleData.fieldRotated);
+            settings.setCompetitionId(scheduleData.competitionId);
+        }
         setScannerOpen(false);
     }
 
     return (
-    <div className="w-full h-full flex flex-col items-center gap-4 px-4">
+    <div className="w-full flex flex-col items-center gap-4 px-4">
         <h1 className="text-xl font-bold mt-4">Settings</h1>
-        <FormControl sx={{maxWidth: "256px"}}>
+        <FormControl className="max-w-96">
             <InputLabel>Client ID</InputLabel>
             <Select id="client-id" label="Client ID" value={settings.clientId+""} onChange={(e)=>settings.setClientId(parseInt(e.target.value))}>
                 <MenuItem value={"0"}>1</MenuItem>
@@ -70,7 +69,7 @@ const SettingsPage = () => {
             </Select>
             <FormHelperText>Make sure each scouting client has a unique ID, as this is used to determine what team you scout each match.</FormHelperText>
         </FormControl>
-        <FormControl sx={{maxWidth: "256px"}}>
+        <FormControl className="max-w-96">
             <TextField 
                 id="competition-id" 
                 label="Competition ID" 
@@ -80,22 +79,23 @@ const SettingsPage = () => {
             />
             <FormHelperText>Make sure this matches the blue alliance url and everybody else's devices!</FormHelperText>
         </FormControl>
+
+        <FormControl className="max-w-96">
+            <FormControlLabel label="Rotate Field View" 
+                control={<Checkbox checked={settings.fieldRotated} onChange={(e)=>settings.setFieldRotated(e.target.checked)} color="primary" />}
+            />
+            <FormHelperText>Change this based on the perspective you are viewing the field for when you are scouting</FormHelperText>
+        </FormControl>
         
         <h1 className="text-xl">Schedule</h1>
         <div className="flex flex-wrap gap-4">
             <Button variant="contained" onClick={()=>setScannerOpen(true)} startIcon={<span className="material-symbols-outlined">photo_camera</span>}>Scan</Button>
             <Button variant="contained" color="secondary" onClick={openQrCodes} startIcon={<span className="material-symbols-outlined">qr_code_2</span>}>Share</Button>
-            <Tooltip title={<ul className="text-md list-disc pl-2">
-                    <li>One device is designated as the 'host' device.</li>
-                    <li>If you ARE the host, click the download button below to get a copy from blue alliance, then click "Share" to generate qr codes for other devices to scan.</li>
-                    <li>If you are NOT the host device, click on "Scan" to get the schedule from the host device.</li>
-                </ul>}>
-                <IconButton>
-                    <span className="material-symbols-outlined">info</span>
-                </IconButton>
-            </Tooltip>
+            <IconButton onClick={()=>setInfoOpen(true)}>
+                <span className="material-symbols-outlined">info</span>
+            </IconButton>
         </div>
-        <div className="flex flex-col items-center w-full">
+        <div className="flex flex-col items-center w-full mb-4">
             <div className="flex items-center gap-2 mb-2">
                 <div>Current Match: </div>
                 <Button 
@@ -120,6 +120,28 @@ const SettingsPage = () => {
             <MatchSchedule />
         </div>
 
+        {/* Info popup */}
+        <Dialog 
+            open={infoOpen} 
+            onClose={()=>setInfoOpen(false)}
+            aria-labelledby="info-dialog-title"
+            maxWidth="sm"
+        >
+            <DialogTitle id="info-dialog-title">
+                Information
+            </DialogTitle>
+            <DialogContent>
+                <ul className="text-md list-disc pl-2">
+                    <li>One device is designated as the 'host' device.</li>
+                    <li>If you are NOT the host device, click on "Scan" to get the schedule from the host device.</li>
+                    <li>If you ARE the host, click the download button below to get a copy from blue alliance, then click "Share" to generate qr codes for other devices to scan.</li>
+                    <li>Sharing the qr code also shares the Competition ID and the field rotation.</li>
+                </ul>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={()=>setInfoOpen(false)}>Close</Button>
+            </DialogActions>
+        </Dialog>
         
         {/* Share match popup */}
         <Dialog
