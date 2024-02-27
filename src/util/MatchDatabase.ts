@@ -141,6 +141,18 @@ async function getAllMatchIdentifiers() {
 }
 
 /**
+ * Gets a match by its id and team number
+ * 
+ * @param matchId - The match id to get
+ * @param teamNumber - The 4 digit team number to get the match for
+ * @returns The match data, or undefined if it does not exist
+ */
+async function getMatchById(matchId: string, teamNumber: number) {
+    const db = await tryOpenDatabase();
+    return db.getFromIndex('matches', 'by-both', [teamNumber, matchId]);
+}
+
+/**
  * Gets all the matches for a given team number
  * 
  * @param teamNumber - The 4 digit team number to get the matches for
@@ -187,6 +199,7 @@ export default {
     getAllMatches,
     getAllEvents,
     getAllMatchIdentifiers,
+    getMatchById,
     getMatchesByTeam,
     getEventsByMatch,
     deleteMatch

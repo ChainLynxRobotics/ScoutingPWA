@@ -13,7 +13,7 @@ import EventLog from "../../components/EventLog";
 import Alert from "@mui/material/Alert/Alert";
 import FormControlLabel from "@mui/material/FormControlLabel/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox/Checkbox";
-
+import { MAX_NOTE_LENGTH } from "../../constants";
 
 const PostMatch = () => {
     const context = useContext(ScoutingContext);
@@ -28,7 +28,10 @@ const PostMatch = () => {
     }
 
     function handleNotesChange(event: React.ChangeEvent<HTMLInputElement>) {
-        context?.pre.setNotes(event.target.value);
+        if (!context) return;
+        if (event.target.value.length <= MAX_NOTE_LENGTH) {
+            context.pre.setNotes(event.target.value);
+        }
     }
 
     if(!context) {

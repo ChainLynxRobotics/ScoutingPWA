@@ -65,6 +65,10 @@ const DuringMatch = () => {
         context?.match.setAttemptedCooperation(!context.match.attemptedCooperation);
     }
 
+    function toggleAutoSpecial() {
+        context?.match.setSpecialAuto(!context.match.specialAuto);
+    }
+
     /**
      * Gets the number of a certain type or types of events that have been saved
      * @param event - Event(s) to look for
@@ -110,7 +114,7 @@ const DuringMatch = () => {
                 </Alert>
             }
             
-            <div className="max-w-md relative my-10 whitespace-nowrap">
+            <div className="max-w-md relative my-12 whitespace-nowrap">
                 <img src={`/imgs/crescendo_field_render_${context.meta.allianceColor == AllianceColor.Red ? "red" : "blue"}.png`} 
                     alt="Crescendo Field Render" className={`w-full ${rotateField ? '-scale-100' : ''}`} />
                 
@@ -182,6 +186,9 @@ const DuringMatch = () => {
                     </div>
                 </div>
             </div>
+
+            <FormControlLabel label="Left Zone in Autonomous Mode" 
+                control={<Checkbox checked={context.match.specialAuto} onClick={toggleAutoSpecial} disabled={isDisabled}/>} />
 
             <FormControlLabel label="Attempted to Cooperate" 
                 control={<Checkbox checked={context.match.attemptedCooperation} onClick={toggleAttemptedCooperation} disabled={isDisabled}/>} />

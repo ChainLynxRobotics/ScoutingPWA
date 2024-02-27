@@ -7,6 +7,7 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
 
     const [competitionId, setCompetitionId] = useLocalStorageState<string>(defaultCompetitionId, "competitionId");
     const [clientId, setClientId] = useLocalStorageState<number>(0, "clientId"); // From 0-5
+    const [scoutName, setScoutName] = useLocalStorageState<string>("", "scoutName"); // The name of the scout, to be submitted with the data
     
     const [fieldRotated, setFieldRotated] = useLocalStorageState<boolean>(false, "fieldRotated"); // Depends on the perspective of the field, used for the during match view
 
@@ -50,6 +51,8 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
         setCompetitionId,
         clientId,
         setClientId,
+        scoutName,
+        setScoutName,
         fieldRotated,
         setFieldRotated,
         matches,
@@ -77,6 +80,8 @@ export type SettingsStateData = {
     setCompetitionId: (competitionId: string) => void;
     clientId: number;
     setClientId: (clientId: number) => void;
+    scoutName: string;
+    setScoutName: (scoutName: string) => void;
     fieldRotated: boolean;
     setFieldRotated: (fieldRotated: boolean) => void;
 

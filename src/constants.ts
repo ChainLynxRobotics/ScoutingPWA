@@ -20,3 +20,8 @@ export const AUTO_DURATION = 15;
  * Automatically disable the amp boost after this many seconds
  */
 export const BOOST_DURATION = 12.5;
+
+/**
+ * Maximum number of characters in a note
+ */
+export const MAX_NOTE_LENGTH = 500;

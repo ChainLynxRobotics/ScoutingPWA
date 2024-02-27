@@ -30,6 +30,9 @@ message MatchData {
     DuringMatchData match = 5;
     PostMatchData post = 6;
     string notes = 7;
+    string scoutName = 8;
+    int64 matchStart = 9;
+    int64 submitTime = 10;
 }
 
 message PreMatchData {
@@ -39,6 +42,7 @@ message PreMatchData {
 
 message DuringMatchData {
     bool attempted_cooperation = 1;
+    bool spacialAuto = 2;
 }
 
 message PostMatchData {

@@ -55,8 +55,18 @@ const SettingsPage = () => {
     }
 
     return (
-    <div className="w-full flex flex-col items-center gap-4 px-4">
+    <div className="w-full flex flex-col items-center gap-5 px-4">
         <h1 className="text-xl font-bold mt-4">Settings</h1>
+        <FormControl className="max-w-96">
+            <TextField 
+                id="scout-name" 
+                label="Scout Name" 
+                value={settings.scoutName} 
+                onChange={(e)=>settings.setScoutName(e.target.value)} 
+                variant="outlined"
+            />
+            <FormHelperText>Your name will be submitted with your data to track contributions.</FormHelperText>
+        </FormControl>
         <FormControl className="max-w-96">
             <InputLabel>Client ID</InputLabel>
             <Select id="client-id" label="Client ID" value={settings.clientId+""} onChange={(e)=>settings.setClientId(parseInt(e.target.value))}>
@@ -86,8 +96,10 @@ const SettingsPage = () => {
             />
             <FormHelperText>Change this based on the perspective you are viewing the field for when you are scouting</FormHelperText>
         </FormControl>
-        
-        <h1 className="text-xl">Schedule</h1>
+
+        <div className="mt-8 mb-2 w-full max-w-md h-1 bg-background-secondary"></div>
+
+        <h1 className="text-xl font-bold">Schedule</h1>
         <div className="flex flex-wrap gap-4">
             <Button variant="contained" onClick={()=>setScannerOpen(true)} startIcon={<span className="material-symbols-outlined">photo_camera</span>}>Scan</Button>
             <Button variant="contained" color="secondary" onClick={openQrCodes} startIcon={<span className="material-symbols-outlined">qr_code_2</span>}>Share</Button>

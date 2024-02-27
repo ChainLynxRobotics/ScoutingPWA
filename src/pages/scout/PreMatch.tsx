@@ -5,15 +5,19 @@ import { useContext, useEffect, useRef } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
 import FormControl from "@mui/material/FormControl/FormControl";
-import { Button, Checkbox, FormControlLabel, FormGroup, TextField } from "@mui/material";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Alert, Button, Checkbox, FormControlLabel, FormGroup, TextField } from "@mui/material";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import HumanPlayerLocation from "../../enums/HumanPlayerLocation";
 import AllianceColor from "../../enums/AllianceColor";
+import SettingsContext from "../../components/context/SettingsContext";
+import { MAX_NOTE_LENGTH } from "../../constants";
 
 
 const PreMatch = () => {
 
     const navigate = useNavigate();
+    const settings = useContext(SettingsContext);
+    if (!settings) throw new Error("Settings context not found?!?!?!");
 
     const context = useContext(ScoutingContext);
     if (!context) return (<NoMatchAvailable />);
@@ -27,7 +31,10 @@ const PreMatch = () => {
     }
 
     const handleNotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        context.pre.setNotes(event.target.value);
+        if (!context) return;
+        if (event.target.value.length <= MAX_NOTE_LENGTH) {
+            context.pre.setNotes(event.target.value);
+        }
     }
 
     // Redirect to during match when the match starts
@@ -96,6 +103,13 @@ const PreMatch = () => {
                 value={context.pre.notes}
                 onChange={handleNotesChange}
             />
+            <div className="h-4"></div> {/* Spacer */}
+            { settings.scoutName === "" &&
+                <Alert severity="warning">
+                    <div className="text-lg mb-1"><b>You have not set your name!</b></div>
+                    <div>Set your name in <Link to='/settings'><u>settings</u></Link> to track your contributions!</div>
+                </Alert>
+            }
         </div>
         </>
     );

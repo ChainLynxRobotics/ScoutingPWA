@@ -1,7 +1,7 @@
 import { Button, Card, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
-import { MatchData } from "../types/MatchData";
+import { MatchData, MatchIdentifier } from "../types/MatchData";
 import QrCodeType from "../enums/QrCodeType";
 import QrCodeDataTransfer from "../components/QrCodeDataTransfer";
 import AllianceColor from "../enums/AllianceColor";
@@ -11,8 +11,9 @@ const DataPage = () => {
 
     const { generateQrCodes, QRCodeList, QRCodeScanner } = QrCodeDataTransfer(onData);
 
-    const [matches, setMatches] = useState<MatchData[]|undefined>(undefined);
-    const [toDelete, setToDelete] = useState<MatchData|undefined>(undefined);
+    const [matches, setMatches] = useState<MatchIdentifier[]|undefined>(undefined);
+    const [toDelete, setToDelete] = useState<MatchIdentifier|undefined>(undefined);
+    const [toDeleteData, setToDeleteData] = useState<MatchData|undefined>(undefined);
     //const [unselectedMatches, setUnselectedMatches] = useLocalStorageState<MatchIdentifier[]>([], "unselectedMatches");
 
     const [qrOpen, setQrOpen] = useState(false);
@@ -21,7 +22,7 @@ const DataPage = () => {
     const [infoOpen, setInfoOpen] = useState(false);
 
     async function updateMatches() {
-        const matches = await MatchDatabase.getAllMatches();
+        const matches = await MatchDatabase.getAllMatchIdentifiers();
         setMatches(matches);
     }
 
@@ -52,6 +53,11 @@ const DataPage = () => {
         setScannerOpen(false);
         updateMatches();
     }
+
+    useEffect(() => {
+        if (toDelete) MatchDatabase.getMatchById(toDelete.matchId, toDelete.teamNumber).then(setToDeleteData);
+        else setToDeleteData(undefined);
+    }, [toDelete]);
 
     async function deleteMatch() {
         if (toDelete) {
@@ -91,7 +97,7 @@ const DataPage = () => {
                 <div className="mx-5 my-2" key={game.matchId+"-"+game.teamNumber}>
                     <Card variant="outlined">
                         <div className="flex items-center justify-between p-2">
-                            <span className="text-xl">Match <code>{game.matchId}</code> - Team <code>{game.teamNumber}</code></span>
+                            <span className="text-xl"><code>{game.matchId}</code> - Team <code>{game.teamNumber}</code></span>
                             <IconButton onClick={()=>setToDelete(game)}>
                                 <span className="material-symbols-outlined text-red-400">delete</span>
                             </IconButton>
@@ -196,18 +202,27 @@ const DataPage = () => {
             fullWidth
             maxWidth="sm"
         >
-            <DialogTitle id="delete-dialog-title">Are you sure you would like to delete this match data?</DialogTitle>
+            <DialogTitle id="delete-dialog-title">Are you sure you would like to delete this match?</DialogTitle>
             <DialogContent>
                 <div className="flex flex-col">
-                    <div>MatchID: {toDelete?.matchId}</div>
-                    <div>Team #: {toDelete?.teamNumber}</div>
-                    <div>Alliance Color: {AllianceColor[toDelete?.allianceColor||0]}</div>
-                    <div>
-                        <div>Notes:</div>
-                        <div className="italic pl-2">{toDelete?.notes}</div>
-                    </div>
+                    <div><b>MatchID:</b> {toDelete?.matchId}</div>
+                    <div><b>Team #:</b> {toDelete?.teamNumber}</div>
+                    { toDeleteData ? <>
+                        <div><b>Alliance Color:</b>&nbsp;
+                            <b className={toDeleteData.allianceColor == AllianceColor.Red ? 'text-red-400' : 'text-blue-400'}>
+                                {AllianceColor[toDeleteData.allianceColor]}
+                            </b>
+                        </div>
+                        <div><b>Scouted By:</b> {toDeleteData.scoutName || "Unknown"}</div>
+                        <div><b>Match Start:</b> {new Date(toDeleteData.matchStart).toLocaleTimeString()}</div>
+                        <div><b>Match Submitted:</b> {new Date(toDeleteData.submitTime).toLocaleTimeString()}</div>
+                        <div>
+                            <div><b>Notes:</b></div>
+                            <textarea className="ml-2 p-1 w-full italic h-32 bg-black bg-opacity-20" disabled value={toDeleteData.notes} />
+                        </div>
+                    </> : "Could not find match data"}
                 </div>
-                <div className="mt-4 text-secondary">This action cannot be undone</div>
+                <div className="mt-4 text-secondary">This delete action cannot be undone</div>
             </DialogContent>
             <DialogActions>
                 <Button color="inherit" onClick={()=>setToDelete(undefined)}>Cancel</Button>

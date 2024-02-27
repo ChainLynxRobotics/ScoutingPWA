@@ -7,6 +7,7 @@ import ScoutingContext from "./ScoutingContext";
 import MatchDatabase from "../../util/MatchDatabase";
 import CurrentMatchContext from "./CurrentMatchContext";
 import { useNavigate } from "react-router-dom";
+import SettingsContext from "./SettingsContext";
 
 /**
  * This function is used to create a new ScoutingStateData object, which is used to store/update all the data that is collected during a match.
@@ -20,6 +21,8 @@ import { useNavigate } from "react-router-dom";
  */
 export default function ScoutingContextProvider({children, matchId, teamNumber, allianceColor}: {children: ReactElement, matchId: string, teamNumber: number, allianceColor: AllianceColor}) {
     const navigate = useNavigate();
+    const settings = useContext(SettingsContext);
+    if (!settings) throw new Error("SettingsContext not found");
     const currentMatchContext = useContext(CurrentMatchContext);
 
     // Pre
@@ -34,6 +37,7 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
     const [isBeingDefendedOn, setIsBeingDefendedOn] = useState<boolean>(false)
     const [isBoostActive, setIsBoostActive] = useState<boolean>(false)
     const [attemptedCooperation, setAttemptedCooperation] = useState<boolean>(false)
+    const [specialAuto, setSpecialAuto] = useState<boolean>(false) // This is crossing the line in auto
 
     const [matchStart, setMatchStart] = useState<number>(0)
     const [boostEnd, setBoostEnd] = useState<number>(0);
@@ -201,20 +205,24 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
     const submit = async () => {
         await MatchDatabase.saveToDatabase(
             {
-                matchId,
+                matchId: settings.competitionId+"_"+matchId,
                 teamNumber,
                 allianceColor,
                 humanPlayerLocation,
                 preload,
                 attemptedCooperation,
+                specialAuto,
                 climb,
                 defense,
                 humanPlayerPerformance,
                 notes,
+                scoutName: settings.scoutName,
+                matchStart,
+                submitTime: Date.now()
             },
             events.map(e=>{
                 return {
-                    matchId,
+                    matchId: settings.competitionId+"_"+matchId,
                     teamNumber,
                     event: e.event,
                     time: e.time
@@ -260,6 +268,8 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
             boostEnd,
             attemptedCooperation,
             setAttemptedCooperation: setAttemptedCooperationWithEvents,
+            specialAuto,
+            setSpecialAuto
         },
         post: {
             climb,
@@ -341,11 +351,13 @@ export type ScoutingContextType = {
          */
         setIsBoostActive: (isBoostActive: boolean) => void,
         boostEnd: number,
+        attemptedCooperation: boolean
         /**
          * Note: This will add the specialCoop event when set to true and remove the event from the timeline if set to false
          */
         setAttemptedCooperation: (attemptedCooperation: boolean) => void,
-        attemptedCooperation: boolean
+        specialAuto: boolean,
+        setSpecialAuto: (specialAuto: boolean) => void
     }
     
 
