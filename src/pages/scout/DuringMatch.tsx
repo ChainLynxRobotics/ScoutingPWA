@@ -135,7 +135,7 @@ const DuringMatch = () => {
                 {/* Amp boost button */}
                 <div className="absolute -translate-y-1/2 -translate-x-1/2 flex" style={{top: !reverseY ? '38px' : 'calc(100% - 38px)', left: !reverseX ? '66%' : '34%'}}>
                     <Button variant="contained" color="warning" size="small" disabled={isDisabled} onClick={onAmpBoost} className={context.match.isBoostActive ? 'glow-warning' : ''}>
-                        Boost 
+                        Amplify
                         {context.match.isBoostActive && 
                             <span className="text-xs">
                                 &nbsp;(<CountDown end={context.match.matchStart + context.match.boostEnd} />)

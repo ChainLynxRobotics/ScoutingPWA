@@ -3,7 +3,7 @@ import HumanPlayerLocation from "../enums/HumanPlayerLocation";
 import MatchEvent from "../enums/MatchEvent";
 
 export type MatchIdentifier = {
-    matchId: string;
+    matchId: string; // This should be the full match id, including the competition id
     teamNumber: number;
 }
 
