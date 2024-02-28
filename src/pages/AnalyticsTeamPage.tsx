@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { MatchData, MatchEventData } from "../types/MatchData";
 import MatchDatabase from "../util/MatchDatabase";
 import { Button } from "@mui/material";
+import MatchEvent from "../enums/MatchEvent";
+import AccuracyStatistic from "../components/analytics/AccuracyStatistic";
 
 const AnalyticsPage = () => {
 
@@ -30,7 +32,14 @@ const AnalyticsPage = () => {
 
     if (!hasLoaded) return (<div className="w-full h-full flex items-center justify-center">Loading...</div>);
 
-    
+    /**
+     * Gets the number of a certain type or types of events that have been saved
+     * @param event - Event(s) to look for
+     * @returns the number of the events that have been recorded
+     */
+    function numOfEvents(...eventsToFilter: MatchEvent[]): number {
+        return events.filter(e=>eventsToFilter.includes(e.event)).length;
+    }
     
     
     return (
@@ -47,7 +56,25 @@ const AnalyticsPage = () => {
             <div className="w-full h-full flex items-center justify-center">Loading...</div>
         :
             <>
-                <h1 className="text-xl text-center mb-4 font-bold">Analytics for Team {team}</h1>
+                <h1 className="text-xl text-center mb-4">Analytics for <b>Team {team}</b></h1>
+                <div className="w-full max-w-md px-4 flex flex-col items-start">
+                    <AccuracyStatistic name="Speaker Accuracy" 
+                        value={numOfEvents(MatchEvent.scoreMid, MatchEvent.scoreMidBoost)} 
+                        total={numOfEvents(MatchEvent.scoreMid, MatchEvent.scoreMidBoost, MatchEvent.scoreMidFail)}
+                    />
+                    <AccuracyStatistic name="Amp Accuracy" 
+                        value={numOfEvents(MatchEvent.scoreLow, MatchEvent.scoreLowBoost)} 
+                        total={numOfEvents(MatchEvent.scoreLow, MatchEvent.scoreLowBoost, MatchEvent.scoreLowFail)}
+                    />
+                    <AccuracyStatistic name="Trap Accuracy" 
+                        value={numOfEvents(MatchEvent.scoreHigh, MatchEvent.scoreHighBoost)} 
+                        total={numOfEvents(MatchEvent.scoreHigh, MatchEvent.scoreHighBoost, MatchEvent.scoreHighFail)}
+                    />
+                    <AccuracyStatistic name="Climbs" 
+                        value={matches.filter(m=>m.climb).length} 
+                        total={matches.length} 
+                    />
+                </div>
             </>
         }
     </div>
