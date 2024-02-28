@@ -25,8 +25,12 @@ const Layout = () => {
                     <span className="text-sm">Scout</span>
                 </NavLink>
                 <NavLink to="/data" className={s=>"flex-grow flex flex-col"+(s.isActive ? ' text-primary' : '')}>
-                    <span className="material-symbols-outlined">bar_chart</span>
+                    <span className="material-symbols-outlined">storage</span>
                     <span className="text-sm">Data</span>
+                </NavLink>
+                <NavLink to="/analytics" className={s=>"flex-grow flex flex-col"+(s.isActive ? ' text-primary' : '')}>
+                    <span className="material-symbols-outlined">query_stats</span>
+                    <span className="text-sm">Analytics</span>
                 </NavLink>
                 <NavLink to="/settings" className={s=>"flex-grow flex flex-col"+(s.isActive ? ' text-primary' : '')}>
                     <span className="material-symbols-outlined">settings</span>

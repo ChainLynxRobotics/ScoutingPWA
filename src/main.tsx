@@ -17,6 +17,8 @@ import { DEFAULT_COMPETITION_ID } from './constants';
 import SettingsContextProvider from './components/context/SettingsContextProvider';
 import CurrentMatchContextProvider from './components/context/CurrentMatchContextProvider';
 import ReloadPrompt from './components/ReloadPrompt';
+import AnalyticsPage from './pages/AnalyticsPage';
+import AnalyticsTeamPage from './pages/AnalyticsTeamPage';
 
 const darkTheme = createTheme({
   palette: {
@@ -58,6 +60,8 @@ export default function App() {
                   <Route path="*" element={<NoPage />} />
                 </Route>
                 <Route path="data" element={<DataPage />} />
+                <Route path="analytics" element={<AnalyticsPage />} />
+                <Route path="analytics/:team" element={<AnalyticsTeamPage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="*" element={<NoPage />} />
               </Route>

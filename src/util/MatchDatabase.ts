@@ -125,6 +125,24 @@ async function getAllEvents() {
 }
 
 /**
+ * Retrieves all unique team numbers in the database
+ * 
+ * @returns - A list of all the team numbers in the database
+ */
+async function getAllTeams() {
+    const db = await tryOpenDatabase();
+    const tx = db.transaction(['matches'], 'readonly');
+    const index = await tx.objectStore('matches').index('by-team');
+
+    const teams: number[] = [];
+    for await (const cursor of index.iterate()) {
+        if (!teams.includes(cursor.value.teamNumber)) teams.push(cursor.value.teamNumber);
+    }
+    await tx.done;
+    return teams;
+}
+
+/**
  * Retrieves a list off all the match identifiers in the database
  */
 async function getAllMatchIdentifiers() {
@@ -175,6 +193,17 @@ async function getEventsByMatch(matchId: string, teamNumber: number) {
     return db.getAllFromIndex('matches', 'by-both', [teamNumber, matchId]);
 }
 
+/**
+ * Gets all the events for a given team number
+ * 
+ * @param teamNumber - The 4 digit team number to get the events for
+ * @returns - All the events for the given team number
+ */
+async function getEventsByTeam(teamNumber: number) {
+    const db = await tryOpenDatabase();
+    return db.getAllFromIndex('events', 'by-team', teamNumber);
+}
+
 async function deleteMatch(matchId: string, teamNumber: number) {
     const db = await tryOpenDatabase();
     
@@ -198,9 +227,11 @@ export default {
     importData,
     getAllMatches,
     getAllEvents,
+    getAllTeams,
     getAllMatchIdentifiers,
     getMatchById,
     getMatchesByTeam,
     getEventsByMatch,
+    getEventsByTeam,
     deleteMatch
 }
