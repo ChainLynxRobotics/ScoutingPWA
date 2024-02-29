@@ -190,7 +190,7 @@ const DuringMatch = () => {
             <FormControlLabel label="Left Zone in Autonomous Mode" 
                 control={<Checkbox checked={context.match.specialAuto} onClick={toggleAutoSpecial} disabled={isDisabled}/>} />
 
-            <FormControlLabel label="Attempted to Cooperate" 
+            <FormControlLabel label="Alliance Attempted to Cooperate" 
                 control={<Checkbox checked={context.match.attemptedCooperation} onClick={toggleAttemptedCooperation} disabled={isDisabled}/>} />
             
             <div className="mt-8 mb-2 w-full h-1 bg-background-secondary"></div>
