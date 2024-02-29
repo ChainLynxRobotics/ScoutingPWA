@@ -35,7 +35,8 @@ const SettingsPage = () => {
             schedule: settings.matches,
             scheduleData: {
                 fieldRotated: settings.fieldRotated,
-                competitionId: settings.competitionId
+                competitionId: settings.competitionId,
+                currentMatch: settings.currentMatchIndex
             }
         };
         generateQrCodes(data);
@@ -50,7 +51,8 @@ const SettingsPage = () => {
         if (scheduleData) {
             settings.setFieldRotated(scheduleData.fieldRotated);
             settings.setCompetitionId(scheduleData.competitionId);
-        }
+            settings.setCurrentMatchIndex(scheduleData.currentMatch);
+        } else console.warn("No schedule meta data found in qr code");
         setScannerOpen(false);
     }
 

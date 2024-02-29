@@ -68,4 +68,5 @@ message ScheduledMatch {
 message ScheduleData {
     bool fieldRotated = 1;
     string competitionId = 2;
+    int32 currentMatch = 3;
 }
