@@ -120,7 +120,7 @@ const AnalyticsPage = () => {
 
 
                     <h2 className="mt-8 text-xl font-bold">During Match:</h2>
-                    <div className="pl-4 py-4">
+                    <div className="pl-4 my-4">
                         <AccuracyStatistic name="Pickup Accuracy" 
                             value={numOfEvents(ME.acquireGround, ME.acquireStation)} 
                             total={numOfEvents(ME.acquireGround, ME.acquireStation, ME.acquireFail)} 
@@ -143,8 +143,8 @@ const AnalyticsPage = () => {
                         />
                         <PerMatchStatistic name="└ Attempts Per Match" pl="24px" {...perMatchStats(ME.scoreHigh, ME.scoreHighBoost, ME.scoreHighFail)} />
                         <div className="h-4"></div>
-                        <AccuracyStatistic name="Autonomous Point" 
-                            value={matches.filter(m=>m.specialAuto).length} 
+                        <AccuracyStatistic name="Leave Autonomous Zone" 
+                            value={matches.filter(m=>events.find(e=>e.matchId===m.matchId && e.event===ME.specialAuto)).length} 
                             total={matches.length}
                         />
                         <AccuracyStatistic name="Attempts to Cooperate" 
@@ -156,12 +156,12 @@ const AnalyticsPage = () => {
                     </div>
 
                     <h2 className="mt-4 text-xl font-bold">Post Match:</h2>
-                    <div className="pl-4 py-4">
+                    <div className="pl-4 my-4">
                         <AccuracyStatistic name="Climbs" 
                             value={matches.filter(m=>m.climb).length} 
                             total={matches.length} 
                         />
-                        <PerMatchStatistic name="Human Player Average" 
+                        <PerMatchStatistic name="Human Player Scored" 
                             desc="The notes scored by the human player at the end of the game. Only counts for the times this team's human player is at the Amp."
                             {...humanPlayerPerformancePerMatch()}
                         />
@@ -183,9 +183,9 @@ const AnalyticsPage = () => {
                     <DialogContent>
                         <div>
                             {matches.filter(m=>m.notes.trim()).map(match=>
-                                <div>
+                                <div key={match.matchId}>
                                     <div>Notes during <b>{match.matchId}</b>:</div>
-                                    <textarea className="ml-2 p-1 w-full italic h-32 bg-black bg-opacity-20 resize-none" disabled value={match.notes} />
+                                    <textarea className="ml-2 p-1 w-full italic h-32 text-white bg-black bg-opacity-20 resize-none" disabled value={match.notes} />
                                 </div>
                             )}
                         </div>

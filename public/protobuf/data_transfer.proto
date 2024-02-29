@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 message DataTransfer {
-    QrCodeType qr_type = 1;
+    QrCodeType qrType = 1;
     repeated MatchData matches = 2;
     repeated MatchEventData events = 3;
     repeated ScheduledMatch schedule = 4;
@@ -16,39 +16,30 @@ enum QrCodeType {
 
 
 message MatchEventData {
-    string match_id = 1;
-    int32 team_number = 2;
+    string matchId = 1;
+    int32 teamNumber = 2;
     int32 event = 3;
     int64 time = 4;
 }
 
 message MatchData {
-    string match_id = 1;
-    int32 team_number = 2;
-    AllianceColor alliance_color = 3;
-    PreMatchData pre = 4;
-    DuringMatchData match = 5;
-    PostMatchData post = 6;
-    string notes = 7;
-    string scoutName = 8;
-    int64 matchStart = 9;
-    int64 submitTime = 10;
-}
-
-message PreMatchData {
-    HumanPlayerLocation human_player_location = 1;
-    bool preload = 2;
-}
-
-message DuringMatchData {
-    bool attempted_cooperation = 1;
-    bool spacialAuto = 2;
-}
-
-message PostMatchData {
-    bool climb = 1;
-    float defense = 2;
-    int32 human_player_performance = 3;
+    string matchId = 1;
+    int32 teamNumber = 2;
+    AllianceColor allianceColor = 3;
+    // pre
+    HumanPlayerLocation humanPlayerLocation = 4;
+    bool preload = 5;
+    // during
+    
+    // post
+    bool climb = 6;
+    float defense = 7;
+    int32 humanPlayerPerformance = 8;
+    // meta
+    string notes = 9;
+    string scoutName = 10;
+    int64 matchStart = 11;
+    int64 submitTime = 12;
 }
 
 enum AllianceColor {

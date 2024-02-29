@@ -1,5 +1,8 @@
 import { useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { isIOS } from "../util/detectDevice";
+
+const iOS = isIOS();
 
 const Layout = () => {
 
@@ -15,11 +18,11 @@ const Layout = () => {
     }, []);
 
     return (
-        <div className="w-full h-screen relative pb-12">
+        <div className="w-full h-screen relative pb-12 overflow-hidden">
             <div className="w-full h-full overflow-y-auto">
                 <Outlet />
             </div>
-            <div className="absolute bottom-0 w-full h-12 text-center flex items-end bg-background-secondary text-secondary">
+            <div className={"absolute bottom-0 w-full text-center flex bg-background-secondary text-secondary " + (!iOS ? 'h-12 items-end' : 'h-16 pt-1')}>
                 <NavLink to="/scout" className={s=>"flex-grow flex flex-col"+(s.isActive ? ' text-primary' : '')}>
                     <span className="material-symbols-outlined">description</span>
                     <span className="text-sm">Scout</span>

@@ -23,7 +23,6 @@ const AnalyticsPage = () => {
                 id="team-search"
                 label="Team #"
                 type="number"
-                autoFocus
                 size="small"
                 value={search || ''} 
                 onChange={(e)=>setSearch(Math.min(Math.max(parseInt(e.target.value), 0), 9999))}

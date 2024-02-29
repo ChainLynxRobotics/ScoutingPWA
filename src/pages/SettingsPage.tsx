@@ -31,11 +31,11 @@ const SettingsPage = () => {
     const openQrCodes = () => {
         if (!settings) return;
         const data = {
-            "qrType": QrCodeType.Schedule,
-            "schedule": settings.matches,
-            "scheduleData": {
-                "fieldRotated": settings.fieldRotated,
-                "competitionId": settings.competitionId
+            qrType: QrCodeType.Schedule,
+            schedule: settings.matches,
+            scheduleData: {
+                fieldRotated: settings.fieldRotated,
+                competitionId: settings.competitionId
             }
         };
         generateQrCodes(data);

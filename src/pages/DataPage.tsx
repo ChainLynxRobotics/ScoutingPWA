@@ -34,9 +34,9 @@ const DataPage = () => {
         const events = await MatchDatabase.getAllEvents();
         const matches = await MatchDatabase.getAllMatches();
         const data = {
-            "qrType": QrCodeType.MatchData,
-            "matches": matches,
-            "events": events,
+            qrType: QrCodeType.MatchData,
+            matches: matches,
+            events: events,
         };
 
         await generateQrCodes(data);

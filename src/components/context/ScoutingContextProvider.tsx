@@ -173,6 +173,22 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
         setBoostEnd(getTime() + BOOST_DURATION * 1000);
     }
 
+    // Because the specialAuto can only happen once per match, this code allows it to work with a checkbox and
+    // add an event when checked, but remove that event if it gets unchecked
+    const setSpecialAutoWithEvents = (specialAuto: boolean) => {
+        if (events.filter(e=>e.event==MatchEvent.specialAuto).length > 0) {
+            if (!specialAuto) {
+                setEvents(events.filter(e=>e.event!=MatchEvent.specialAuto));
+                setSpecialAuto(false);
+            } else console.warn("Attempted to add specialAuto event when it already exists")
+        } else {
+            if (specialAuto) {
+                addEvent(MatchEvent.specialAuto, getTime())
+                setSpecialAuto(true);
+            } else console.warn("Attempted to remove specialAuto event when it doesn't exist")
+        }
+    }
+
     // Because the cooperation can only happen once per match, this code allows it to work with a checkbox and
     // add an event when checked, but remove that event if it gets unchecked
     const setAttemptedCooperationWithEvents = (attemptedCooperation: boolean) => {
@@ -210,8 +226,6 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
                 allianceColor,
                 humanPlayerLocation,
                 preload,
-                attemptedCooperation,
-                specialAuto,
                 climb,
                 defense,
                 humanPlayerPerformance,
@@ -269,7 +283,7 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
             attemptedCooperation,
             setAttemptedCooperation: setAttemptedCooperationWithEvents,
             specialAuto,
-            setSpecialAuto
+            setSpecialAuto: setSpecialAutoWithEvents
         },
         post: {
             climb,

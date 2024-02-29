@@ -15,14 +15,13 @@ export type MatchData = {
     humanPlayerLocation: HumanPlayerLocation;
     preload: boolean;
     // during match
-    attemptedCooperation: boolean;
-    specialAuto: boolean;
+    
     // post
     climb: boolean;
     defense: number;
     humanPlayerPerformance: number;
-    notes: string;
     // meta
+    notes: string;
     scoutName: string;
     matchStart: number;
     submitTime: number;
