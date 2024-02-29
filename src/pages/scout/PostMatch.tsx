@@ -14,6 +14,7 @@ import Alert from "@mui/material/Alert/Alert";
 import FormControlLabel from "@mui/material/FormControlLabel/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox/Checkbox";
 import { MAX_NOTE_LENGTH } from "../../constants";
+import MatchResult from "../../enums/MatchResult";
 
 const PostMatch = () => {
     const context = useContext(ScoutingContext);
@@ -92,6 +93,20 @@ const PostMatch = () => {
                     <MenuItem value={1}>1</MenuItem>
                     <MenuItem value={2}>2</MenuItem>
                     <MenuItem value={3}>3</MenuItem>
+                </Select>
+            </FormControl>
+            <FormControl sx={{maxWidth: "256px"}}>
+                <InputLabel>Match Result</InputLabel>
+                <Select 
+                    id="match-result" 
+                    label="Match Result" 
+                    variant="outlined"
+                    value={context.post.matchResult}
+                    onChange={(e) => context.post.setMatchResult(e.target.value as number)}
+                >
+                    <MenuItem value={MatchResult.Loss}>Loss</MenuItem>
+                    <MenuItem value={MatchResult.Tie}>Tie</MenuItem>
+                    <MenuItem value={MatchResult.Win}>Win</MenuItem>
                 </Select>
             </FormControl>
             <TextField

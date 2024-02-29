@@ -1,6 +1,7 @@
 import AllianceColor from "../enums/AllianceColor";
 import HumanPlayerLocation from "../enums/HumanPlayerLocation";
 import MatchEvent from "../enums/MatchEvent";
+import MatchResult from "../enums/MatchResult";
 
 export type MatchIdentifier = {
     matchId: string; // This should be the full match id, including the competition id
@@ -20,6 +21,7 @@ export type MatchData = {
     climb: boolean;
     defense: number;
     humanPlayerPerformance: number;
+    matchResult: MatchResult;
     // meta
     notes: string;
     scoutName: string;

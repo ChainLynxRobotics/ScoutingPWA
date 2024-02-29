@@ -35,11 +35,12 @@ message MatchData {
     bool climb = 6;
     float defense = 7;
     int32 humanPlayerPerformance = 8;
+    MatchResult matchResult = 9;
     // meta
-    string notes = 9;
-    string scoutName = 10;
-    int64 matchStart = 11;
-    int64 submitTime = 12;
+    string notes = 10;
+    string scoutName = 11;
+    int64 matchStart = 12;
+    int64 submitTime = 13;
 }
 
 enum AllianceColor {
@@ -51,6 +52,12 @@ enum HumanPlayerLocation {
     None = 0;
     Source = 1;
     Amp = 2;
+}
+
+enum MatchResult {
+    Loss = 0;
+    Tie = 1;
+    Win = 2;
 }
 
 

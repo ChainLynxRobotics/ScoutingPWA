@@ -8,6 +8,7 @@ import MatchDatabase from "../../util/MatchDatabase";
 import CurrentMatchContext from "./CurrentMatchContext";
 import { useNavigate } from "react-router-dom";
 import SettingsContext from "./SettingsContext";
+import MatchResult from "../../enums/MatchResult";
 
 /**
  * This function is used to create a new ScoutingStateData object, which is used to store/update all the data that is collected during a match.
@@ -46,6 +47,7 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
     const [climb, setClimb] = useState<boolean>(false);
     const [defense, setDefense] = useState<number>(3);
     const [humanPlayerPerformance, setHumanPlayerPerformance] = useState<number>(0);
+    const [matchResult, setMatchResult] = useState<MatchResult>(MatchResult.Loss);
 
     const getTime = () => {
         if (!matchActive) {
@@ -229,6 +231,7 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
                 climb,
                 defense,
                 humanPlayerPerformance,
+                matchResult,
                 notes,
                 scoutName: settings.scoutName,
                 matchStart,
@@ -292,6 +295,8 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
             setDefense,
             humanPlayerPerformance,
             setHumanPlayerPerformance,
+            matchResult,
+            setMatchResult,
             submit
         },
     }
@@ -382,6 +387,8 @@ export type ScoutingContextType = {
         setDefense: (defense: number) => void,
         humanPlayerPerformance: number,
         setHumanPlayerPerformance: (humanPlayerPerformance: number) => void,
+        matchResult: MatchResult,
+        setMatchResult: (matchResult: MatchResult) => void,
         submit: () => void
     }
 
