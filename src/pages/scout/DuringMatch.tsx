@@ -8,6 +8,7 @@ import EventLog from "../../components/EventLog";
 import MatchEvent from "../../enums/MatchEvent";
 import AllianceColor from "../../enums/AllianceColor";
 import SettingsContext from "../../components/context/SettingsContext";
+import Divider from "../../components/Divider";
 
 
 const DuringMatch = () => {
@@ -193,7 +194,8 @@ const DuringMatch = () => {
             <FormControlLabel label="Alliance Attempted to Cooperate" 
                 control={<Checkbox checked={context.match.attemptedCooperation} onClick={toggleAttemptedCooperation} disabled={isDisabled}/>} />
             
-            <div className="mt-8 mb-2 w-full h-1 bg-background-secondary"></div>
+            <Divider />
+            
             <div className="flex flex-col items-center">
                 <h3 className="text-xl">Event Log</h3>
                 <p className="mb-4 text-secondary">You can also edit events later in the post-match page</p>

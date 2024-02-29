@@ -14,6 +14,7 @@ import Alert from "@mui/material/Alert/Alert";
 import { MAX_NOTE_LENGTH } from "../../constants";
 import MatchResult from "../../enums/MatchResult";
 import ClimbResult from "../../enums/ClimbResult";
+import Divider from "../../components/Divider";
 
 const PostMatch = () => {
     const context = useContext(ScoutingContext);
@@ -142,7 +143,8 @@ const PostMatch = () => {
                 </Button>
             </div>
 
-            <div className="mt-8 mb-2 w-full h-1 bg-background-secondary"></div>
+            <Divider />
+            
             <div className="flex flex-col items-center">
                 <h3 className="text-xl mb-2">Event Log</h3>
                 <EventLog />

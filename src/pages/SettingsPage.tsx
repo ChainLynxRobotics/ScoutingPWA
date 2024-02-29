@@ -5,6 +5,7 @@ import MatchSchedule from "../components/MatchSchedule";
 import QrCodeDataTransfer from "../components/QrCodeDataTransfer";
 import QrCodeType from "../enums/QrCodeType";
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormHelperText, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import Divider from "../components/Divider";
 
 const SettingsPage = () => {
 
@@ -105,7 +106,7 @@ const SettingsPage = () => {
             <FormHelperText>Change this based on the perspective you are viewing the field for when you are scouting</FormHelperText>
         </FormControl>
 
-        <div className="mt-8 mb-2 w-full max-w-md h-1 bg-background-secondary"></div>
+        <Divider />
 
         <h1 className="text-xl font-bold">Schedule</h1>
         <div className="flex flex-wrap gap-4">

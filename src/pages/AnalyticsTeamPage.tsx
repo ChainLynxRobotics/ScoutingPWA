@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MatchData, MatchEventData } from "../types/MatchData";
 import MatchDatabase from "../util/MatchDatabase";
@@ -10,6 +10,8 @@ import { PieChart } from "@mui/x-charts";
 import HumanPlayerLocation from "../enums/HumanPlayerLocation";
 import Statistic from "../components/analytics/Statistic";
 import ClimbResult from "../enums/ClimbResult";
+import { autoEvents, numOfEvents, perMatchStats, teleopEvents } from "../util/analyticsUtil";
+import Divider from "../components/Divider";
 
 const AnalyticsPage = () => {
 
@@ -19,6 +21,9 @@ const AnalyticsPage = () => {
     const [hasLoaded, setHasLoaded] = useState(false);
     const [matches, setMatches] = useState<MatchData[]>([]);
     const [events, setEvents] = useState<MatchEventData[]>([]);
+
+    const auto = useMemo(()=>autoEvents(matches, events), [matches, events]);
+    const teleop = useMemo(()=>teleopEvents(matches, events), [matches, events]);
 
     const [notesOpen, setNotesOpen] = useState(false);
 
@@ -39,33 +44,6 @@ const AnalyticsPage = () => {
 
     if (!hasLoaded) return (<div className="w-full h-full flex items-center justify-center">Loading...</div>);
 
-    /**
-     * Gets the number of a certain type or types of events that have been saved
-     * @param event - Event(s) to look for
-     * @returns the number of the events that have been recorded
-     */
-    function numOfEvents(...eventsToFilter: ME[]): number {
-        return events.filter(e=>eventsToFilter.includes(e.event)).length;
-    }
-
-    /**
-     * Gets the average, minimum, and maximum number of events per match
-     * @param eventsToFilter - Event(s) to look for
-     * @returns the average, minimum, and maximum number of events per match
-     */
-    function perMatchStats(...eventsToFilter: ME[]): {avg: number, min: number, max: number} {
-        var sum = 0, min = Infinity, max = 0, total = 0;
-        matches.forEach(match=> {
-            const count = events.filter(e=>match.matchId===e.matchId).filter(e=>eventsToFilter.includes(e.event)).length;
-            sum += count;
-            if (count < min) min = count;
-            if (count > max) max = count;
-            total++;
-        })
-        if (total == 0) return {avg: NaN, min: 0, max: 0}
-        return {avg: sum/matches.length, min, max};
-    }
-
 
     function humanPlayerPerformancePerMatch(): {avg: number, min: number, max: number} {
         var sum = 0, min = 0, max = 0, total = 0;
@@ -79,7 +57,6 @@ const AnalyticsPage = () => {
         if (total == 0) return {avg: NaN, min: 0, max: 0}
         return {avg: sum/matches.length, min, max};
     }
-    
     
     return (
     <div className="w-full h-full flex flex-col items-center relative">
@@ -98,8 +75,13 @@ const AnalyticsPage = () => {
                 <h1 className="text-xl text-center mb-4">Analytics for <b>Team {team}</b></h1>
                 <div className="w-full max-w-md px-2 flex flex-col items-start">
                     
+                    <Statistic name="Matches Scouted">
+                        {matches.length}
+                    </Statistic>
                     
-                    <h2 className="text-lg font-bold">Pre Match:</h2>
+                    <Divider />
+                    
+                    <h2 className="mt-4 text-xl font-bold">Pre Match:</h2>
                     <div className="flex flex-col items-center my-2">
                         <div>Human Player Location</div>
                         <PieChart
@@ -118,36 +100,85 @@ const AnalyticsPage = () => {
                             total={matches.length} 
                         />
                     </div>
+                    
+                    <Divider />
 
-
-                    <h2 className="mt-8 text-xl font-bold">During Match:</h2>
+                    <h2 className="mt-4 text-xl font-bold">During Match (Auto):</h2>
                     <div className="pl-4 my-4">
                         <AccuracyStatistic name="Pickup Accuracy" 
-                            value={numOfEvents(ME.acquireGround, ME.acquireStation)} 
-                            total={numOfEvents(ME.acquireGround, ME.acquireStation, ME.acquireFail)} 
+                            value={numOfEvents(auto, ME.acquireGround, ME.acquireStation)} 
+                            total={numOfEvents(auto, ME.acquireGround, ME.acquireStation, ME.acquireFail)} 
                         />
-                        <PerMatchStatistic name="└ Attempts Per Match" pl="24px" {...perMatchStats(ME.acquireGround, ME.acquireStation, ME.acquireFail)} />
+                        <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
+                            {...perMatchStats(matches, auto, ME.acquireGround, ME.acquireStation, ME.acquireFail)}
+                        />
+
                         <div className="h-4"></div>
+
                         <AccuracyStatistic name="Speaker Accuracy" 
-                            value={numOfEvents(ME.scoreMid, ME.scoreMidBoost)} 
-                            total={numOfEvents(ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
+                            value={numOfEvents(auto, ME.scoreMid, ME.scoreMidBoost)} 
+                            total={numOfEvents(auto, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
                         />
-                        <PerMatchStatistic name="└ Attempts Per Match" pl="24px" {...perMatchStats(ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)} />
+                        <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
+                            {...perMatchStats(matches, auto, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
+                        />
+
                         <AccuracyStatistic name="Amp Accuracy" 
-                            value={numOfEvents(ME.scoreLow, ME.scoreLowBoost)} 
-                            total={numOfEvents(ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
+                            value={numOfEvents(auto, ME.scoreLow, ME.scoreLowBoost)} 
+                            total={numOfEvents(auto, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
                         />
-                        <PerMatchStatistic name="└ Attempts Per Match" pl="24px" {...perMatchStats(ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)} />
-                        <AccuracyStatistic name="Trap Accuracy" 
-                            value={numOfEvents(ME.scoreHigh, ME.scoreHighBoost)} 
-                            total={numOfEvents(ME.scoreHigh, ME.scoreHighBoost, ME.scoreHighFail)}
+                        <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
+                            {...perMatchStats(matches, auto, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
                         />
-                        <PerMatchStatistic name="└ Attempts Per Match" pl="24px" {...perMatchStats(ME.scoreHigh, ME.scoreHighBoost, ME.scoreHighFail)} />
+
                         <div className="h-4"></div>
+
                         <AccuracyStatistic name="Leave Autonomous Zone" 
                             value={matches.filter(m=>events.find(e=>e.matchId===m.matchId && e.event===ME.specialAuto)).length} 
                             total={matches.length}
                         />
+                    </div>
+
+                    <Divider />
+
+                    <h2 className="mt-4 text-xl font-bold">During Match (Teleop):</h2>
+                    <div className="pl-4 my-4">
+                        <AccuracyStatistic name="Pickup Accuracy" 
+                            value={numOfEvents(teleop, ME.acquireGround, ME.acquireStation)} 
+                            total={numOfEvents(teleop, ME.acquireGround, ME.acquireStation, ME.acquireFail)} 
+                        />
+                        <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
+                            {...perMatchStats(matches, teleop, ME.acquireGround, ME.acquireStation, ME.acquireFail)}
+                        />
+
+                        <div className="h-4"></div>
+
+                        <AccuracyStatistic name="Speaker Accuracy" 
+                            value={numOfEvents(teleop, ME.scoreMid, ME.scoreMidBoost)} 
+                            total={numOfEvents(teleop, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
+                        />
+                        <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
+                            {...perMatchStats(matches, teleop, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
+                        />
+
+                        <AccuracyStatistic name="Amp Accuracy" 
+                            value={numOfEvents(teleop, ME.scoreLow, ME.scoreLowBoost)} 
+                            total={numOfEvents(teleop, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
+                        />
+                        <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
+                            {...perMatchStats(matches, teleop, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
+                        />
+
+                        <AccuracyStatistic name="Trap Accuracy" 
+                            value={numOfEvents(teleop, ME.scoreHigh, ME.scoreHighBoost)} 
+                            total={numOfEvents(teleop, ME.scoreHigh, ME.scoreHighBoost, ME.scoreHighFail)}
+                        />
+                        <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
+                            {...perMatchStats(matches, teleop, ME.scoreHigh, ME.scoreHighBoost, ME.scoreHighFail)}
+                        />
+
+                        <div className="h-4"></div>
+
                         <AccuracyStatistic name="Attempts to Cooperate" 
                             value={matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Amp)
                                     .filter(m=>events.find(e=>e.matchId===m.matchId && e.event===ME.specialCoop)).length} 
@@ -155,6 +186,8 @@ const AnalyticsPage = () => {
                             desc="Only counts for the times this team's human player is at the Amp"
                         />
                     </div>
+
+                    <Divider />
 
                     <h2 className="mt-4 text-xl font-bold">Post Match:</h2>
                     <div className="pl-4 my-4">
