@@ -56,7 +56,13 @@ const SettingsPage = () => {
 
     return (
     <div className="w-full flex flex-col items-center gap-5 px-4">
-        <h1 className="text-xl font-bold mt-4">Settings</h1>
+        <h1 className="text-2xl font-bold mt-4">Settings</h1>
+
+        <div className="mb-2 flex flex-col items-center">
+            <div className="text-secondary">App Version: <i>{APP_VERSION}</i></div>
+            <div className="text-secondary">Build Date: <i>{BUILD_DATE}</i></div>
+        </div>
+
         <FormControl className="max-w-96">
             <TextField 
                 id="scout-name" 
