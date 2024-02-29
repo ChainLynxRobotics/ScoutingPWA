@@ -9,6 +9,7 @@ import PerMatchStatistic from "../components/analytics/PerMatchStatistic";
 import { PieChart } from "@mui/x-charts";
 import HumanPlayerLocation from "../enums/HumanPlayerLocation";
 import Statistic from "../components/analytics/Statistic";
+import ClimbResult from "../enums/ClimbResult";
 
 const AnalyticsPage = () => {
 
@@ -158,7 +159,11 @@ const AnalyticsPage = () => {
                     <h2 className="mt-4 text-xl font-bold">Post Match:</h2>
                     <div className="pl-4 my-4">
                         <AccuracyStatistic name="Climbs" 
-                            value={matches.filter(m=>m.climb).length} 
+                            value={matches.filter(m=>m.climb===ClimbResult.Climb).length} 
+                            total={matches.length} 
+                        />
+                        <AccuracyStatistic name="└ Parks" pl="24px"
+                            value={matches.filter(m=>m.climb!==ClimbResult.None).length} 
                             total={matches.length} 
                         />
                         <PerMatchStatistic name="Human Player Scored" 

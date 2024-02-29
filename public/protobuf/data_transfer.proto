@@ -54,6 +54,12 @@ enum HumanPlayerLocation {
     Amp = 2;
 }
 
+enum ClimbResult {
+    None = 0;
+    Parked = 1;
+    Climb = 2;
+}
+
 enum MatchResult {
     Loss = 0;
     Tie = 1;

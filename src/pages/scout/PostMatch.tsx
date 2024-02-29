@@ -11,10 +11,9 @@ import Rating from "@mui/material/Rating/Rating";
 import TextField from "@mui/material/TextField/TextField";
 import EventLog from "../../components/EventLog";
 import Alert from "@mui/material/Alert/Alert";
-import FormControlLabel from "@mui/material/FormControlLabel/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox/Checkbox";
 import { MAX_NOTE_LENGTH } from "../../constants";
 import MatchResult from "../../enums/MatchResult";
+import ClimbResult from "../../enums/ClimbResult";
 
 const PostMatch = () => {
     const context = useContext(ScoutingContext);
@@ -63,9 +62,21 @@ const PostMatch = () => {
                 </Alert>
             }
 
-            <FormControlLabel label="Successfully climbed?" 
-                control={<Checkbox checked={context.post.climb} onClick={()=>context.post.setClimb(!context.post.climb)}/>} />
-            <div className="flex flex-row items-center gap-1">
+            <FormControl sx={{maxWidth: "256px"}}>
+                <InputLabel>Climb Result</InputLabel>
+                <Select 
+                    id="climb-result" 
+                    label="Climb Result" 
+                    variant="outlined"
+                    value={context.post.climb}
+                    onChange={(e) => context.post.setClimb(e.target.value as number)}
+                >
+                    <MenuItem value={ClimbResult.None}>None</MenuItem>
+                    <MenuItem value={ClimbResult.Parked}>Parked (in triangle zone)</MenuItem>
+                    <MenuItem value={MatchResult.Win}>Climb (on chain)</MenuItem>
+                </Select>
+            </FormControl>
+            <div className="flex flex-row items-center gap-1 my-2">
                 <span className="text-lg">Defense:</span>
                 <Rating
                     name="defense-quality"

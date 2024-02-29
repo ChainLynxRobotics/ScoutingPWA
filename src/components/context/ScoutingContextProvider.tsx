@@ -9,6 +9,7 @@ import CurrentMatchContext from "./CurrentMatchContext";
 import { useNavigate } from "react-router-dom";
 import SettingsContext from "./SettingsContext";
 import MatchResult from "../../enums/MatchResult";
+import ClimbResult from "../../enums/ClimbResult";
 
 /**
  * This function is used to create a new ScoutingStateData object, which is used to store/update all the data that is collected during a match.
@@ -44,7 +45,7 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
     const [boostEnd, setBoostEnd] = useState<number>(0);
 
     // Post Match
-    const [climb, setClimb] = useState<boolean>(false);
+    const [climb, setClimb] = useState<ClimbResult>(ClimbResult.None);
     const [defense, setDefense] = useState<number>(3);
     const [humanPlayerPerformance, setHumanPlayerPerformance] = useState<number>(0);
     const [matchResult, setMatchResult] = useState<MatchResult>(MatchResult.Loss);
@@ -381,8 +382,8 @@ export type ScoutingContextType = {
     
 
     post: {
-        climb: boolean,
-        setClimb: (climbLocation: boolean) => void,
+        climb: ClimbResult,
+        setClimb: (climbLocation: ClimbResult) => void,
         defense: number,
         setDefense: (defense: number) => void,
         humanPlayerPerformance: number,

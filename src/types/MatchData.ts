@@ -1,4 +1,5 @@
 import AllianceColor from "../enums/AllianceColor";
+import ClimbResult from "../enums/ClimbResult";
 import HumanPlayerLocation from "../enums/HumanPlayerLocation";
 import MatchEvent from "../enums/MatchEvent";
 import MatchResult from "../enums/MatchResult";
@@ -18,7 +19,7 @@ export type MatchData = {
     // during match
     
     // post
-    climb: boolean;
+    climb: ClimbResult;
     defense: number;
     humanPlayerPerformance: number;
     matchResult: MatchResult;
