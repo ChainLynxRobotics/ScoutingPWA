@@ -129,7 +129,7 @@ async function getAllEvents() {
  * 
  * @returns - A list of all the team numbers in the database
  */
-async function getAllTeams() {
+async function getUniqueTeams() {
     const db = await tryOpenDatabase();
     const tx = db.transaction(['matches'], 'readonly');
     const index = await tx.objectStore('matches').index('by-team');
@@ -140,6 +140,24 @@ async function getAllTeams() {
     }
     await tx.done;
     return teams;
+}
+
+/**
+ * Retrieves all the different matches in the database
+ * 
+ * @returns - A list of all the different matches in the database
+ */
+async function getUniqueMatches() {
+    const db = await tryOpenDatabase();
+    const tx = db.transaction(['matches'], 'readonly');
+    const index = await tx.objectStore('matches').index('by-matchId');
+
+    const matches: string[] = [];
+    for await (const cursor of index.iterate()) {
+        if (!matches.includes(cursor.value.matchId)) matches.push(cursor.value.matchId);
+    }
+    await tx.done;
+    return matches;
 }
 
 /**
@@ -165,9 +183,21 @@ async function getAllMatchIdentifiers() {
  * @param teamNumber - The 4 digit team number to get the match for
  * @returns The match data, or undefined if it does not exist
  */
-async function getMatchById(matchId: string, teamNumber: number) {
+async function getMatchByIdentifier(matchId: string, teamNumber: number) {
     const db = await tryOpenDatabase();
     return db.getFromIndex('matches', 'by-both', [teamNumber, matchId]);
+}
+
+/**
+ * This returns all the matches for a given match id.
+ * There are multiple matches for a given match id because each team has their own match data
+ * 
+ * @param matchId - The match id to get
+ * @returns 
+ */
+async function getMatchesByMatchId(matchId: string) {
+    const db = await tryOpenDatabase();
+    return db.getAllFromIndex('matches', 'by-matchId', matchId);
 }
 
 /**
@@ -182,15 +212,18 @@ async function getMatchesByTeam(teamNumber: number) {
 }
 
 /**
- * Gets events from a team during a match
+ * Gets events during a specific match for an (optionally) specific team
  * 
  * @param matchId - The match id to get the events for
- * @param teamNumber - The 4 digit team number to get the events for
+ * @param teamNumber - The 4 digit team number to get the events for, if unspecified it will get events from all teams for that match
  * @returns - All the events for the given match id and team number
  */
-async function getEventsByMatch(matchId: string, teamNumber: number) {
+async function getEventsByMatch(matchId: string, teamNumber?: number) {
     const db = await tryOpenDatabase();
-    return db.getAllFromIndex('matches', 'by-both', [teamNumber, matchId]);
+    if (teamNumber)
+        return db.getAllFromIndex('events', 'by-both', [teamNumber, matchId]);
+    else 
+        return db.getAllFromIndex('events', 'by-matchId', matchId);
 }
 
 /**
@@ -227,9 +260,11 @@ export default {
     importData,
     getAllMatches,
     getAllEvents,
-    getAllTeams,
+    getUniqueTeams,
+    getUniqueMatches,
     getAllMatchIdentifiers,
-    getMatchById,
+    getMatchByIdentifier,
+    getMatchesByMatchId,
     getMatchesByTeam,
     getEventsByMatch,
     getEventsByTeam,
