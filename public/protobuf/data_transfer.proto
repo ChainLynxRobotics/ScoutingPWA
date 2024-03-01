@@ -32,7 +32,7 @@ message MatchData {
     // during
     
     // post
-    bool climb = 6;
+    ClimbResult climb = 6;
     float defense = 7;
     int32 humanPlayerPerformance = 8;
     MatchResult matchResult = 9;
