@@ -1,10 +1,13 @@
 import Button from "@mui/material/Button/Button";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SettingsContext from "../components/context/SettingsContext";
 
 const IndexPage = () => {
 
     const navigate = useNavigate();
+
+    const settings = useContext(SettingsContext);
 
     // The install prompt event, which is fired when the browser is ready to prompt the user to install the app
     // we store this in state so that we can call prompt() on it later
@@ -68,6 +71,12 @@ const IndexPage = () => {
                     </Button> 
                 </div>
             }
+
+            <div className="mt-12">
+                <Button variant="outlined" color="secondary" onClick={() => {settings?.setBypassInstall(true); navigate('/scout')}}>
+                    Bypass install & use browser
+                </Button> 
+            </div>
         </div>
     );
   };

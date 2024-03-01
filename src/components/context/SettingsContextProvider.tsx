@@ -5,6 +5,8 @@ import SettingsContext from "./SettingsContext";
 
 export default function SettingsContextProvider({defaultCompetitionId, children}: {defaultCompetitionId: string, children: ReactElement}) {
 
+    const [bypassInstall, setBypassInstall] = useLocalStorageState<boolean>(false, "bypassInstall"); // Used to bypass the install
+
     const [competitionId, setCompetitionId] = useLocalStorageState<string>(defaultCompetitionId, "competitionId");
     const [clientId, setClientId] = useLocalStorageState<number>(0, "clientId"); // From 0-5
     const [scoutName, setScoutName] = useLocalStorageState<string>("", "scoutName"); // The name of the scout, to be submitted with the data
@@ -47,6 +49,8 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
     }
 
     const value = {
+        bypassInstall,
+        setBypassInstall,
         competitionId,
         setCompetitionId,
         clientId,
@@ -76,6 +80,9 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
 // The following types are used to define the value of the SettingsContext.Provider
 
 export type SettingsStateData = {
+    bypassInstall: boolean;
+    setBypassInstall: (bypassInstall: boolean) => void;
+
     competitionId: string;
     setCompetitionId: (competitionId: string) => void;
     clientId: number;

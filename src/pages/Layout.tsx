@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { isIOS } from "../util/detectDevice";
+import SettingsContext from "../components/context/SettingsContext";
 
 const iOS = isIOS();
 
@@ -8,9 +9,12 @@ const Layout = () => {
 
     const navigate = useNavigate();
 
+    const settings = useContext(SettingsContext);
+
     // If the app is not installed, redirect to the install page
     useEffect(() => {
         if (import.meta.env.DEV) return; // Don't redirect in dev mode
+        if (settings?.bypassInstall) return;
 
         if (!window.matchMedia('(display-mode: standalone)').matches) {
             navigate('/');
