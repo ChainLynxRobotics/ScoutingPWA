@@ -2,4 +2,4 @@
 /// <reference types="vite-plugin-pwa/client" />
 
 declare const APP_VERSION: string;
-declare const BUILD_DATE: string;
+declare const BUILD_DATE: number;

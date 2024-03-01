@@ -1,9 +1,6 @@
 import { useContext, useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import { isIOS } from "../util/detectDevice";
 import SettingsContext from "../components/context/SettingsContext";
-
-const iOS = isIOS();
 
 const Layout = () => {
 
@@ -22,11 +19,11 @@ const Layout = () => {
     }, []);
 
     return (
-        <div className="w-full h-screen relative pb-12 overflow-hidden">
+        <div className="w-full h-dvh relative flex flex-col overflow-hidden">
             <div className="w-full h-full overflow-y-auto">
                 <Outlet />
             </div>
-            <div className={"absolute bottom-0 w-full text-center flex bg-background-secondary text-secondary " + (!iOS ? 'h-12 items-end' : 'h-16 pt-1')}>
+            <div className={"w-full text-center flex bg-background-secondary text-secondary py-1"} style={{paddingBottom: getComputedStyle(document.documentElement).getPropertyValue("--sab")}}>                
                 <NavLink to="/scout" className={s=>"flex-grow flex flex-col"+(s.isActive ? ' text-primary' : '')}>
                     <span className="material-symbols-outlined">description</span>
                     <span className="text-sm">Scout</span>
