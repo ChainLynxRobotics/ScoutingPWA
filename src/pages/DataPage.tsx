@@ -55,7 +55,7 @@ const DataPage = () => {
     }
 
     useEffect(() => {
-        if (toDelete) MatchDatabase.getMatchById(toDelete.matchId, toDelete.teamNumber).then(setToDeleteData);
+        if (toDelete) MatchDatabase.getMatchByIdentifier(toDelete.matchId, toDelete.teamNumber).then(setToDeleteData);
         else setToDeleteData(undefined);
     }, [toDelete]);
 

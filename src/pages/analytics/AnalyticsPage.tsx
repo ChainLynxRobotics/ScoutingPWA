@@ -18,7 +18,7 @@ const AnalyticsPage = () => {
     }, []);
 
     return (
-    <div className="w-full h-full flex flex-col items-center relative">
+    <div className="w-full h-full px-4 flex flex-col items-center relative">
         <h1 className="text-xl text-center mb-4 pt-4 font-bold">Analytics</h1>
         <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-secondary">search</span>

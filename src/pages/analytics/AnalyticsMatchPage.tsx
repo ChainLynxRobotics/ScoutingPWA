@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { MatchData, MatchEventData } from "../../types/MatchData";
 import MatchDatabase from "../../util/MatchDatabase";
 
@@ -27,8 +27,17 @@ export default function AnalyticsMatchPage() {
     }, [matchId]);
     
     return (
-        <div>
-            <h1>AnalyticsMatchPage</h1>
-        </div>
+        <>
+            <h1 className="text-xl text-center mb-4">Analytics for <b>match {matchId}</b></h1>
+            <span>Not done :(</span>
+            <div className="w-full max-w-md px-2 flex flex-col items-start">
+                <h3 className="text-lg mt-4">Known teams in this match: </h3>
+                <ul className="list-disc pl-8">
+                    {matches.map(m => m.teamNumber).map((team) => 
+                        <li><Link to={'/analytics/team/'+team} key={team} className="text-blue-500 underline">{team}</Link></li>
+                    )}
+                </ul>
+            </div>
+        </>
     )
 }
