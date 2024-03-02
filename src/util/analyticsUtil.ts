@@ -41,9 +41,9 @@ export function perMatchStats(matches: MatchData[], events: MatchEventData[], ..
 export function autoEvents(matches: MatchData[], events: MatchEventData[]): MatchEventData[] {
     const res: MatchEventData[] = []
     matches.forEach(match=> {
-        const filteredEvents = events.filter(e=>e.matchId===match.matchId);
-        const i = filteredEvents.findIndex(e=>e.matchId===match.matchId && e.event===ME.autoEnd);
-        if (i == -1) return;
+        const filteredEvents = events.filter(e=>e.matchId==match.matchId).sort((a,b)=>a.time-b.time);
+        const i = filteredEvents.findIndex(e=>e.event==ME.autoEnd);
+        if (i == -1) return console.log("Did not find auto end in auto loop");
         res.push(...filteredEvents.slice(0, i));
     });
     return res;
@@ -59,9 +59,9 @@ export function autoEvents(matches: MatchData[], events: MatchEventData[]): Matc
 export function teleopEvents(matches: MatchData[], events: MatchEventData[]): MatchEventData[] {
     const res: MatchEventData[] = []
     matches.forEach(match=> {
-        const filteredEvents = events.filter(e=>e.matchId===match.matchId);
-        const i = filteredEvents.findIndex(e=>e.matchId===match.matchId && e.event===ME.autoEnd);
-        if (i == -1) return;
+        const filteredEvents = events.filter(e=>e.matchId==match.matchId).sort((a,b)=>a.time-b.time);
+        const i = filteredEvents.findIndex(e=>e.event==ME.autoEnd);
+        if (i == -1) return console.log("Did not find auto end in teleop loop");
         res.push(...filteredEvents.slice(i + 1));
     });
     return res;
