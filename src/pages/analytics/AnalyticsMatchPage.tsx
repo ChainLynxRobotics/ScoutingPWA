@@ -1,7 +1,4 @@
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { MatchData, MatchEventData } from "../../types/MatchData";
-import MatchDatabase from "../../util/MatchDatabase";
+import { useParams } from "react-router-dom";
 
 export default function AnalyticsMatchPage() {
 
