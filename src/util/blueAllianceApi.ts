@@ -24,12 +24,12 @@ export async function getSchedule(competitionId: string): Promise<ScheduledMatch
     const matches: ScheduledMatch[] = json.sort((a, b)=>a.match_number-b.match_number).map((match: any): ScheduledMatch => {
         return {
             matchId: match.key.substring(competitionId.length+1),
-            blue1: match.alliances.blue.team_keys[0].substring(3),
-            blue2: match.alliances.blue.team_keys[1].substring(3),
-            blue3: match.alliances.blue.team_keys[2].substring(3),
-            red1: match.alliances.red.team_keys[0].substring(3),
-            red2: match.alliances.red.team_keys[1].substring(3),
-            red3: match.alliances.red.team_keys[2].substring(3),
+            blue1: parseInt(match.alliances.blue.team_keys[0].substring(3)),
+            blue2: parseInt(match.alliances.blue.team_keys[1].substring(3)),
+            blue3: parseInt(match.alliances.blue.team_keys[2].substring(3)),
+            red1: parseInt(match.alliances.red.team_keys[0].substring(3)),
+            red2: parseInt(match.alliances.red.team_keys[1].substring(3)),
+            red3: parseInt(match.alliances.red.team_keys[2].substring(3)),
         }
     });
     return matches;
