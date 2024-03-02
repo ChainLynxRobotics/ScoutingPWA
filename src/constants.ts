@@ -9,12 +9,12 @@ export const DEFAULT_COMPETITION_ID = "2024wasno";
 /** 
  * The number of seconds in a match
  */
-export const MATCH_DURATION = 150; // 2:30
+export const MATCH_DURATION = 150 + 5; // 2:30 plus 5 extra seconds to finish pressing everything (and 3 of those seconds were lost to auto to teleop switch)
 
 /**
  * Automatically switch to teleop after this many seconds
  */
-export const AUTO_DURATION = 15;
+export const AUTO_DURATION = 15 + 3; // 3 extra seconds to include the change in between auto and teleop
 
 /**
  * Automatically disable the amp boost after this many seconds
