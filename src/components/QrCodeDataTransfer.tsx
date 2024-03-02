@@ -4,7 +4,7 @@ import { compressMessageToBase64Gzip, decompressMessageFromBase64Gzip } from "..
 import QRCode from "react-qr-code";
 import { QrScanner } from "@yudiel/react-qr-scanner";
 
-export const QR_CHUNK_SIZE = 512;
+export const QR_CHUNK_SIZE = 256;
 export const QR_PROTOCOL_REGEX = /^scoutingdata:(\d+)\/(\d+):(.+)$/;
 
 export default function QrCodeDataTransfer(onReceiveData: (data: any) => void) {
