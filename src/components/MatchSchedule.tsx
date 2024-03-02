@@ -3,6 +3,7 @@ import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, 
 import SettingsContext from "./context/SettingsContext";
 import ErrorPage from "../pages/ErrorPage";
 import { getSchedule } from "../util/blueAllianceApi";
+import Divider from "./Divider";
 
 const MatchSchedule = () => {
 
@@ -113,6 +114,13 @@ const MatchSchedule = () => {
         });
     }
 
+    const deleteAll = () => {
+        if (!settings) return;
+
+        settings.setMatches([]);
+        settings.setCurrentMatchIndex(0);
+    }
+
     if (!settings) return (<ErrorPage msg="Settings context not found?!?!?!" />);
     
     return (
@@ -155,9 +163,17 @@ const MatchSchedule = () => {
                 <div className="w-full mt-1 text-secondary text-center">No matches scheduled</div>
             }
 
+            <Divider style={{marginTop: "64px"}}/>
+
+            <span className="mt-4 mb-4 italic">Only the host should be pressing the buttons below!</span>
+
             <div className="flex mt-2 gap-4">
                 <Button variant="outlined" color="primary" size="small" onClick={downloadMatches}>BlueAlliance Download</Button>
                 <Button variant="outlined" color="secondary" size="small" onClick={()=>setMatchCreateOpen(true)}>Manual Add</Button>
+            </div>
+
+            <div className="flex mt-4 gap-4">
+                <Button variant="contained" color="error" size="small" onClick={deleteAll}>Delete all scheduled matches</Button>
             </div>
 
             {/* Create match popup */}

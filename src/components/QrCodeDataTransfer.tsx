@@ -35,12 +35,13 @@ export default function QrCodeDataTransfer(onReceiveData: (data: any) => void) {
     // Decodes a fully assembled qr code and imports the match data
     async function decodeQrCode(data: string) {
         console.log("Decoding: ", data);
-        const protos = await protobuf.load("/protobuf/data_transfer.proto");
-        var DataTransfer = protos.lookupType("DataTransfer");
-
-        const message = await decompressMessageFromBase64Gzip(data, DataTransfer);
-        const object = DataTransfer.toObject(message);
         try {
+            const protos = await protobuf.load("/protobuf/data_transfer.proto");
+            var DataTransfer = protos.lookupType("DataTransfer");
+
+            const message = await decompressMessageFromBase64Gzip(data, DataTransfer);
+            const object = DataTransfer.toObject(message);
+            
             await onReceiveData(object);
         } catch (e) {
             console.error("Error receiving qr code data", e);

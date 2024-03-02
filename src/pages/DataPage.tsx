@@ -31,17 +31,22 @@ const DataPage = () => {
     }, []);
 
     async function openQrData() {
-        const events = await MatchDatabase.getAllEvents();
-        const matches = await MatchDatabase.getAllMatches();
-        const data = {
-            qrType: QrCodeType.MatchData,
-            matches: matches,
-            events: events,
-        };
+        try {
+            const events = await MatchDatabase.getAllEvents();
+            const matches = await MatchDatabase.getAllMatches();
+            const data = {
+                qrType: QrCodeType.MatchData,
+                matches: matches,
+                events: events,
+            };
 
-        await generateQrCodes(data);
-        
-        setQrOpen(true);
+            await generateQrCodes(data);
+            
+            setQrOpen(true);
+        } catch (e) {
+            console.error(e);
+            alert(e);
+        }
     }
 
     // Decodes a fully assembled qr code and imports the match data
@@ -91,7 +96,7 @@ const DataPage = () => {
     return (
     <div className="w-full h-full block justify-center relative">
         <h1 className="text-xl text-center mb-4 pt-4 font-bold">Saved matches</h1>
-        <div className="h-min block">
+        <div className="h-min block mb-16">
             {matches?.map((game) => {
             return (
                 <div className="mx-5 my-2" key={game.matchId+"-"+game.teamNumber}>
@@ -108,7 +113,7 @@ const DataPage = () => {
             })}
         </div>
 
-        <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center">
+        <div className="fixed bottom-16 left-0 right-0 flex justify-center items-center">
             <div className="flex flex-wrap gap-2 justify-center items-center">
                 <Chip label="Share" onClick={openQrData} color="primary"
                     icon={<span className="material-symbols-outlined">qr_code_2</span>} />
