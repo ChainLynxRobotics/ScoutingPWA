@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, TextField, FormHelperText, InputAdornment } from "@mui/material";
 import SettingsContext from "./context/SettingsContext";
 import ErrorPage from "../pages/ErrorPage";
+import { getSchedule } from "../util/blueAllianceApi";
 
 const MatchSchedule = () => {
 
@@ -101,7 +102,15 @@ const MatchSchedule = () => {
     }
 
     const downloadMatches = () => {
-        // TODO: download matches from blue alliance
+        if (!settings) return;
+
+        getSchedule(settings.competitionId).then((matches) => {
+            settings.setMatches(matches);
+            settings.setCurrentMatchIndex(0);
+        }).catch((err) => {
+            console.error("Failed to get schedule from blue alliance", err);
+            alert(err);
+        });
     }
 
     if (!settings) return (<ErrorPage msg="Settings context not found?!?!?!" />);
