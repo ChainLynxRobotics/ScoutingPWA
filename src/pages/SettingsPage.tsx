@@ -116,11 +116,11 @@ const SettingsPage = () => {
                 <span className="material-symbols-outlined">info</span>
             </IconButton>
         </div>
-        <div className="flex flex-col items-center w-full mb-4">
+        <div className="flex flex-col items-center w-full mb-4 mt-4">
             <div className="flex items-center gap-2 mb-2">
                 <div>Current Match: </div>
                 <Button 
-                    variant="outlined" 
+                    variant="contained" 
                     color="secondary" 
                     size="small" 
                     onClick={previousMatch} 
@@ -129,7 +129,7 @@ const SettingsPage = () => {
                     Previous
                 </Button>
                 <Button 
-                    variant="outlined" 
+                    variant="contained" 
                     color="primary" 
                     size="small" 
                     onClick={nextMatch} 

@@ -223,13 +223,13 @@ const EventLog = () => {
                         <span>
                             Event:&nbsp;
                             <span className="text-primary font-bold">
-                                {MatchEvent[context.match.getEventById(eventToEdit)?.event||0]}
+                                {MatchEvent[context.match.getEventById(eventToDelete)?.event||0]}
                             </span>
                         </span>
                         <span>
                             Time:&nbsp;
                             <span className="text-primary font-bold">
-                                {matchTimeAsString(context.match.getEventById(eventToEdit)?.time||0)}
+                                {matchTimeAsString(context.match.getEventById(eventToDelete)?.time||0)}
                             </span>
                         </span>
                     </div>

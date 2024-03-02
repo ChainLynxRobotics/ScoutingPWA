@@ -67,7 +67,12 @@ const PreMatch = () => {
                 <span className={`font-bold ${context.meta.allianceColor == AllianceColor.Red ? 'text-red-400' : 'text-blue-400'}`}>
                     {context.meta.teamNumber}
                 </span>
+                <span> in match </span>
+                <span>
+                    {context.meta.matchId}
+                </span>
             </h1>
+            <span className="mb-8 max-w-md text-center text-secondary">If this is the wrong match, use the Next and Previous buttons on the schedule part of the settings page.</span>
             <FormControl sx={{ m: 1, minWidth: 224 }}>
                 <InputLabel id="human-player-location-label">
                     {context.meta.teamNumber != 8248 ? `${context.meta.teamNumber}'s Human Player Location` : `Soren's Location`}
