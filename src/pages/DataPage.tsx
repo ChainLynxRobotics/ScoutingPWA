@@ -1,11 +1,12 @@
 import { Button, Card, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchData, MatchIdentifier } from "../types/MatchData";
 import QrCodeType from "../enums/QrCodeType";
 import QrCodeDataTransfer from "../components/QrCodeDataTransfer";
 import AllianceColor from "../enums/AllianceColor";
 import MatchDataIO from "../util/MatchDataIO";
+import useLocalStorageState from "../util/localStorageState";
 
 const DataPage = () => {
 
@@ -14,7 +15,7 @@ const DataPage = () => {
     const [matches, setMatches] = useState<MatchIdentifier[]|undefined>(undefined);
     const [toDelete, setToDelete] = useState<MatchIdentifier|undefined>(undefined);
     const [toDeleteData, setToDeleteData] = useState<MatchData|undefined>(undefined);
-    //const [unselectedMatches, setUnselectedMatches] = useLocalStorageState<MatchIdentifier[]>([], "unselectedMatches");
+    const [scannedMatches, setScannedMatches] = useLocalStorageState<string[]>([], "scannedMatches"); 
 
     const [qrOpen, setQrOpen] = useState(false);
     const [scannerOpen, setScannerOpen] = useState(false);
@@ -32,8 +33,8 @@ const DataPage = () => {
 
     async function openQrData() {
         try {
-            const events = await MatchDatabase.getAllEvents();
-            const matches = await MatchDatabase.getAllMatches();
+            const matches = (await MatchDatabase.getAllMatches()).filter((match) => scannedMatches.indexOf(match.matchId) == -1);
+            const events = (await MatchDatabase.getAllEvents()).filter((event) => scannedMatches.indexOf(event.matchId) == -1);
             const data = {
                 qrType: QrCodeType.MatchData,
                 matches: matches,
@@ -92,17 +93,42 @@ const DataPage = () => {
         updateMatches();
     }
 
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
+
 
     return (
     <div className="w-full h-full block justify-center relative">
-        <h1 className="text-xl text-center mb-4 pt-4 font-bold">Saved matches</h1>
+        <h1 className="text-xl text-center mb-4 pt-4 font-bold">Saved matches <Button onClick={() => {setScannedMatches(matches!!.map((match) => match.matchId))}}>Archive All</Button></h1>
         <div className="h-min block mb-16">
-            {matches?.map((game) => {
+            {matches?.filter((match) => !scannedMatches.includes(match.matchId)).map((game) => {
             return (
                 <div className="mx-5 my-2" key={game.matchId+"-"+game.teamNumber}>
                     <Card variant="outlined">
                         <div className="flex items-center justify-between p-2">
                             <span className="text-xl"><code>{game.matchId}</code> - Team <code>{game.teamNumber}</code></span>
+                            <IconButton onClick={()=>setScannedMatches([...scannedMatches, game.matchId])}>
+                                <span className="material-symbols-outlined">archive</span>
+                            </IconButton>
+                            <IconButton onClick={()=>setToDelete(game)}>
+                                <span className="material-symbols-outlined text-red-400">delete</span>
+                            </IconButton>
+                        </div>
+                    </Card>
+                </div>
+                )
+            })}
+        </div>
+        <h1 className="text-xl text-center mb-4 pt-4 font-bold">Archived (Scanned) matches <Button onClick={() => {setScannedMatches([])}}>Unarchive All</Button></h1>
+        <div className="h-min block mb-16">
+            {matches?.filter((match) => scannedMatches.includes(match.matchId)).map((game) => {
+            return (
+                <div className="mx-5 my-2" key={game.matchId+"-"+game.teamNumber}>
+                    <Card variant="outlined">
+                        <div className="flex items-center justify-between p-2">
+                            <span className="text-xl"><code>{game.matchId}</code> - Team <code>{game.teamNumber}</code></span>
+                            <IconButton onClick={()=>{let localScannedMatches = scannedMatches; localScannedMatches.splice(localScannedMatches.indexOf(game.matchId), 1); setScannedMatches(localScannedMatches); forceUpdate()}}>
+                                <span className="material-symbols-outlined">unarchive</span>
+                            </IconButton>
                             <IconButton onClick={()=>setToDelete(game)}>
                                 <span className="material-symbols-outlined text-red-400">delete</span>
                             </IconButton>
@@ -113,7 +139,7 @@ const DataPage = () => {
             })}
         </div>
 
-        <div className="fixed bottom-16 left-0 right-0 flex justify-center items-center">
+        <div className="fixed bottom-16 left-0 right-0 z-50 flex justify-center items-center">
             <div className="flex flex-wrap gap-2 justify-center items-center">
                 <Chip label="Share" onClick={openQrData} color="primary"
                     icon={<span className="material-symbols-outlined">qr_code_2</span>} />
@@ -172,7 +198,8 @@ const DataPage = () => {
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => {setQrOpen(false)}}>Close</Button>
+                <Button onClick={() => {setQrOpen(false); setScannedMatches([...scannedMatches, ...matches!!.map((match) => match.matchId)])}}><span style={{color: "green"}}>SCAN FINISHED</span></Button>
+                <Button onClick={() => {setQrOpen(false)}}><span style={{color: "red"}}>CANCEL</span></Button>
             </DialogActions>
         </Dialog>
 
