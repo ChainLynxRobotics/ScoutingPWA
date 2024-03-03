@@ -126,7 +126,7 @@ const DataPage = () => {
                     <Card variant="outlined">
                         <div className="flex items-center justify-between p-2">
                             <span className="text-xl"><code>{game.matchId}</code> - Team <code>{game.teamNumber}</code></span>
-                            <IconButton onClick={()=>{let localScannedMatches = scannedMatches; localScannedMatches.splice(localScannedMatches.indexOf(game.matchId), 1); setScannedMatches(localScannedMatches); forceUpdate()}}>
+                            <IconButton onClick={()=>{let localScannedMatches = scannedMatches; localScannedMatches.splice(localScannedMatches.indexOf(game.matchId), 1); setScannedMatches(localScannedMatches); updateMatches()}}>
                                 <span className="material-symbols-outlined">unarchive</span>
                             </IconButton>
                             <IconButton onClick={()=>setToDelete(game)}>
