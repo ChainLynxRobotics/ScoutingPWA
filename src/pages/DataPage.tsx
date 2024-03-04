@@ -1,5 +1,5 @@
 import { Button, Card, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchData, MatchIdentifier } from "../types/MatchData";
 import QrCodeType from "../enums/QrCodeType";
@@ -7,6 +7,7 @@ import QrCodeDataTransfer from "../components/QrCodeDataTransfer";
 import AllianceColor from "../enums/AllianceColor";
 import MatchDataIO from "../util/MatchDataIO";
 import useLocalStorageState from "../util/localStorageState";
+import matchCompare from "../util/matchCompare";
 
 const DataPage = () => {
 
@@ -24,7 +25,7 @@ const DataPage = () => {
 
     async function updateMatches() {
         const matches = await MatchDatabase.getAllMatchIdentifiers();
-        setMatches(matches);
+        setMatches(matches.sort((a, b) => matchCompare(a.matchId, b.matchId)));
     }
 
     useEffect(() => {
@@ -92,9 +93,6 @@ const DataPage = () => {
         await MatchDataIO.importDataFromZip(file);
         updateMatches();
     }
-
-    const [, forceUpdate] = useReducer(x => x + 1, 0);
-
 
     return (
     <div className="w-full h-full block justify-center relative">

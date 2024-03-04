@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import MatchDatabase from "../../util/MatchDatabase";
 import { Link } from "react-router-dom";
 import Divider from "../../components/Divider";
+import matchCompare from "../../util/matchCompare";
 
 const AnalyticsPage = () => {
 
@@ -14,7 +15,7 @@ const AnalyticsPage = () => {
 
     useEffect(() => {
         MatchDatabase.getUniqueTeams().then(setTeamList);
-        MatchDatabase.getUniqueMatches().then(setMatchList);
+        MatchDatabase.getUniqueMatches().then((matches)=>setMatchList(matches.sort(matchCompare)));
     }, []);
 
     return (
