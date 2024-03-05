@@ -187,7 +187,7 @@ const DataPage = () => {
             <DialogTitle id="alert-dialog-title">
                 Share Match Data
             </DialogTitle>
-            <DialogContent>
+            <DialogContent sx={{scrollSnapType: "y mandatory"}}>
                 <div className="w-full flex flex-col items-center">
                     <div className="w-full max-w-md">
                         <p className="text-center">Scan the following QR code(s) on another device to import match data</p>
