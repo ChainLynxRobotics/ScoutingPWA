@@ -37,6 +37,9 @@ const DataPage = () => {
         try {
             const matches = (await MatchDatabase.getAllMatches()).filter((match) => scannedMatches.indexOf(match.matchId) == -1);
             const events = (await MatchDatabase.getAllEvents()).filter((event) => scannedMatches.indexOf(event.matchId) == -1);
+            
+            if (matches.length === 0 && events.length === 0) return alert("No new data to share");
+            
             const data = {
                 qrType: QrCodeType.MatchData,
                 matches: matches,
