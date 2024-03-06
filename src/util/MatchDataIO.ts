@@ -79,7 +79,7 @@ async function importDataFromZip(file: File) {
     const events = JSON.parse(await rawEventData.async("string"));
     console.log(events);
 
-    MatchDatabase.importData(matchData, events);
+    await MatchDatabase.importData(matchData, events);
 }
 
 export default {
