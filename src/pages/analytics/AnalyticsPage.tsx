@@ -33,7 +33,7 @@ const AnalyticsPage = () => {
         </div>
         <div className="w-full max-w-md flex flex-col">
             <h2 className="text-lg font-bold">Teams</h2>
-            <div className="flex flex-col my-4 px-4">
+            <div className="flex flex-col gap-2 my-4 px-4">
                 {teamList.map((team) => (
                     <Link to={`/analytics/team/${team}`} key={team} style={{display: search && !team.toString().includes(search) ? 'none': ''}}>
                         <Card variant="outlined" className="flex justify-between items-center">
@@ -45,7 +45,7 @@ const AnalyticsPage = () => {
             </div>
             <Divider />
             <h2 className="text-lg font-bold">Matches</h2>
-            <div className="flex flex-col my-4 px-4">
+            <div className="flex flex-col gap-2 my-4 px-4">
                 {matchList.map((match) => (
                     <Link to={`/analytics/match/${match}`} key={match} style={{display: search && !match.includes(search) ? 'none': ''}}>
                         <Card variant="outlined" className="flex justify-between items-center">
