@@ -24,6 +24,10 @@ const ScoutPage = () => {
 
     const [warningDismissed, setWarningDismissed] = useState(false);
 
+    function startMatch() {
+        context?.match.startMatch();
+    }
+    
     function skipAuto() {
         context?.match.setIsAuto(false);
     }
@@ -43,7 +47,7 @@ const ScoutPage = () => {
                         </span>
                         <div className="flex-1 text-center whitespace-nowrap">
                             {!context.match.matchStart ?
-                                <Button variant="contained" size="small" color="success" onClick={() => context.match.startMatch()}>Start Match</Button>
+                                <Button variant="contained" size="small" color="success" onClick={startMatch}>Start Match</Button>
                                 :
                                 (context.match.matchActive ?
                                     <CountUp start={context.match.matchStart}></CountUp>
@@ -57,14 +61,14 @@ const ScoutPage = () => {
                                 (context.match.inAuto ?
                                     <span className="">Auto <button className="text-sm text-secondary" onClick={skipAuto}>&#40;skip&#41;</button></span>
                                     :
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 items-center justify-end">
                                         <span>Teleop</span>
                                         <Button variant="contained" size="small" color="error" onClick={endMatch}>end</Button>
                                     </div>
                                 )
                                 :
                                 (context.match.matchStart ?
-                                    <span className="text-sm text-secondary">Match Ended</span>
+                                    <span className="text-sm text-secondary">Match Ended <button className="text-sm text-secondary" onClick={startMatch}>&#40;undo&#41;</button></span>
                                     :
                                     <span className="text-sm text-secondary">Not Started</span>
                                 )

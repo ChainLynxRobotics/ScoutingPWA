@@ -96,9 +96,15 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
     }
 
     const startMatch = () => {
-        setMatchStart(Date.now());
-        addEvent(MatchEvent.matchStart, 0);
-        setMatchActive(true);
+        if (!matchStart) {
+            setMatchStart(Date.now());
+            addEvent(MatchEvent.matchStart, 0);
+            setMatchActive(true);
+        } else if (!matchActive) {
+            // Allows you to re-enable the match if it was ended
+            setEvents(events.filter(e=>e.event!=MatchEvent.matchEnd));
+            setMatchActive(true);
+        }
     }
 
     const endMatch = () => {
