@@ -99,7 +99,7 @@ const DataPage = () => {
     }
 
     return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full flex flex-col items-center text-center">
         <h1 className="text-xl mb-4 pt-4 font-bold">Saved matches <Button onClick={() => {setScannedMatches(matches!!.map((match) => match.matchId))}}>Archive All</Button></h1>
         <div className="w-full max-w-lg">
             {matches?.filter((match) => !scannedMatches.includes(match.matchId)).map((game) =>
