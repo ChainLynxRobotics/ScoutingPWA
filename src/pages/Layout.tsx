@@ -18,6 +18,16 @@ const Layout = () => {
         }
     }, []);
 
+    useEffect(() => {
+        const screen: any = window.screen;
+
+        screen.lockOrientationUniversal = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
+
+        if ('lock' in screen.orientation) (screen.orientation as any).lock('portrait-primary');
+        else if (screen.lockOrientationUniversal) screen.lockOrientationUniversal('portrait-primary');
+        else console.error("Orientation lock not supported");
+    }, []);
+
     return (
         <div className="w-full h-dvh relative flex flex-col overflow-hidden">
             <div className="w-full h-full overflow-y-auto">
