@@ -2,17 +2,40 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { MatchData, MatchEventData } from "../../types/MatchData";
 import MatchDatabase from "../../util/MatchDatabase";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Rating } from "@mui/material";
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Rating, Select, SelectChangeEvent } from "@mui/material";
 import ME from "../../enums/MatchEvent";
 import AccuracyStatistic from "../../components/analytics/AccuracyStatistic";
 import PerMatchStatistic from "../../components/analytics/PerMatchStatistic";
 import { PieChart } from "@mui/x-charts";
 import HumanPlayerLocation from "../../enums/HumanPlayerLocation";
-import Statistic from "../../components/analytics/Statistic";
+import Statistic, { StatisticProps } from "../../components/analytics/Statistic";
 import ClimbResult from "../../enums/ClimbResult";
 import { autoEvents, numOfEvents, perMatchStats, teleopEvents } from "../../util/analyticsUtil";
 import Divider from "../../components/Divider";
 import matchCompare from "../../util/matchCompare";
+import AnalyticsGraph, { AnalyticsGraphFunction } from "../../components/analytics/AnalyticsGraph";
+import useLocalStorageState from "../../util/localStorageState";
+
+// Plotting functions that can be selected, the function returns the number of times the event happened per match
+const graphOptions: { [key: string]: AnalyticsGraphFunction } = {
+    "Auto Pickup": (match, auto, teleop) => numOfEvents(auto, ME.acquireGround, ME.acquireStation),
+    "Auto Speaker": (match, auto, teleop) => numOfEvents(auto, ME.scoreMid, ME.scoreMidBoost),
+    "Auto Amp": (match, auto, teleop) => numOfEvents(auto, ME.scoreLow, ME.scoreLowBoost),
+    "Auto Leave Auto Zone": (match, auto, teleop) => match.humanPlayerLocation===HumanPlayerLocation.Amp ? 1 : 0,
+    "Teleop Pickup": (match, auto, teleop) => numOfEvents(teleop, ME.acquireGround, ME.acquireStation),
+    "Teleop Speaker": (match, auto, teleop) => numOfEvents(teleop, ME.scoreMid, ME.scoreMidBoost),
+    "Teleop Amp": (match, auto, teleop) => numOfEvents(teleop, ME.scoreLow, ME.scoreLowBoost),
+    "Teleop Trap": (match, auto, teleop) => numOfEvents(teleop, ME.scoreHigh, ME.scoreHighBoost),
+    "Teleop Coop": (match, auto, teleop) => match.humanPlayerLocation===HumanPlayerLocation.Amp ? 1 : 0,
+    "Climb": (match, auto, teleop) => match.climb===ClimbResult.Climb ? 1 : 0,
+    "Climb Park": (match, auto, teleop) => match.climb!==ClimbResult.None ? 1 : 0,
+    "Human Player Scored": (match, auto, teleop) => match.humanPlayerLocation===HumanPlayerLocation.Amp ? match.humanPlayerPerformance : null,
+    "Defense": (match, auto, teleop) => match.defense,
+}
+
+const graphColors = [
+    "#FFC107", "#FF5722", "#E91E63", "#9C27B0", "#3F51B5", "#03A9F4", "#009688", "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B", "#FF5722", "#795548", "#9E9E9E", "#607D8B"
+]
 
 const AnalyticsPage = () => {
 
@@ -26,6 +49,10 @@ const AnalyticsPage = () => {
     const teleop = useMemo(()=>teleopEvents(matches, events), [matches, events]);
 
     const [notesOpen, setNotesOpen] = useState(false);
+
+
+    const [graphsEnabled, setGraphsEnabled] = useLocalStorageState<string[]>([], "analyticsGraphsEnabled");
+
 
     useEffect(() => {
         if (hasLoaded) return;
@@ -43,9 +70,6 @@ const AnalyticsPage = () => {
         loadMatches();
     }, [team]);
 
-    if (!hasLoaded) return (<div className="w-full h-full flex items-center justify-center">Loading...</div>);
-
-
     function humanPlayerPerformancePerMatch(): {avg: number, min: number, max: number} {
         var sum = 0, min = 0, max = 0, total = 0;
         matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Amp).forEach(match=> {
@@ -59,7 +83,29 @@ const AnalyticsPage = () => {
         return {avg: sum/matches.length, min, max};
     }
 
+    // Generates graph props for a statistic component
+    function graphOptionOf(name: string): StatisticProps["plot"] {
+        return {
+            name,
+            color: graphColors[Object.keys(graphOptions).indexOf(name)],
+            enabled: graphsEnabled.includes(name),
+            setEnabled: (enabled: boolean) => {
+                if (enabled && !graphsEnabled.includes(name)) setGraphsEnabled([...graphsEnabled, name]);
+                else if (!enabled && graphsEnabled.includes(name)) setGraphsEnabled(graphsEnabled.filter(n=>n!==name));
+            }
+        }
+    }
+
+    function handleChangeGraphsEnabled(event: SelectChangeEvent<string[]>): void {
+        const value = event.target.value;
+        setGraphsEnabled(
+            // On autofill we get a stringified value.
+            typeof value === 'string' ? value.split(',') : value,
+        );
+    }
+
     if (!hasLoaded) return (<div className="w-full h-full flex items-center justify-center">Loading...</div>);
+
     return (
         <>
             <h1 className="text-xl text-center mb-4">Analytics for <b>Team {team}</b></h1>
@@ -200,6 +246,42 @@ const AnalyticsPage = () => {
                     <div className="h-4"></div>
                     <Button onClick={()=>setNotesOpen(true)} variant="contained" color="secondary">View Notes</Button>
                 </div>
+
+                <Divider />
+
+                <AnalyticsGraph 
+                    matches={matches} 
+                    autoEvents={auto} 
+                    teleopEvents={teleop} 
+                    functions={Object.keys(graphOptions)
+                        .filter(name=>graphsEnabled.includes(name))
+                        .reduce((acc, key)=>({...acc, [key]: graphOptions[key]}), {})
+                    }
+                    colors={Object.keys(graphOptions)
+                        .filter(name=>graphsEnabled.includes(name))
+                        .reduce((acc, key, i)=>({...acc, [key]: graphColors[i]}), {})
+                    }
+                />
+
+                <FormControl sx={{ m: 1, width: 300 }}>
+                    <InputLabel id="graph-multiple-checkbox-label">Show Graphs</InputLabel>
+                    <Select
+                        labelId="graph-multiple-checkbox-label"
+                        id="graph-multiple-checkbox"
+                        multiple
+                        value={graphsEnabled}
+                        onChange={handleChangeGraphsEnabled}
+                        input={<OutlinedInput label="Show Graphs" />}
+                        renderValue={(selected) => selected.join(', ')}
+                    >
+                    {Object.keys(graphOptions).map((name) => (
+                        <MenuItem key={name} value={name}>
+                            <Checkbox checked={graphsEnabled.indexOf(name) > -1} />
+                            <ListItemText primary={name} />
+                        </MenuItem>
+                    ))}
+                    </Select>
+                </FormControl>
             </div>
             <Dialog 
                 open={notesOpen} 
