@@ -12,6 +12,7 @@ import Statistic from "../../components/analytics/Statistic";
 import ClimbResult from "../../enums/ClimbResult";
 import { autoEvents, numOfEvents, perMatchStats, teleopEvents } from "../../util/analyticsUtil";
 import Divider from "../../components/Divider";
+import matchCompare from "../../util/matchCompare";
 
 const AnalyticsPage = () => {
 
@@ -32,8 +33,9 @@ const AnalyticsPage = () => {
         async function loadMatches() {
             if (!team) return;
             const matches = await MatchDatabase.getMatchesByTeam(parseInt(team));
-            matches.sort((a, b) => a.matchId.localeCompare(b.matchId));
+            matches.sort((a, b) => matchCompare(a.matchId, b.matchId));
             const events = await MatchDatabase.getEventsByTeam(parseInt(team));
+            events.sort((a, b) => a.time - b.time);
             setMatches(matches);
             setEvents(events);
             setHasLoaded(true);
