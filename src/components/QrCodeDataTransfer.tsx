@@ -86,7 +86,7 @@ export default function QrCodeDataTransfer(onReceiveData: (data: any) => void) {
         return (
             <div className="flex flex-col w-full items-center">
                 {outQrData.map((qr, index) => {
-                    return <div className="mt-4 w-full" key={index}>
+                    return <div className="mt-4 w-full snap-center" key={index}>
                         <p className="mb-2 text-lg text-center">Chunk {index+1}/{outQrData.length}</p>
                         <QRCode 
                             value={qr} 

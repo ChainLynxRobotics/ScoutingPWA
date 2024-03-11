@@ -1,4 +1,4 @@
-import { Button, Card, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
+import { Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchData, MatchIdentifier } from "../types/MatchData";
@@ -8,6 +8,7 @@ import AllianceColor from "../enums/AllianceColor";
 import MatchDataIO from "../util/MatchDataIO";
 import useLocalStorageState from "../util/localStorageState";
 import matchCompare from "../util/matchCompare";
+import Divider from "../components/Divider";
 
 const DataPage = () => {
 
@@ -36,6 +37,9 @@ const DataPage = () => {
         try {
             const matches = (await MatchDatabase.getAllMatches()).filter((match) => scannedMatches.indexOf(match.matchId) == -1);
             const events = (await MatchDatabase.getAllEvents()).filter((event) => scannedMatches.indexOf(event.matchId) == -1);
+            
+            if (matches.length === 0 && events.length === 0) return alert("No new data to share");
+            
             const data = {
                 qrType: QrCodeType.MatchData,
                 matches: matches,
@@ -95,58 +99,95 @@ const DataPage = () => {
     }
 
     return (
-    <div className="w-full h-full block justify-center relative">
-        <h1 className="text-xl text-center mb-4 pt-4 font-bold">Saved matches <Button onClick={() => {setScannedMatches(matches!!.map((match) => match.matchId))}}>Archive All</Button></h1>
-        <div className="h-min block mb-16">
-            {matches?.filter((match) => !scannedMatches.includes(match.matchId)).map((game) => {
-            return (
+    <div className="w-full flex flex-col items-center text-center">
+        <h1 className="text-xl mb-4 pt-4 font-bold">Saved matches <Button onClick={() => {setScannedMatches(matches!!.map((match) => match.matchId))}}>Archive All</Button></h1>
+        <div className="w-full max-w-lg">
+            {matches?.filter((match) => !scannedMatches.includes(match.matchId)).map((game) =>
                 <div className="mx-5 my-2" key={game.matchId+"-"+game.teamNumber}>
                     <Card variant="outlined">
                         <div className="flex items-center justify-between p-2">
-                            <span className="text-xl"><code>{game.matchId}</code> - Team <code>{game.teamNumber}</code></span>
-                            <IconButton onClick={()=>setScannedMatches([...scannedMatches, game.matchId])}>
-                                <span className="material-symbols-outlined">archive</span>
-                            </IconButton>
-                            <IconButton onClick={()=>setToDelete(game)}>
-                                <span className="material-symbols-outlined text-red-400">delete</span>
-                            </IconButton>
+                            <span className=""><code>{game.matchId}</code> - Team <code>{game.teamNumber}</code></span>
+                            <div>
+                                <IconButton onClick={()=>setScannedMatches([...scannedMatches, game.matchId])}>
+                                    <span className="material-symbols-outlined">archive</span>
+                                </IconButton>
+                                <IconButton onClick={()=>setToDelete(game)}>
+                                    <span className="material-symbols-outlined text-red-400">delete</span>
+                                </IconButton>
+                            </div>
                         </div>
                     </Card>
                 </div>
-                )
-            })}
+            )}
+            {matches?.filter((match) => !scannedMatches.includes(match.matchId)).length === 0 && 
+                <div className="text-center text-secondary">No matches saved</div>
+            }
         </div>
-        <h1 className="text-xl text-center mb-4 pt-4 font-bold">Archived (Scanned) matches <Button onClick={() => {setScannedMatches([])}}>Unarchive All</Button></h1>
-        <div className="h-min block mb-16">
-            {matches?.filter((match) => scannedMatches.includes(match.matchId)).map((game) => {
-            return (
+        
+        <Divider />
+
+        <h1 className="text-xl mb-4 pt-4 font-bold">Archived (Scanned) matches <Button onClick={() => {setScannedMatches([])}}>Unarchive All</Button></h1>
+        <div className="w-full max-w-lg mb-32">
+            {matches?.filter((match) => scannedMatches.includes(match.matchId)).map((game) =>
                 <div className="mx-5 my-2" key={game.matchId+"-"+game.teamNumber}>
                     <Card variant="outlined">
                         <div className="flex items-center justify-between p-2">
-                            <span className="text-xl"><code>{game.matchId}</code> - Team <code>{game.teamNumber}</code></span>
-                            <IconButton onClick={()=>{let localScannedMatches = scannedMatches; localScannedMatches.splice(localScannedMatches.indexOf(game.matchId), 1); setScannedMatches(localScannedMatches); updateMatches()}}>
-                                <span className="material-symbols-outlined">unarchive</span>
-                            </IconButton>
-                            <IconButton onClick={()=>setToDelete(game)}>
-                                <span className="material-symbols-outlined text-red-400">delete</span>
-                            </IconButton>
+                            <span className=""><code>{game.matchId}</code> - Team <code>{game.teamNumber}</code></span>
+                            <div>
+                                <IconButton onClick={()=>{let localScannedMatches = scannedMatches; localScannedMatches.splice(localScannedMatches.indexOf(game.matchId), 1); setScannedMatches(localScannedMatches); updateMatches()}}>
+                                    <span className="material-symbols-outlined">unarchive</span>
+                                </IconButton>
+                                <IconButton onClick={()=>setToDelete(game)}>
+                                    <span className="material-symbols-outlined text-red-400">delete</span>
+                                </IconButton>
+                            </div>
                         </div>
                     </Card>
                 </div>
-                )
-            })}
+            )}
+            {matches?.filter((match) => scannedMatches.includes(match.matchId)).length === 0 && 
+                <div className="text-center text-secondary">No matches archived</div>
+            }
         </div>
 
         <div className="fixed bottom-16 left-0 right-0 z-50 flex justify-center items-center">
             <div className="flex flex-wrap gap-2 justify-center items-center">
-                <Chip label="Share" onClick={openQrData} color="primary"
-                    icon={<span className="material-symbols-outlined">qr_code_2</span>} />
-                <Chip label="Collect" onClick={() => setScannerOpen(true)} 
-                    icon={<span className="material-symbols-outlined">photo_camera</span>} />
-                <Chip label="Export" onClick={exportData} 
-                    icon={<span className="material-symbols-outlined">download</span>}/>
-                <Chip label="Import" onClick={()=>fileUpload.current?.click()} 
-                    icon={<span className="material-symbols-outlined">upload</span>}/>
+                <Button 
+                    color="primary"
+                    variant="contained"
+                    size="small"
+                    onClick={openQrData} 
+                    startIcon={<span className="material-symbols-outlined">qr_code_2</span>}
+                >
+                    Share
+                </Button>
+                <Button 
+                    variant="contained"
+                    color="secondary"
+                    size="small"
+                    onClick={() => setScannerOpen(true)}
+                    startIcon={<span className="material-symbols-outlined">photo_camera</span>}
+                >
+                    Collect
+                </Button>
+                <Button 
+                    variant="contained"
+                    color="secondary"
+                    size="small"
+                    onClick={exportData} 
+                    startIcon={<span className="material-symbols-outlined">download</span>}
+                >
+                    Export
+                </Button>
+                <Button 
+                    variant="contained"
+                    color="secondary"
+                    size="small"
+                    onClick={()=>fileUpload.current?.click()} 
+                    startIcon={<span className="material-symbols-outlined">upload</span>}
+                >
+                    Import
+                </Button>
                 <input type="file" ref={fileUpload} id="data-import" accept=".zip" style={{display: "none"}} onChange={importData} />
                 
                 <IconButton onClick={()=>setInfoOpen(true)}>
@@ -168,7 +209,8 @@ const DataPage = () => {
                     <li>One device is designated as the 'host' device.</li>
                     <li>If you ARE NOT the host device, click on Share to generate qr codes containing match data for the host to scan.</li>
                     <li>If you ARE the host, click the Collect button and scan other qr codes.</li>
-                    <li>Exporting and importing data allows you to backup and restore match data for in between competition days, or for an alternate way of transferring data to others.</li>
+                    <li>Sharing a qr code only includes the new (top list) of matches, to share data from all of the matches, click the "unarchive all" button.</li>
+                    <li>Exporting and importing data as a .zip allows you to backup and restore match data for in between competition days, or for an alternate way of transferring data to others.</li>
                 </ul>
             </DialogContent>
             <DialogActions>
@@ -187,7 +229,7 @@ const DataPage = () => {
             <DialogTitle id="alert-dialog-title">
                 Share Match Data
             </DialogTitle>
-            <DialogContent>
+            <DialogContent sx={{scrollSnapType: "y mandatory"}}>
                 <div className="w-full flex flex-col items-center">
                     <div className="w-full max-w-md">
                         <p className="text-center">Scan the following QR code(s) on another device to import match data</p>
