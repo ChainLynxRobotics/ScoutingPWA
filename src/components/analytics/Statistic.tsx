@@ -24,14 +24,14 @@ export default function Statistic(props: StatisticProps & {children: React.React
 
             {props.plot && (
                 props.plot.enabled ?
-                    <a href="#" onClick={()=>props.plot?.setEnabled(false)} className="material-symbols-outlined" style={{color: props.plot.color}}>query_stats</a>
+                    <button onClick={()=>props.plot?.setEnabled(false)} className="material-symbols-outlined" style={{color: props.plot.color}}>query_stats</button>
                     :
-                    <a href="#" onClick={()=>props.plot?.setEnabled(true)} className="material-symbols-outlined text-secondary">query_stats</a>
+                    <button onClick={()=>props.plot?.setEnabled(true)} className="material-symbols-outlined text-secondary">query_stats</button>
             )}
             
             {props.desc && 
                 <>
-                    <a href="#" onClick={()=>setInfoOpen(true)} className="material-symbols-outlined text-secondary text-right">info</a>
+                    <button onClick={()=>setInfoOpen(true)} className="material-symbols-outlined text-secondary text-right">info</button>
                     <Dialog 
                         open={infoOpen} 
                         onClose={()=>setInfoOpen(false)}
