@@ -11,7 +11,6 @@ import HumanPlayerLocation from "../../enums/HumanPlayerLocation";
 import Statistic, { StatisticProps } from "../../components/analytics/Statistic";
 import ClimbResult from "../../enums/ClimbResult";
 import { autoEvents, numOfEvents, perMatchStats, teleopEvents } from "../../util/analyticsUtil";
-import Divider from "../../components/Divider";
 import matchCompare from "../../util/matchCompare";
 import AnalyticsGraph, { AnalyticsGraphFunction } from "../../components/analytics/AnalyticsGraph";
 import useLocalStorageState from "../../util/localStorageState";
@@ -84,7 +83,7 @@ const AnalyticsPage = () => {
     }
 
     // Generates graph props for a statistic component
-    function graphOptionOf(name: string): StatisticProps["plot"] {
+    function graphPropsOf(name: string): StatisticProps["plot"] {
         return {
             name,
             color: graphColors[Object.keys(graphOptions).indexOf(name)],
