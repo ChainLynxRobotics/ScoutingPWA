@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { MatchData, MatchEventData } from "../../types/MatchData";
 import MatchDatabase from "../../util/MatchDatabase";
-import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Rating, Select, SelectChangeEvent } from "@mui/material";
+import { Button, Card, CardContent, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Rating, Select, SelectChangeEvent } from "@mui/material";
 import ME from "../../enums/MatchEvent";
 import AccuracyStatistic from "../../components/analytics/AccuracyStatistic";
 import PerMatchStatistic from "../../components/analytics/PerMatchStatistic";
@@ -26,9 +26,9 @@ const graphOptions: { [key: string]: AnalyticsGraphFunction } = {
     "Teleop Speaker": (match, auto, teleop) => numOfEvents(teleop, ME.scoreMid, ME.scoreMidBoost),
     "Teleop Amp": (match, auto, teleop) => numOfEvents(teleop, ME.scoreLow, ME.scoreLowBoost),
     "Teleop Trap": (match, auto, teleop) => numOfEvents(teleop, ME.scoreHigh, ME.scoreHighBoost),
-    "Teleop Coop": (match, auto, teleop) => match.humanPlayerLocation===HumanPlayerLocation.Amp ? 1 : 0,
+    "Cooperate": (match, auto, teleop) => match.humanPlayerLocation===HumanPlayerLocation.Amp ? 1 : 0,
     "Climb": (match, auto, teleop) => match.climb===ClimbResult.Climb ? 1 : 0,
-    "Climb Park": (match, auto, teleop) => match.climb!==ClimbResult.None ? 1 : 0,
+    "Park": (match, auto, teleop) => match.climb!==ClimbResult.None ? 1 : 0,
     "Human Player Scored": (match, auto, teleop) => match.humanPlayerLocation===HumanPlayerLocation.Amp ? match.humanPlayerPerformance : null,
     "Defense": (match, auto, teleop) => match.defense,
 }
@@ -109,180 +109,193 @@ const AnalyticsPage = () => {
     return (
         <>
             <h1 className="text-xl text-center mb-4">Analytics for <b>Team {team}</b></h1>
-            <div className="w-full max-w-md px-2 flex flex-col items-start">
+            <Statistic name="Matches Scouted">
+                {matches.length}
+            </Statistic>
+            <div className="text-secondary text-sm">"P.M." = "Per Match"</div>
+
+            <div className="w-full mt-4 px-2 pb-12 flex flex-wrap gap-8 justify-center">
                 
-                <Statistic name="Matches Scouted">
-                    {matches.length}
-                </Statistic>
+                <Card className="w-full max-w-md">
+                    <CardContent>
+                        <h2 className="text-xl font-bold">Pre Match:</h2>
+                        <div className="pl-4 mt-4">
+                            <div>Human Player Location:</div>
+                            <PieChart
+                                series={[{ data: [
+                                    { id: 1, value: matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.None).length, label: "Not on Field" },
+                                    { id: 2, value: matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Source).length, label: "Source" },
+                                    { id: 3, value: matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Amp).length, label: "Amp" },
+                                ]}]}
+                                width={300}
+                                height={100}
+                            />
+                            <AccuracyStatistic name="Note Preloaded" 
+                                value={matches.filter(m=>m.preload).length} 
+                                total={matches.length} 
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
                 
-                <Divider />
-                
-                <h2 className="mt-4 text-xl font-bold">Pre Match:</h2>
-                <div className="flex flex-col items-center my-2">
-                    <div>Human Player Location</div>
-                    <PieChart
-                        series={[{ data: [
-                            { id: 1, value: matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.None).length, label: "Not on Field" },
-                            { id: 2, value: matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Source).length, label: "Source" },
-                            { id: 3, value: matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Amp).length, label: "Amp" },
-                        ]}]}
-                        width={300}
-                        height={100}
-                    />
-                </div>
-                <div className="pl-4">
-                    <AccuracyStatistic name="Note Preloaded" 
-                        value={matches.filter(m=>m.preload).length} 
-                        total={matches.length} 
-                    />
-                </div>
-                
-                <Divider />
+                <Card className="w-full max-w-md">
+                    <CardContent>
+                        <h2 className="text-xl font-bold">During Match (Auto):</h2>
+                        <div className="pl-4 mt-4">
+                            <AccuracyStatistic name="Pickup Accuracy" 
+                                value={numOfEvents(auto, ME.acquireGround, ME.acquireStation)} 
+                                total={numOfEvents(auto, ME.acquireGround, ME.acquireStation, ME.acquireFail)} 
+                            />
+                            <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
+                                {...perMatchStats(matches, auto, ME.acquireGround, ME.acquireStation, ME.acquireFail)}
+                            />
 
-                <h2 className="mt-4 text-xl font-bold">During Match (Auto):</h2>
-                <div className="pl-4 my-4">
-                    <AccuracyStatistic name="Pickup Accuracy" 
-                        value={numOfEvents(auto, ME.acquireGround, ME.acquireStation)} 
-                        total={numOfEvents(auto, ME.acquireGround, ME.acquireStation, ME.acquireFail)} 
-                    />
-                    <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
-                        {...perMatchStats(matches, auto, ME.acquireGround, ME.acquireStation, ME.acquireFail)}
-                    />
+                            <div className="h-4"></div>
 
-                    <div className="h-4"></div>
+                            <AccuracyStatistic name="Speaker Accuracy" 
+                                value={numOfEvents(auto, ME.scoreMid, ME.scoreMidBoost)} 
+                                total={numOfEvents(auto, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
+                            />
+                            <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
+                                {...perMatchStats(matches, auto, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
+                            />
 
-                    <AccuracyStatistic name="Speaker Accuracy" 
-                        value={numOfEvents(auto, ME.scoreMid, ME.scoreMidBoost)} 
-                        total={numOfEvents(auto, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
-                    />
-                    <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
-                        {...perMatchStats(matches, auto, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
-                    />
+                            <AccuracyStatistic name="Amp Accuracy" 
+                                value={numOfEvents(auto, ME.scoreLow, ME.scoreLowBoost)} 
+                                total={numOfEvents(auto, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
+                            />
+                            <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
+                                {...perMatchStats(matches, auto, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
+                            />
 
-                    <AccuracyStatistic name="Amp Accuracy" 
-                        value={numOfEvents(auto, ME.scoreLow, ME.scoreLowBoost)} 
-                        total={numOfEvents(auto, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
-                    />
-                    <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
-                        {...perMatchStats(matches, auto, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
-                    />
+                            <div className="h-4"></div>
 
-                    <div className="h-4"></div>
+                            <AccuracyStatistic name="Leave Autonomous Zone" 
+                                value={matches.filter(m=>events.find(e=>e.matchId===m.matchId && e.event===ME.specialAuto)).length} 
+                                total={matches.length}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <AccuracyStatistic name="Leave Autonomous Zone" 
-                        value={matches.filter(m=>events.find(e=>e.matchId===m.matchId && e.event===ME.specialAuto)).length} 
-                        total={matches.length}
-                    />
-                </div>
+                <Card className="w-full max-w-md">
+                    <CardContent>
+                        <h2 className="text-xl font-bold">During Match (Teleop):</h2>
+                        <div className="pl-4 mt-4">
+                            <AccuracyStatistic name="Pickup Accuracy" 
+                                value={numOfEvents(teleop, ME.acquireGround, ME.acquireStation)} 
+                                total={numOfEvents(teleop, ME.acquireGround, ME.acquireStation, ME.acquireFail)} 
+                            />
+                            <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
+                                {...perMatchStats(matches, teleop, ME.acquireGround, ME.acquireStation, ME.acquireFail)}
+                            />
 
-                <Divider />
+                            <div className="h-4"></div>
 
-                <h2 className="mt-4 text-xl font-bold">During Match (Teleop):</h2>
-                <div className="pl-4 my-4">
-                    <AccuracyStatistic name="Pickup Accuracy" 
-                        value={numOfEvents(teleop, ME.acquireGround, ME.acquireStation)} 
-                        total={numOfEvents(teleop, ME.acquireGround, ME.acquireStation, ME.acquireFail)} 
-                    />
-                    <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
-                        {...perMatchStats(matches, teleop, ME.acquireGround, ME.acquireStation, ME.acquireFail)}
-                    />
+                            <AccuracyStatistic name="Speaker Accuracy" 
+                                value={numOfEvents(teleop, ME.scoreMid, ME.scoreMidBoost)} 
+                                total={numOfEvents(teleop, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
+                            />
+                            <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
+                                {...perMatchStats(matches, teleop, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
+                            />
 
-                    <div className="h-4"></div>
+                            <AccuracyStatistic name="Amp Accuracy" 
+                                value={numOfEvents(teleop, ME.scoreLow, ME.scoreLowBoost)} 
+                                total={numOfEvents(teleop, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
+                            />
+                            <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
+                                {...perMatchStats(matches, teleop, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
+                            />
 
-                    <AccuracyStatistic name="Speaker Accuracy" 
-                        value={numOfEvents(teleop, ME.scoreMid, ME.scoreMidBoost)} 
-                        total={numOfEvents(teleop, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
-                    />
-                    <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
-                        {...perMatchStats(matches, teleop, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
-                    />
+                            <AccuracyStatistic name="Trap Accuracy" 
+                                value={numOfEvents(teleop, ME.scoreHigh, ME.scoreHighBoost)} 
+                                total={numOfEvents(teleop, ME.scoreHigh, ME.scoreHighBoost, ME.scoreHighFail)}
+                            />
+                            <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
+                                {...perMatchStats(matches, teleop, ME.scoreHigh, ME.scoreHighBoost, ME.scoreHighFail)}
+                            />
 
-                    <AccuracyStatistic name="Amp Accuracy" 
-                        value={numOfEvents(teleop, ME.scoreLow, ME.scoreLowBoost)} 
-                        total={numOfEvents(teleop, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
-                    />
-                    <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
-                        {...perMatchStats(matches, teleop, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
-                    />
+                            <div className="h-4"></div>
 
-                    <AccuracyStatistic name="Trap Accuracy" 
-                        value={numOfEvents(teleop, ME.scoreHigh, ME.scoreHighBoost)} 
-                        total={numOfEvents(teleop, ME.scoreHigh, ME.scoreHighBoost, ME.scoreHighFail)}
-                    />
-                    <PerMatchStatistic name="└ Attempts Per Match" pl="24px" 
-                        {...perMatchStats(matches, teleop, ME.scoreHigh, ME.scoreHighBoost, ME.scoreHighFail)}
-                    />
+                            <AccuracyStatistic name="Attempts to Cooperate" 
+                                value={matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Amp)
+                                        .filter(m=>events.find(e=>e.matchId===m.matchId && e.event===ME.specialCoop)).length} 
+                                total={matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Amp).length}
+                                desc="Only counts for the times this team's human player is at the Amp"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <div className="h-4"></div>
+                <Card className="w-full max-w-md">
+                    <CardContent>
+                        <h2 className="text-xl font-bold">Post Match:</h2>
+                        <div className="pl-4 mt-4">
+                            <AccuracyStatistic name="Climbs" 
+                                value={matches.filter(m=>m.climb===ClimbResult.Climb).length} 
+                                total={matches.length} 
+                            />
+                            <AccuracyStatistic name="└ Parks" pl="24px"
+                                value={matches.filter(m=>m.climb!==ClimbResult.None).length} 
+                                total={matches.length} 
+                            />
+                            <PerMatchStatistic name="Human Player Scored" 
+                                desc="The notes scored by the human player at the end of the game. Only counts for the times this team's human player is at the Amp."
+                                {...humanPlayerPerformancePerMatch()}
+                            />
+                            <Statistic name="Avg Defense Rating">
+                                <Rating value={matches.reduce((acc, m)=>acc+m.defense, 0) / matches.length} precision={0.1} readOnly />
+                                <span className="text-secondary italic">({Math.round(matches.reduce((acc, m)=>acc+m.defense, 0) / matches.length * 100) / 100})</span>
+                            </Statistic>
+                            <div className="h-4"></div>
+                            <Button onClick={()=>setNotesOpen(true)} variant="contained" color="secondary">View Notes</Button>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <AccuracyStatistic name="Attempts to Cooperate" 
-                        value={matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Amp)
-                                .filter(m=>events.find(e=>e.matchId===m.matchId && e.event===ME.specialCoop)).length} 
-                        total={matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Amp).length}
-                        desc="Only counts for the times this team's human player is at the Amp"
-                    />
-                </div>
+                <Card className="w-full max-w-md">
+                    <CardContent>
+                        <h2 className="text-xl font-bold">Per match analysis:</h2>
+                        <div className="w-full flex flex-col gap-6 mt-4">
+                            <AnalyticsGraph 
+                                matches={matches} 
+                                autoEvents={auto} 
+                                teleopEvents={teleop} 
+                                functions={Object.keys(graphOptions)
+                                    .filter(name=>graphsEnabled.includes(name))
+                                    .reduce((acc, key)=>({...acc, [key]: graphOptions[key]}), {})
+                                }
+                                colors={Object.keys(graphOptions)
+                                    .filter(name=>graphsEnabled.includes(name))
+                                    .reduce((acc, key, i)=>({...acc, [key]: graphColors[i]}), {})
+                                }
+                            />
+                            <FormControl fullWidth>
+                                <InputLabel id="graph-multiple-checkbox-label">Show Graphs</InputLabel>
+                                <Select
+                                    labelId="graph-multiple-checkbox-label"
+                                    id="graph-multiple-checkbox"
+                                    multiple
+                                    value={graphsEnabled}
+                                    onChange={handleChangeGraphsEnabled}
+                                    input={<OutlinedInput label="Show Graphs" />}
+                                    renderValue={(selected) => selected.join(', ')}
+                                >
+                                {Object.keys(graphOptions).map((name) => (
+                                    <MenuItem key={name} value={name}>
+                                        <Checkbox checked={graphsEnabled.indexOf(name) > -1} />
+                                        <ListItemText primary={name} />
+                                    </MenuItem>
+                                ))}
+                                </Select>
+                            </FormControl>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                <Divider />
-
-                <h2 className="mt-4 text-xl font-bold">Post Match:</h2>
-                <div className="pl-4 my-4">
-                    <AccuracyStatistic name="Climbs" 
-                        value={matches.filter(m=>m.climb===ClimbResult.Climb).length} 
-                        total={matches.length} 
-                    />
-                    <AccuracyStatistic name="└ Parks" pl="24px"
-                        value={matches.filter(m=>m.climb!==ClimbResult.None).length} 
-                        total={matches.length} 
-                    />
-                    <PerMatchStatistic name="Human Player Scored" 
-                        desc="The notes scored by the human player at the end of the game. Only counts for the times this team's human player is at the Amp."
-                        {...humanPlayerPerformancePerMatch()}
-                    />
-                    <Statistic name="Average Defense Rating">
-                        <Rating value={matches.reduce((acc, m)=>acc+m.defense, 0) / matches.length} precision={0.1} readOnly />
-                        <span className="text-secondary italic">({Math.round(matches.reduce((acc, m)=>acc+m.defense, 0) / matches.length * 100) / 100})</span>
-                    </Statistic>
-                    <div className="h-4"></div>
-                    <Button onClick={()=>setNotesOpen(true)} variant="contained" color="secondary">View Notes</Button>
-                </div>
-
-                <Divider />
-
-                <AnalyticsGraph 
-                    matches={matches} 
-                    autoEvents={auto} 
-                    teleopEvents={teleop} 
-                    functions={Object.keys(graphOptions)
-                        .filter(name=>graphsEnabled.includes(name))
-                        .reduce((acc, key)=>({...acc, [key]: graphOptions[key]}), {})
-                    }
-                    colors={Object.keys(graphOptions)
-                        .filter(name=>graphsEnabled.includes(name))
-                        .reduce((acc, key, i)=>({...acc, [key]: graphColors[i]}), {})
-                    }
-                />
-
-                <FormControl sx={{ m: 1, width: 300 }}>
-                    <InputLabel id="graph-multiple-checkbox-label">Show Graphs</InputLabel>
-                    <Select
-                        labelId="graph-multiple-checkbox-label"
-                        id="graph-multiple-checkbox"
-                        multiple
-                        value={graphsEnabled}
-                        onChange={handleChangeGraphsEnabled}
-                        input={<OutlinedInput label="Show Graphs" />}
-                        renderValue={(selected) => selected.join(', ')}
-                    >
-                    {Object.keys(graphOptions).map((name) => (
-                        <MenuItem key={name} value={name}>
-                            <Checkbox checked={graphsEnabled.indexOf(name) > -1} />
-                            <ListItemText primary={name} />
-                        </MenuItem>
-                    ))}
-                    </Select>
-                </FormControl>
             </div>
+
             <Dialog 
                 open={notesOpen} 
                 onClose={()=>setNotesOpen(false)}
@@ -291,7 +304,7 @@ const AnalyticsPage = () => {
             >
                 <DialogTitle id="info-dialog-title">Notes given to team {team}</DialogTitle>
                 <DialogContent>
-                    <div>
+                    <div className="w-full max-w-lg flex flex-col gap-8">
                         {matches.filter(m=>m.notes.trim()).map(match=>
                             <div key={match.matchId}>
                                 <div>Notes during <b>{match.matchId}</b>:</div>

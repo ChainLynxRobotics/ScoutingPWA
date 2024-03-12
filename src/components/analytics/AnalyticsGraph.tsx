@@ -54,22 +54,20 @@ export default function AnalyticsGraph(props: AnalyticsGraphProps) {
                 data: props.matches.map((match) => func[1](match, autoEventsByMatch[match.matchId], teleopEventsByMatch[match.matchId]))
             }
         });
-        console.log(series);
         return series;
     }, [props]);
 
+    const labelHeight = Math.floor(Object.keys(props.functions).length / 3) * 32 + 64;
 
     return (
         <LineChart
             xAxis={[{ 
-                data: props.matches.map((_match, i)=>i), 
-                tickNumber: props.matches.length,
-                valueFormatter: (value: number) => 
-                    props.matches[value]?.matchId.match(/[^_]+$/)?.join('') || '' 
+                data: props.matches.map((match)=>match.matchId.match(/[^_]+$/)?.join('') || ''), 
+                scaleType: "point",
             }]}
             series={series}
-            height={300}
-            margin={{ top: 10, bottom: 20 }}
+            height={300 + labelHeight}
+            margin={{ top: labelHeight }}
         />
     )
 }

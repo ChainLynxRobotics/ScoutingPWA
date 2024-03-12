@@ -19,7 +19,7 @@ export default function Statistic(props: StatisticProps & {children: React.React
     
     return (
         <div className="flex items-center gap-2" style={props.pl ? {paddingLeft: props.pl} : undefined}>
-            <span className="">{props.name}: </span>
+            <span className="-indent-2 pl-2">{props.name}: </span>
             {props.children}
 
             {props.plot && (
