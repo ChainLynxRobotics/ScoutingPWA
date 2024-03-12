@@ -34,7 +34,7 @@ const graphOptions: { [key: string]: AnalyticsGraphFunction } = {
 }
 
 const graphColors = [
-    "#FFC107", "#FF5722", "#E91E63", "#9C27B0", "#3F51B5", "#03A9F4", "#009688", "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B", "#FF5722", "#795548", "#9E9E9E", "#607D8B"
+    "#FFC107", "#FF5722", "#E91E63", "#9C27B0", "#3F51B5", "#03A9F4", "#009688", "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B", "#FF5722", "#795548", "#EEEEEE"
 ]
 
 const AnalyticsPage = () => {
@@ -269,7 +269,7 @@ const AnalyticsPage = () => {
 
                 <Card className="w-full max-w-md">
                     <CardContent>
-                        <h2 className="text-xl font-bold">Per match analysis:</h2>
+                        <h2 className="text-xl font-bold">Per match graph:</h2>
                         <div className="w-full flex flex-col gap-6 mt-4">
                             <AnalyticsGraph 
                                 matches={matches} 
