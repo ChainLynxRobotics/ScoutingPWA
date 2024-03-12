@@ -17,6 +17,7 @@ import useLocalStorageState from "../../util/localStorageState";
 
 // Plotting functions that can be selected, the function returns the number of times the event happened per match
 const graphOptions: { [key: string]: AnalyticsGraphFunction } = {
+    "Note Preloaded": (match, auto, teleop) => match.preload ? 1 : 0,
     "Auto Pickup": (match, auto, teleop) => numOfEvents(auto, ME.acquireGround, ME.acquireStation),
     "Auto Speaker": (match, auto, teleop) => numOfEvents(auto, ME.scoreMid, ME.scoreMidBoost),
     "Auto Amp": (match, auto, teleop) => numOfEvents(auto, ME.scoreLow, ME.scoreLowBoost),
@@ -132,6 +133,7 @@ const AnalyticsPage = () => {
                             <AccuracyStatistic name="Note Preloaded" 
                                 value={matches.filter(m=>m.preload).length} 
                                 total={matches.length} 
+                                plot={graphPropsOf("Note Preloaded")}
                             />
                         </div>
                     </CardContent>
@@ -144,6 +146,7 @@ const AnalyticsPage = () => {
                             <AccuracyStatistic name="Pickup Accuracy" 
                                 value={numOfEvents(auto, ME.acquireGround, ME.acquireStation)} 
                                 total={numOfEvents(auto, ME.acquireGround, ME.acquireStation, ME.acquireFail)} 
+                                plot={graphPropsOf("Auto Pickup")}
                             />
                             <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
                                 {...perMatchStats(matches, auto, ME.acquireGround, ME.acquireStation, ME.acquireFail)}
@@ -154,6 +157,7 @@ const AnalyticsPage = () => {
                             <AccuracyStatistic name="Speaker Accuracy" 
                                 value={numOfEvents(auto, ME.scoreMid, ME.scoreMidBoost)} 
                                 total={numOfEvents(auto, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
+                                plot={graphPropsOf("Auto Speaker")}
                             />
                             <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
                                 {...perMatchStats(matches, auto, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
@@ -162,6 +166,7 @@ const AnalyticsPage = () => {
                             <AccuracyStatistic name="Amp Accuracy" 
                                 value={numOfEvents(auto, ME.scoreLow, ME.scoreLowBoost)} 
                                 total={numOfEvents(auto, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
+                                plot={graphPropsOf("Auto Amp")}
                             />
                             <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
                                 {...perMatchStats(matches, auto, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
@@ -172,6 +177,7 @@ const AnalyticsPage = () => {
                             <AccuracyStatistic name="Leave Autonomous Zone" 
                                 value={matches.filter(m=>events.find(e=>e.matchId===m.matchId && e.event===ME.specialAuto)).length} 
                                 total={matches.length}
+                                plot={graphPropsOf("Auto Leave Auto Zone")}
                             />
                         </div>
                     </CardContent>
@@ -184,6 +190,7 @@ const AnalyticsPage = () => {
                             <AccuracyStatistic name="Pickup Accuracy" 
                                 value={numOfEvents(teleop, ME.acquireGround, ME.acquireStation)} 
                                 total={numOfEvents(teleop, ME.acquireGround, ME.acquireStation, ME.acquireFail)} 
+                                plot={graphPropsOf("Teleop Pickup")}
                             />
                             <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
                                 {...perMatchStats(matches, teleop, ME.acquireGround, ME.acquireStation, ME.acquireFail)}
@@ -194,6 +201,7 @@ const AnalyticsPage = () => {
                             <AccuracyStatistic name="Speaker Accuracy" 
                                 value={numOfEvents(teleop, ME.scoreMid, ME.scoreMidBoost)} 
                                 total={numOfEvents(teleop, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
+                                plot={graphPropsOf("Teleop Speaker")}
                             />
                             <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
                                 {...perMatchStats(matches, teleop, ME.scoreMid, ME.scoreMidBoost, ME.scoreMidFail)}
@@ -202,6 +210,7 @@ const AnalyticsPage = () => {
                             <AccuracyStatistic name="Amp Accuracy" 
                                 value={numOfEvents(teleop, ME.scoreLow, ME.scoreLowBoost)} 
                                 total={numOfEvents(teleop, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
+                                plot={graphPropsOf("Teleop Amp")}
                             />
                             <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
                                 {...perMatchStats(matches, teleop, ME.scoreLow, ME.scoreLowBoost, ME.scoreLowFail)}
@@ -210,6 +219,7 @@ const AnalyticsPage = () => {
                             <AccuracyStatistic name="Trap Accuracy" 
                                 value={numOfEvents(teleop, ME.scoreHigh, ME.scoreHighBoost)} 
                                 total={numOfEvents(teleop, ME.scoreHigh, ME.scoreHighBoost, ME.scoreHighFail)}
+                                plot={graphPropsOf("Teleop Trap")}
                             />
                             <PerMatchStatistic name="└ Attempts P.M." pl="24px" 
                                 {...perMatchStats(matches, teleop, ME.scoreHigh, ME.scoreHighBoost, ME.scoreHighFail)}
@@ -222,6 +232,7 @@ const AnalyticsPage = () => {
                                         .filter(m=>events.find(e=>e.matchId===m.matchId && e.event===ME.specialCoop)).length} 
                                 total={matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Amp).length}
                                 desc="Only counts for the times this team's human player is at the Amp"
+                                plot={graphPropsOf("Cooperate")}
                             />
                         </div>
                     </CardContent>
@@ -234,16 +245,19 @@ const AnalyticsPage = () => {
                             <AccuracyStatistic name="Climbs" 
                                 value={matches.filter(m=>m.climb===ClimbResult.Climb).length} 
                                 total={matches.length} 
+                                plot={graphPropsOf("Climb")}
                             />
                             <AccuracyStatistic name="└ Parks" pl="24px"
                                 value={matches.filter(m=>m.climb!==ClimbResult.None).length} 
                                 total={matches.length} 
+                                plot={graphPropsOf("Park")}
                             />
                             <PerMatchStatistic name="Human Player Scored" 
                                 desc="The notes scored by the human player at the end of the game. Only counts for the times this team's human player is at the Amp."
                                 {...humanPlayerPerformancePerMatch()}
+                                plot={graphPropsOf("Human Player Scored")}
                             />
-                            <Statistic name="Avg Defense Rating">
+                            <Statistic name="Avg Defense Rating" plot={graphPropsOf("Defense")}>
                                 <Rating value={matches.reduce((acc, m)=>acc+m.defense, 0) / matches.length} precision={0.1} readOnly />
                                 <span className="text-secondary italic">({Math.round(matches.reduce((acc, m)=>acc+m.defense, 0) / matches.length * 100) / 100})</span>
                             </Statistic>
@@ -267,7 +281,7 @@ const AnalyticsPage = () => {
                                 }
                                 colors={Object.keys(graphOptions)
                                     .filter(name=>graphsEnabled.includes(name))
-                                    .reduce((acc, key, i)=>({...acc, [key]: graphColors[i]}), {})
+                                    .reduce((acc, key)=>({...acc, [key]: graphColors[Object.keys(graphOptions).indexOf(key)]}), {})
                                 }
                             />
                             <FormControl fullWidth>
