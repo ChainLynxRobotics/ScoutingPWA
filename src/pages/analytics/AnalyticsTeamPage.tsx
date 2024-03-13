@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { MatchData, MatchEventData } from "../../types/MatchData";
 import MatchDatabase from "../../util/MatchDatabase";
 import { Button, Card, CardContent, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Rating, Select, SelectChangeEvent } from "@mui/material";
@@ -20,8 +20,17 @@ import PerMatchScatterPlot from "../../components/analytics/PerMatchScatterPlot"
 const AnalyticsPage = () => {
 
     const { team } = useParams();
+    const navigate = useNavigate();
+    const [teamList, setTeamList] = useState<number[]>([]);
 
-    const [hasLoaded, setHasLoaded] = useState(false);
+    useEffect(() => {
+        async function loadTeams() {
+            setTeamList(await MatchDatabase.getUniqueTeams());
+        }
+        loadTeams();
+    }, []);
+
+    const [hasLoaded, setHasLoaded] = useState<string|undefined>(undefined);
     const [matches, setMatches] = useState<MatchData[]>([]);
     const [events, setEvents] = useState<MatchEventData[]>([]);
 
@@ -35,7 +44,7 @@ const AnalyticsPage = () => {
 
 
     useEffect(() => {
-        if (hasLoaded) return;
+        if (hasLoaded===team) return;
         // Load matches for team
         async function loadMatches() {
             if (!team) return;
@@ -45,7 +54,7 @@ const AnalyticsPage = () => {
             events.sort((a, b) => a.time - b.time);
             setMatches(matches);
             setEvents(events);
-            setHasLoaded(true);
+            setHasLoaded(team);
         }
         loadMatches();
     }, [team]);
@@ -84,11 +93,29 @@ const AnalyticsPage = () => {
         );
     }
 
-    if (!hasLoaded) return (<div className="w-full h-full flex items-center justify-center">Loading...</div>);
-
     return (
         <>
-            <h1 className="text-xl text-center mb-4">Analytics for <b>Team {team}</b></h1>
+            <h1 className="text-xl mb-4 flex items-center gap-2">
+                <span>Analytics for </span>
+                <b>Team </b>
+                <FormControl variant="standard" sx={{ minWidth: 100 }}>
+                    <Select
+                        id="team-select-label"
+                        value={team}
+                        onChange={(e)=>navigate(`/analytics/team/${e.target.value}`)}
+                        label="Age"
+                    >
+                        {teamList.map(team=>
+                            <MenuItem key={team} value={team}><b className="text-xl">{team}</b></MenuItem>)
+                        }
+                    </Select>
+                </FormControl>
+            </h1>
+
+            {hasLoaded===undefined || hasLoaded!==team ?
+                <div className="w-full h-full flex items-center justify-center">Loading...</div>
+            :
+            <>
             <Statistic name="Matches Scouted">
                 {matches.length}
             </Statistic>
@@ -319,6 +346,8 @@ const AnalyticsPage = () => {
                     <Button onClick={()=>setNotesOpen(false)}>Close</Button>
                 </DialogActions>
             </Dialog>
+            </>
+            }
         </>
     )
 }
