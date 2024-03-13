@@ -12,9 +12,10 @@ import Statistic, { StatisticProps } from "../../components/analytics/Statistic"
 import ClimbResult from "../../enums/ClimbResult";
 import { autoEvents, numOfEvents, perMatchStats, teleopEvents } from "../../util/analytics/analyticsUtil";
 import matchCompare from "../../util/matchCompare";
-import AnalyticsGraph from "../../components/analytics/AnalyticsGraph";
+import PerMatchGraph from "../../components/analytics/PerMatchGraph";
 import useLocalStorageState from "../../util/localStorageState";
 import plotFunctions, { PlotDefinition } from "../../util/analytics/analyticsPlotFunctions";
+import PerMatchScatterPlot from "../../components/analytics/PerMatchScatterPlot";
 
 const AnalyticsPage = () => {
 
@@ -250,7 +251,7 @@ const AnalyticsPage = () => {
                     <CardContent>
                         <h2 className="text-xl font-bold">Per match graph:</h2>
                         <div className="w-full flex flex-col gap-6 mt-4">
-                            <AnalyticsGraph 
+                            <PerMatchGraph 
                                 matches={matches} 
                                 autoEvents={auto} 
                                 teleopEvents={teleop} 
@@ -276,6 +277,22 @@ const AnalyticsPage = () => {
                                 </Select>
                             </FormControl>
                         </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="w-full max-w-md">
+                    <CardContent>
+                        <h2 className="text-xl font-bold">Scatter plot:</h2>
+                        <div className="w-full flex flex-col gap-6 mt-4">
+                            <PerMatchScatterPlot
+                                matches={matches} 
+                                autoEvents={auto} 
+                                teleopEvents={teleop} 
+                                plots={Object.values(plotFunctions).filter(plot=>plotsEnabled.includes(plot.name))}
+                            />
+                        </div>
+                        <div className="italic text-secondary indent-4 px-4 text-sm">To control items displayed, use the same select menu as the previous graph</div>
+                        <div className="italic text-secondary indent-4 px-4 text-sm mt-2">First 15 seconds are in autonomous mode</div>
                     </CardContent>
                 </Card>
 

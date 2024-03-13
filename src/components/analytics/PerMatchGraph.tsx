@@ -3,14 +3,14 @@ import { MatchData, MatchEventData } from "../../types/MatchData";
 import { useMemo } from "react";
 import { PlotDefinition } from "../../util/analytics/analyticsPlotFunctions";
 
-export type AnalyticsGraphProps = {
+export type PerMatchGraph = {
     matches: MatchData[], 
     autoEvents: MatchEventData[], 
     teleopEvents: MatchEventData[],
     plots: PlotDefinition[],
 }
 
-export default function AnalyticsGraph(props: AnalyticsGraphProps) {
+export default function PerMatchGraph(props: PerMatchGraph) {
 
     // Gets an object with the key being the matchId and the value being an array of auto events for that match
     const autoEventsByMatch = useMemo(() => {

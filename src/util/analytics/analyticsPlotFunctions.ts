@@ -1,6 +1,6 @@
 import HumanPlayerLocation from "../../enums/HumanPlayerLocation";
 import ME from "../../enums/MatchEvent";
-import { numOfEvents } from "./analyticsUtil";
+import { numOfEvents, timesOfEvents } from "./analyticsUtil";
 import ClimbResult from "../../enums/ClimbResult";
 import { MatchData, MatchEventData } from "../../types/MatchData";
 
@@ -14,41 +14,49 @@ const plotFunctions = {
         name: "Auto Pickup",
         color: "#FF5722",
         matchCount: (match, auto, teleop) => numOfEvents(auto, ME.acquireGround, ME.acquireStation),
+        matchTimes: (match, auto, teleop) => timesOfEvents(auto, ME.acquireGround, ME.acquireStation),
     },
     autoSpeaker: {
         name: "Auto Speaker",
         color: "#E91E63",
         matchCount: (match, auto, teleop) => numOfEvents(auto, ME.scoreMid, ME.scoreMidBoost),
+        matchTimes: (match, auto, teleop) => timesOfEvents(auto, ME.scoreMid, ME.scoreMidBoost),
     },
     autoAmp: {
         name: "Auto Amp",
         color: "#9C27B0",
         matchCount: (match, auto, teleop) => numOfEvents(auto, ME.scoreLow, ME.scoreLowBoost),
+        matchTimes: (match, auto, teleop) => timesOfEvents(auto, ME.scoreLow, ME.scoreLowBoost),
     },
     autoLeaveAutoZone: {
         name: "Auto Leave Auto Zone",
         color: "#3F51B5",
-        matchCount: (match, auto, teleop) => match.humanPlayerLocation===HumanPlayerLocation.Amp ? 1 : 0,
+        matchCount: (match, auto, teleop) => numOfEvents(auto, ME.specialAuto),
+        matchTimes: (match, auto, teleop) => timesOfEvents(auto, ME.specialAuto),
     },
     teleopPickup: {
         name: "Teleop Pickup",
         color: "#03A9F4",
         matchCount: (match, auto, teleop) => numOfEvents(teleop, ME.acquireGround, ME.acquireStation),
+        matchTimes: (match, auto, teleop) => timesOfEvents(teleop, ME.acquireGround, ME.acquireStation),
     },
     teleopSpeaker: {
         name: "Teleop Speaker",
         color: "#009688",
         matchCount: (match, auto, teleop) => numOfEvents(teleop, ME.scoreMid, ME.scoreMidBoost),
+        matchTimes: (match, auto, teleop) => timesOfEvents(teleop, ME.scoreMid, ME.scoreMidBoost),
     },
     teleopAmp: {
         name: "Teleop Amp",
         color: "#4CAF50",
         matchCount: (match, auto, teleop) => numOfEvents(teleop, ME.scoreLow, ME.scoreLowBoost),
+        matchTimes: (match, auto, teleop) => timesOfEvents(teleop, ME.scoreLow, ME.scoreLowBoost),
     },
     teleopTrap: {
         name: "Teleop Trap",
         color: "#8BC34A",
         matchCount: (match, auto, teleop) => numOfEvents(teleop, ME.scoreHigh, ME.scoreHighBoost),
+        matchTimes: (match, auto, teleop) => timesOfEvents(teleop, ME.scoreHigh, ME.scoreHighBoost),
     },
     cooperate: {
         name: "Cooperate",
@@ -80,7 +88,7 @@ const plotFunctions = {
 export default plotFunctions;
 
 export type MatchCountFunction = (match: MatchData, auto: MatchEventData[], teleop: MatchEventData[]) => number | null;
-export type MatchTimesFunction = (match: MatchData, events: MatchEventData[]) => number[];
+export type MatchTimesFunction = (match: MatchData, auto: MatchEventData[], teleop: MatchEventData[]) => number[];
 
 export type PlotDefinition = {
     name: string; 
