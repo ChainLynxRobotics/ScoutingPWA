@@ -1,16 +1,14 @@
 import { LineChart, LineSeriesType } from "@mui/x-charts";
 import { MatchData, MatchEventData } from "../../types/MatchData";
 import { useMemo } from "react";
+import { PlotDefinition } from "../../util/analytics/analyticsPlotFunctions";
 
 export type AnalyticsGraphProps = {
     matches: MatchData[], 
     autoEvents: MatchEventData[], 
     teleopEvents: MatchEventData[],
-    functions: { [key: string]: AnalyticsGraphFunction },
-    colors: { [key: string]: string }
+    plots: PlotDefinition[],
 }
-
-export type AnalyticsGraphFunction = (match: MatchData, auto: MatchEventData[], teleop: MatchEventData[]) => number|null;
 
 export default function AnalyticsGraph(props: AnalyticsGraphProps) {
 
@@ -45,19 +43,19 @@ export default function AnalyticsGraph(props: AnalyticsGraphProps) {
 
     // Formats and executes the list of data functions into a database for the graph
     const series: LineSeriesType[] = useMemo(() => {
-        const series = Object.entries(props.functions).map((func): LineSeriesType => {
+        const series = props.plots.map((plot): LineSeriesType => {
             return {
                 type: "line",
-                label: func[0],
+                label: plot.name,
                 curve: "linear",
-                color: props.colors[func[0]],
-                data: props.matches.map((match) => func[1](match, autoEventsByMatch[match.matchId], teleopEventsByMatch[match.matchId]))
+                color: plot.color,
+                data: props.matches.map((match) => plot.matchCount(match, autoEventsByMatch[match.matchId], teleopEventsByMatch[match.matchId]))
             }
         });
         return series;
     }, [props]);
 
-    const labelHeight = Math.floor(Object.keys(props.functions).length / 3) * 32 + 64;
+    const labelHeight = Math.floor(props.plots.length / 3) * 32 + 64;
 
     return (
         <LineChart
