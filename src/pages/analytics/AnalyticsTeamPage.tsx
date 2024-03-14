@@ -141,7 +141,7 @@ const AnalyticsPage = () => {
                     <CardContent>
                         <h2 className="text-xl font-bold">Pre Match:</h2>
                         <div className="pl-4 mt-4">
-                            <div>Human Player Location:</div>
+                            <div>{team !== "8248" ? "Human Player Location:" : "Soren's Location:"}</div>
                             <PieChart
                                 series={[{ data: [
                                     { id: 1, value: matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.None).length, label: "Not on Field" },
