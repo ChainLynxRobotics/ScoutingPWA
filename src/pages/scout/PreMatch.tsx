@@ -79,7 +79,7 @@ const PreMatch = () => {
                         }}
                         label="Select Match">
                         {settings.matches.map((match) => {
-                            return <MenuItem value={match.matchId+""}><b>{match.matchId}</b></MenuItem>;
+                            return <MenuItem key={match.matchId} value={match.matchId}><b>{match.matchId}</b></MenuItem>;
                         })}
                     </Select>
                 </FormControl>
