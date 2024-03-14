@@ -16,7 +16,9 @@ export default function CurrentMatchContextProvider({children}: {children: React
     const [scoutingData, setScoutingData] = useState<{matchId: string, teamNumber: number, allianceColor: AllianceColor} | undefined>(undefined);
 
     const [hasUpdate, setHasUpdate] = useState(false);
+    const [shouldAutoUpdate, setShouldAutoUpdate] = useState(true);
     const [updateNextRender, setUpdateNextRender] = useState(true); // Update on page load
+
 
     /**
      * Updates the current match being scouting, may clear any in-progress data. 
@@ -51,7 +53,11 @@ export default function CurrentMatchContextProvider({children}: {children: React
     }
 
     useEffect(() => {
-        setHasUpdate(true);
+        if (shouldAutoUpdate) {
+            update();
+        } else {
+            setHasUpdate(true);
+        }
     }, [settings.currentMatchIndex, settings.clientId, settings.matches]);
 
     useEffect(() => {
@@ -61,7 +67,7 @@ export default function CurrentMatchContextProvider({children}: {children: React
     }, [updateNextRender]);
 
     return (
-        <CurrentMatchContext.Provider value={{setHasUpdate, hasUpdate, update, incrementAndUpdate}}>
+        <CurrentMatchContext.Provider value={{setHasUpdate, hasUpdate, update, incrementAndUpdate, shouldAutoUpdate, setShouldAutoUpdate}}>
             <ConditionalWrapper 
                 condition={scoutingData} 
                 wrapper={(children) => 

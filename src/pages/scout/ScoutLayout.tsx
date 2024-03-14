@@ -42,6 +42,11 @@ const ScoutPage = () => {
         }
     }, [currentMatchContext?.hasUpdate]);
 
+    useEffect(() => {
+        if (context == undefined) return;
+        currentMatchContext?.setShouldAutoUpdate(context.match.events.length == 0);
+    }, [context]);
+
     const [warningDismissed, setWarningDismissed] = useState(false);
 
     function startMatch() {

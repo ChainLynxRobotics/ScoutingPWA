@@ -68,9 +68,21 @@ const PreMatch = () => {
                     {context.meta.teamNumber}
                 </span>
                 <span> in match </span>
-                <span>
-                    {context.meta.matchId}
-                </span>
+                <FormControl variant="standard">
+                    <Select
+                        labelId="match-select-label"
+                        id="match-select"
+                        value={context.meta.matchId}
+                        onChange={(event) => {
+                            let index = settings.matches.map((match) => match.matchId+"").indexOf(event.target.value);
+                            settings?.setCurrentMatchIndex(index);
+                        }}
+                        label="Select Match">
+                        {settings.matches.map((match) => {
+                            return <MenuItem value={match.matchId+""}><b>{match.matchId}</b></MenuItem>;
+                        })}
+                    </Select>
+                </FormControl>
             </h1>
             <span className="mb-8 max-w-md text-center text-secondary">If this is the wrong match, use the Next and Previous buttons on the schedule part of the settings page.</span>
             <FormControl sx={{ m: 1, minWidth: 224 }}>
