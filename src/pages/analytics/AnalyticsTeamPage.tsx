@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MatchData, MatchEventData } from "../../types/MatchData";
 import MatchDatabase from "../../util/MatchDatabase";
@@ -16,12 +16,15 @@ import PerMatchGraph from "../../components/analytics/PerMatchGraph";
 import useLocalStorageState from "../../util/localStorageState";
 import plotFunctions, { PlotDefinition } from "../../util/analytics/analyticsPlotFunctions";
 import PerMatchScatterPlot from "../../components/analytics/PerMatchScatterPlot";
+import SettingsContext from "../../components/context/SettingsContext";
 
 const AnalyticsPage = () => {
 
     const { team } = useParams();
     const navigate = useNavigate();
-    const [teamList, setTeamList] = useState<number[]>([]);
+    const [teamList, setTeamList] = useState<number[]|undefined>(undefined);
+
+    const settings = useContext(SettingsContext);
 
     useEffect(() => {
         async function loadTeams() {
@@ -98,15 +101,26 @@ const AnalyticsPage = () => {
             <h1 className="text-xl mb-4 flex items-center gap-2">
                 <span>Analytics for </span>
                 <b>Team </b>
-                <FormControl variant="standard" sx={{ minWidth: 100 }}>
+                <FormControl variant="standard" sx={{ minWidth: 120 }}>
                     <Select
                         id="team-select-label"
                         value={team}
                         onChange={(e)=>navigate(`/analytics/team/${e.target.value}`)}
                         label="Age"
                     >
-                        {teamList.map(team=>
-                            <MenuItem key={team} value={team}><b className="text-xl">{team}</b></MenuItem>)
+                        {teamList ? 
+                            teamList.map(t=> 
+                                <MenuItem key={t} value={t}>
+                                    <div className="flex items-center gap-1">
+                                        <b className="text-xl">{t}</b>
+                                        {settings?.starredTeams.includes(t) && 
+                                            <span className="material-symbols-outlined text-yellow-300" style={{fontSize: "20px"}}>star</span>
+                                        }
+                                    </div>
+                                </MenuItem>
+                            )
+                        :
+                            <MenuItem value={team}><b className="text-xl">{team}</b></MenuItem>
                         }
                     </Select>
                 </FormControl>

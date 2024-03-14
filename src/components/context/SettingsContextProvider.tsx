@@ -16,6 +16,8 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
     const [matches, setMatches] = useLocalStorageState<ScheduledMatch[]>([], "matches");
     const [currentMatchIndex, setCurrentMatchIndex] = useLocalStorageState<number>(0, "nextMatch"); // The current match being, used to determine what match to show on the main page
 
+    const [starredTeams, setStarredTeams] = useLocalStorageState<number[]>([], "starredTeams"); // Special teams we want to know about, used on the analytics page
+
     const addMatch = (match: ScheduledMatch) => {
         setMatches([...matches, match]);
     }
@@ -67,7 +69,10 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
         editMatch,
         removeMatch,
         moveMatchUp,
-        moveMatchDown
+        moveMatchDown,
+
+        starredTeams,
+        setStarredTeams,
     }
 
     return (
@@ -101,6 +106,9 @@ export type SettingsStateData = {
     removeMatch: (matchId: string) => void;
     moveMatchUp: (matchId: string) => void;
     moveMatchDown: (matchId: string) => void;
+
+    starredTeams: number[];
+    setStarredTeams: (starredTeams: number[]) => void;
 }
 
 export type ScheduledMatch = {
