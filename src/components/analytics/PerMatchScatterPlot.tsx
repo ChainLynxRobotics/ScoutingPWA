@@ -88,6 +88,7 @@ export default function PerMatchGraph(props: PerMatchGraph) {
                 max: MATCH_DURATION * 1000,
                 min: 0,
             }]}
+            grid={{ vertical: true, horizontal: true }}
             series={series}
             height={300 + labelHeight}
             margin={{ top: labelHeight }}
