@@ -5,6 +5,8 @@ export type CurrentMatchContextType = {
     hasUpdate: boolean,
     update: ()=>void,
     incrementAndUpdate: ()=>void,
+    shouldAutoUpdate: boolean,
+    setShouldAutoUpdate: (autoUpdate: boolean)=>void,
 }
 
 const CurrentMatchContext = createContext<CurrentMatchContextType|undefined>(undefined);

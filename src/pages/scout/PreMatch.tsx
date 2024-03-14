@@ -1,7 +1,7 @@
 import InputLabel from "@mui/material/InputLabel/InputLabel";
 import MenuItem from "@mui/material/MenuItem/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select/Select";
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
 import FormControl from "@mui/material/FormControl/FormControl";
@@ -10,7 +10,10 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import HumanPlayerLocation from "../../enums/HumanPlayerLocation";
 import AllianceColor from "../../enums/AllianceColor";
 import SettingsContext from "../../components/context/SettingsContext";
-import { MAX_NOTE_LENGTH } from "../../constants";
+import { DEFAULT_COMPETITION_ID, MAX_NOTE_LENGTH } from "../../constants";
+import { MatchIdentifier } from "../../types/MatchData";
+import MatchDatabase from "../../util/MatchDatabase";
+import matchCompare from "../../util/matchCompare";
 
 
 const PreMatch = () => {
@@ -68,9 +71,20 @@ const PreMatch = () => {
                     {context.meta.teamNumber}
                 </span>
                 <span> in match </span>
-                <span>
-                    {context.meta.matchId}
-                </span>
+                <Select
+                    labelId="match-select-label"
+                    id="match-select"
+                    value={context.meta.matchId}
+                    onChange={(event) => {
+                        let index = settings.matches.map((match) => match.matchId+"").indexOf(event.target.value);
+                        settings?.setCurrentMatchIndex(index);
+                    }}
+                    label="Select Match"
+                >
+                    {settings.matches.map((match) => {
+                        return <MenuItem value={match.matchId+""}>{match.matchId}</MenuItem>;
+                    })}
+                </Select>
             </h1>
             <span className="mb-8 max-w-md text-center text-secondary">If this is the wrong match, use the Next and Previous buttons on the schedule part of the settings page.</span>
             <FormControl sx={{ m: 1, minWidth: 224 }}>
