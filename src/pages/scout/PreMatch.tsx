@@ -1,7 +1,7 @@
 import InputLabel from "@mui/material/InputLabel/InputLabel";
 import MenuItem from "@mui/material/MenuItem/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select/Select";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
 import FormControl from "@mui/material/FormControl/FormControl";
@@ -10,10 +10,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import HumanPlayerLocation from "../../enums/HumanPlayerLocation";
 import AllianceColor from "../../enums/AllianceColor";
 import SettingsContext from "../../components/context/SettingsContext";
-import { DEFAULT_COMPETITION_ID, MAX_NOTE_LENGTH } from "../../constants";
-import { MatchIdentifier } from "../../types/MatchData";
-import MatchDatabase from "../../util/MatchDatabase";
-import matchCompare from "../../util/matchCompare";
+import { MAX_NOTE_LENGTH } from "../../constants";
 
 
 const PreMatch = () => {
