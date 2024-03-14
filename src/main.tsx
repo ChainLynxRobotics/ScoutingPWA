@@ -62,8 +62,8 @@ export default function App() {
                   <Route path="*" element={<NoPage />} />
                 </Route>
                 <Route path="data" element={<DataPage />} />
+                <Route path="analytics" element={<AnalyticsPage />} />
                 <Route path="analytics" element={<AnalyticsLayout />}>
-                  <Route index element={<AnalyticsPage />} />
                   <Route path="team/:team" element={<AnalyticsTeamPage />} />
                   <Route path="match/:matchId" element={<AnalyticsMatchPage />} />
                 </Route>

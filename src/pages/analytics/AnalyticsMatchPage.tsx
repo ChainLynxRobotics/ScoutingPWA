@@ -34,7 +34,9 @@ export default function AnalyticsMatchPage() {
                 <h3 className="text-lg mt-4">Known teams in this match: </h3>
                 <ul className="list-disc pl-8">
                     {matches.map(m => m.teamNumber).map((team) => 
-                        <li><Link to={'/analytics/team/'+team} key={team} className="text-blue-500 underline">{team}</Link></li>
+                        <li key={team}>
+                            <Link to={'/analytics/team/'+team} className="text-blue-500 underline">{team}</Link>
+                        </li>
                     )}
                 </ul>
             </div>

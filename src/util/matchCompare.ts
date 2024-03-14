@@ -11,6 +11,6 @@ export default function matchCompare(a: string, b: string): number {
         MATCH_TYPE_ORDER.indexOf(idA.match(TYPE_REGEX)?.[0] || '') - MATCH_TYPE_ORDER.indexOf(idB.match(TYPE_REGEX)?.[0] || '') ||
         (parseInt(idA.match(TYPE_NUMBER_REGEX)?.[0] || '0') - parseInt(idB.match(TYPE_NUMBER_REGEX)?.[0] || '0')) ||
         (parseInt(idA.match(MATCH_NUMBER_REGEX)?.[0] || '0') - parseInt(idB.match(MATCH_NUMBER_REGEX)?.[0] || '0')) ||
-        console.log("MatchCompare: Unhandled case for", a, b, "returning 0.")||0
+        0
     );
 }

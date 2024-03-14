@@ -4,7 +4,7 @@ export default function PerMatchStatistic(props: StatisticProps & {avg: number, 
     return (
         <Statistic {...props}>
             <b className="text-lg">{Math.round(props.avg * 100) / 100} </b>
-            <span className="text-secondary italic text-nowrap flex-shrink-0">(min: {props.min} max: {props.max})</span>
+            { props.max > 0 && <span className="text-secondary italic text-nowrap flex-shrink-0">(min: {props.min} max: {props.max})</span> }
         </Statistic>
     )
 }

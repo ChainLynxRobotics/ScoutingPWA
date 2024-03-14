@@ -1,14 +1,24 @@
-import { MatchData, MatchEventData } from "../types/MatchData";
-import ME from "../enums/MatchEvent";
+import { MatchData, MatchEventData } from "../../types/MatchData";
+import ME from "../../enums/MatchEvent";
 
 /**
-     * Gets the number of a certain type or types of events that have been saved
-     * @param events - Events to look through
-     * @param event - Event(s) to look for
-     * @returns the number of the events that have been recorded
-     */
+ * Gets the number of a certain type or types of events that have been saved
+ * @param events - Events to look through
+ * @param event - Event(s) to look for
+ * @returns the number of the events that have been recorded
+ */
 export function numOfEvents(events: MatchEventData[], ...eventsToFilter: ME[]): number {
     return events.filter(e=>eventsToFilter.includes(e.event)).length;
+}
+
+/**
+ * Gets a list of times that a certain type or types of events have happened
+ * @param events - Events to look through
+ * @param event - Event(s) to look for
+ * @returns a list of times that the events have happened, in milliseconds, relative to the start of the match
+ */
+export function timesOfEvents(events: MatchEventData[], ...eventsToFilter: ME[]): number[] {
+    return events.filter(e=>eventsToFilter.includes(e.event)).map(e=>e.time);
 }
 
 /**
