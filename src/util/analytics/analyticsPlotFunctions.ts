@@ -61,7 +61,8 @@ const plotFunctions = {
     cooperate: {
         name: "Cooperate",
         color: "#CDDC39",
-        matchCount: (match, auto, teleop) => match.humanPlayerLocation===HumanPlayerLocation.Amp ? 1 : 0,
+        matchCount: (match, auto, teleop) => match.humanPlayerLocation===HumanPlayerLocation.Amp ? numOfEvents(teleop, ME.specialCoop) : null,
+        matchTimes: (match, auto, teleop) => match.humanPlayerLocation===HumanPlayerLocation.Amp ? timesOfEvents(teleop, ME.specialCoop) : [],
     },
     climb: {
         name: "Climb",
