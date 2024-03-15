@@ -15,12 +15,14 @@ const AnalyticsPage = () => {
 
     const [teamList, setTeamList] = useState<number[]>([]);
     const [matchList, setMatchList] = useState<string[]>([]);
+    const [contributors, setContributors] = useState<{[key: string]: number}>({});
 
     const [analyticsMatchIndex, setAnalyticsMatchIndex] = useLocalStorageState(settings?.currentMatchIndex||0, "analyticsMatchIndex");
 
     useEffect(() => {
         MatchDatabase.getUniqueTeams().then(setTeamList);
         MatchDatabase.getUniqueMatches().then((matches)=>setMatchList(matches.sort(matchCompare)));
+        MatchDatabase.getContributions().then((contributors)=>setContributors(contributors));
     }, []);
 
     function setCurrentMatch(matchId: string) {
@@ -89,6 +91,18 @@ const AnalyticsPage = () => {
                             <Button endIcon={<span className="material-symbols-outlined">navigate_next</span>}>View</Button>
                         </Card>
                     </Link>
+                ))}
+            </div>
+
+            <Divider />
+
+            <h2 className="text-lg font-bold mt-4">Matches Scouted</h2>
+            <div className="flex flex-col gap-2 my-4 px-4">
+                {Object.entries(contributors).sort((a, b)=>b[1]-a[1]).map((contributor) => (
+                    <Card variant="outlined" className="flex justify-between items-center">
+                        <div className="text-lg font-bold px-2">{contributor[0]}</div>
+                        <div className="text-xl font-cold px-2"><code>{contributor[1]}</code></div>
+                    </Card>
                 ))}
             </div>
         </div>

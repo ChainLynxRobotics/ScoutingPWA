@@ -24,12 +24,19 @@ interface MatchDatabaseSchema extends DBSchema {
 
 var dbCache: IDBPDatabase<MatchDatabaseSchema> | null = null;
 
+var dbOpenCallback: null|Promise<IDBPDatabase<MatchDatabaseSchema>> = null;
 /**
- * Trys to open the database, if it is already open it will return the cached database
+ * Tries to open the database, if it is already open it will return the cached database
+ * If a database open is already in effect, will return the promise to the already existing open operation
  * 
  * @returns - The database object
  */
-async function tryOpenDatabase() {
+function tryOpenDatabase() {
+    if (dbOpenCallback) return dbOpenCallback;
+    return dbOpenCallback = openDatabase();
+}
+
+async function openDatabase() {
     if (dbCache) {
         return dbCache;
     }
@@ -255,6 +262,30 @@ async function deleteMatch(matchId: string, teamNumber: number) {
     );
 }
 
+/**
+ * Gets the number of matches each scout has submitted
+ * 
+ * @returns - A map of scoutName to the number of matches they have scouted
+ */
+async function getContributions() {
+    const db = await tryOpenDatabase();
+
+    const tx = db.transaction(['matches'], 'readonly');
+    const store = await tx.objectStore('matches');
+
+    const people: {[key: string]: number} = {};
+    for await (const cursor of store.iterate()) {
+        let name = (cursor.value.scoutName||'').trim()
+        if (name) {
+            if (!people[cursor.value.scoutName]) people[cursor.value.scoutName] = 0;
+            people[cursor.value.scoutName]++;
+        }
+    }
+    await tx.done;
+
+    return people;
+}
+
 export default {
     saveToDatabase,
     importData,
@@ -268,5 +299,6 @@ export default {
     getMatchesByTeam,
     getEventsByMatch,
     getEventsByTeam,
-    deleteMatch
+    deleteMatch,
+    getContributions,
 }
