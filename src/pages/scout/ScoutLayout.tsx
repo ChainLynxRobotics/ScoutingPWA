@@ -43,9 +43,10 @@ const ScoutPage = () => {
     }, [currentMatchContext?.hasUpdate]);
 
     useEffect(() => {
-        if (context == undefined) return;
-        currentMatchContext?.setShouldAutoUpdate(context.match.events.length == 0);
-    }, [context]);
+        if (currentMatchContext?.hasUpdate && context?.match.events.length == 0) {
+            currentMatchContext?.update();
+        }
+    }, [currentMatchContext, context]);
 
     const [warningDismissed, setWarningDismissed] = useState(false);
 
