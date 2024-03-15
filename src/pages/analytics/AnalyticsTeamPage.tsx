@@ -133,7 +133,15 @@ const AnalyticsPage = () => {
             <Statistic name="Matches Scouted">
                 {matches.length}
             </Statistic>
-            <div className="text-secondary text-sm">"P.M." = "Per Match"</div>
+            <div className="mt-2 flex flex-col items-center text-secondary text-sm">
+                <div>"P.M." = "Per Match"</div>
+                <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined">query_stats</span> = Tap to show on graph
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined">info</span> = Tap for more info
+                </div>
+            </div>
 
             <div className="w-full mt-4 px-2 pb-12 flex flex-wrap gap-8 justify-center">
                 
