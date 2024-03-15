@@ -122,7 +122,7 @@ const TeamList = ({teams, search, colored}: {teams: number[], search: string, co
                 <Link to={`/analytics/team/${team}`} key={team} style={{display: search && !team.toString().includes(search) ? 'none': ''}}>
                     <Card variant="outlined" className="flex justify-between items-center">
                         <div className="flex items-center gap-2 px-2">
-                            <b className="text-xl" style={colored ? {color: i <= 2 ? 'blue' : 'red'} : undefined}>{team}</b>
+                            <b className={"text-xl" + (colored ? (i <= 2 ? ' text-blue-400' : ' text-red-400') : '')}>{team}</b>
                             {settings?.starredTeams.includes(team) ?
                                 <button onClick={(e)=>unstarTeam(e, team)} className="material-symbols-outlined text-yellow-300" style={{fontSize: "20px"}}>star</button>
                                 :
