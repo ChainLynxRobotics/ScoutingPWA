@@ -68,8 +68,9 @@ const ScoutPage = () => {
                 <>
                 <div className="w-full bg-background-secondary shadow">
                     <h1 className="text-lg m-2 flex-1 flex items-center">
-                        <span className={`flex-1 text-start font-bold ${context.meta.allianceColor == AllianceColor.Red ? 'text-red-400' : 'text-blue-400'}`}>
-                            {context.meta.teamNumber}
+                        <span className={`flex-1 flex items-center gap-2`}>
+                            <span className={`font-bold ${context.meta.allianceColor == AllianceColor.Red ? 'text-red-400' : 'text-blue-400'}`}>{context.meta.teamNumber}</span>
+                            <span className="text-sm italic">({context.meta.matchId})</span>
                         </span>
                         <div className="flex-1 text-center whitespace-nowrap">
                             {!context.match.matchStart ?
@@ -103,9 +104,7 @@ const ScoutPage = () => {
                     </h1>
                 </div>
                 <Outlet />
-                <div className="w-full mt-16 pb-2 text-center">
-                    <span className="text-sm text-secondary">Match Id: <code>{context.meta.matchId}</code></span>
-                </div>
+                <div className="pt-16 w-full"></div>
                 </>
             :
                 <NoMatchAvailable />

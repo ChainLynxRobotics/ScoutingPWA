@@ -138,6 +138,7 @@ const SettingsPage = () => {
                     Next
                 </Button>
             </div>
+            <div className="max-w-sm mb-2 text-center text-secondary text-sm">Tap on the ID column below or use the buttons above to switch to the current match.</div>
             <MatchSchedule />
         </div>
 
