@@ -43,7 +43,7 @@ const ScoutPage = () => {
     }, [currentMatchContext?.hasUpdate]);
 
     useEffect(() => {
-        if (currentMatchContext?.hasUpdate && context?.match.events.length == 0) {
+        if (currentMatchContext?.hasUpdate && (!context || context?.match.events.length == 0)) {
             currentMatchContext?.update();
         }
     }, [currentMatchContext, context]);
