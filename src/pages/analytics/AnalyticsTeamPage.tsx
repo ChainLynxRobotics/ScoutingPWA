@@ -98,7 +98,7 @@ const AnalyticsPage = () => {
 
     return (
         <>
-            <h1 className="text-xl mb-4 flex items-center gap-2">
+            <h1 className="text-xl mb-2 flex items-center gap-2">
                 <span>Analytics for </span>
                 <b>Team </b>
                 <FormControl variant="standard" sx={{ minWidth: 120 }}>
@@ -125,6 +125,8 @@ const AnalyticsPage = () => {
                     </Select>
                 </FormControl>
             </h1>
+
+            <a href={`https://www.thebluealliance.com/team/${team}`} target="_blank" rel="noreferrer" className="text-sm mb-4 text-blue-400 underline hover:text-blue-500 transition">View on The Blue Alliance</a>
 
             {hasLoaded===undefined || hasLoaded!==team ?
                 <div className="w-full h-full flex items-center justify-center">Loading...</div>
