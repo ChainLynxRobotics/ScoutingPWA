@@ -33,7 +33,7 @@ const AnalyticsPage = () => {
 
     function teamsInCurrentMatch() {
         if (!settings) return [];
-        const match = settings.matches[analyticsMatchIndex];
+        const match = settings.matches[analyticsMatchIndex] || [];
         const teams = [match.blue1, match.blue2, match.blue3, match.red1, match.red2, match.red3]
         return teams.filter(team=>teamList.includes(team));
     }
