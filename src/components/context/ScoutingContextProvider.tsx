@@ -255,6 +255,7 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
             })
         );
         currentMatchContext?.incrementAndUpdate();
+        currentMatchContext?.setShowConfetti(true);
         navigate("/scout");
     }
 

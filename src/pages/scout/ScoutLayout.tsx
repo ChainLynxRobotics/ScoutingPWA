@@ -7,6 +7,7 @@ import CountUp from "../../components/CountUp";
 import AllianceColor from "../../enums/AllianceColor";
 import CurrentMatchContext from "../../components/context/CurrentMatchContext";
 import SettingsContext from "../../components/context/SettingsContext";
+import ConfettiWrapper from "../../components/ConfettiWrapper";
 
 const ScoutPage = () => {
     
@@ -108,6 +109,9 @@ const ScoutPage = () => {
                 </>
             :
                 <NoMatchAvailable />
+            }
+            {currentMatchContext?.showConfetti && 
+                <ConfettiWrapper />
             }
             {currentMatchContext?.hasUpdate && !(settings.matches.length == 0 || settings.currentMatchIndex >= settings.matches.length) &&
                 <div className={"fixed bottom-16 right-0 pr-2 transition-transform "+(warningDismissed ? 'translate-x-[90%]' : '')} onClick={()=>setWarningDismissed(false)}>

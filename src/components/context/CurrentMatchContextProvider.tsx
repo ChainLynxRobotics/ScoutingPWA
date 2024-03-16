@@ -18,6 +18,8 @@ export default function CurrentMatchContextProvider({children}: {children: React
     const [hasUpdate, setHasUpdate] = useState(false);
     const [updateNextRender, setUpdateNextRender] = useState(true); // Update on page load
 
+    const [showConfetti, setShowConfetti] = useState(false); // Show confetti on data submit
+
 
     /**
      * Updates the current match being scouting, may clear any in-progress data. 
@@ -62,7 +64,7 @@ export default function CurrentMatchContextProvider({children}: {children: React
     }, [updateNextRender]);
 
     return (
-        <CurrentMatchContext.Provider value={{setHasUpdate, hasUpdate, update, incrementAndUpdate}}>
+        <CurrentMatchContext.Provider value={{setHasUpdate, hasUpdate, update, incrementAndUpdate, showConfetti, setShowConfetti}}>
             <ConditionalWrapper 
                 condition={scoutingData} 
                 wrapper={(children) => 
@@ -85,4 +87,6 @@ export type CurrentMatchContextType = {
     hasUpdate: boolean,
     update: ()=>void,
     incrementAndUpdate: ()=>void,
+    showConfetti: boolean,
+    setShowConfetti: (show: boolean)=>void
 }
