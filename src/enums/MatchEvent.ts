@@ -32,8 +32,42 @@ enum MatchEvent {
     defendedOnStart, // When the robot is being defended on
     defendedOnEnd, // When the robot is no longer being defended on
 }
-
 export default MatchEvent;
+
+/**
+ * List of event names, in the same order as the MatchEvent enum.
+ * Used to display the event names in the UI
+ */
+export const MatchEventNames = [
+    "Match Start",
+    "Auto End",
+    "Match End",
+    "Ground Pickup",
+    "Source Pickup",
+    "Failed Pickup",
+    "Trap Score",
+    "Unused",
+    "Trap Fail",
+    "Speaker Score",
+    "Speaker Score (AMP)",
+    "Speaker Fail",
+    "AMP Score",
+    "Unused",
+    "AMP Fail",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Climb Success",
+    "Climb Fail",
+    "Ranking Point",
+    "Leave Auto Zone",
+    "Amplification Start",
+    "Amplification End",
+    "Cooperation",
+    "Unused",
+    "Defended On",
+    "Defended On End",
+]
 
 /**
  * List of events that are not removable from the match event list by the user
@@ -51,7 +85,9 @@ export const NonEditableEvents = [
     MatchEvent.matchStart,
     // Unused events (so they don't show up in the edit dialog)
     MatchEvent.scoreHighBoost,
+    MatchEvent.scoreLowBoost,
     MatchEvent.climbSuccessTop,
     MatchEvent.climbSuccessHigh,
     MatchEvent.climbSuccessMid,
+    MatchEvent.specialRankingOpportunity,
 ];

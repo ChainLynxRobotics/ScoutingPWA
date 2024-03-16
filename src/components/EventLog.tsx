@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import ScoutingContext from "./context/ScoutingContext";
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
-import MatchEvent, { NonEditableEvents, NonRemovableEvents } from "../enums/MatchEvent";
+import MatchEvent, { MatchEventNames, NonEditableEvents, NonRemovableEvents } from "../enums/MatchEvent";
 
 const EventLog = () => {
 
@@ -11,11 +11,11 @@ const EventLog = () => {
     const [eventToDelete, setEventToDelete] = useState<number>(-1); // id of event to delete for the modal, -1 if none
     const [eventCreateOpen, setEventCreateOpen] = useState<boolean>(false); // if the create event modal is open
 
-    const [editName, setEditName] = useState<MatchEvent>(MatchEvent.scoreLow); // event name to edit for the modal
+    const [editName, setEditName] = useState<MatchEvent>(MatchEvent.scoreMid); // event name to edit for the modal
     const [editTimeMinutes, setEditTimeMinutes] = useState<number>(0); // event time to edit for the modal
     const [editTimeSeconds, setEditTimeSeconds] = useState<number>(0); // event time to edit for the modal
 
-    const [createName, setCreateName] = useState<MatchEvent>(MatchEvent.scoreLow); // event name to edit for the modal
+    const [createName, setCreateName] = useState<MatchEvent>(MatchEvent.scoreMid); // event name to edit for the modal
     const [createTimeMinutes, setCreateTimeMinutes] = useState<number>(0); // event time to edit for the modal
     const [createTimeSeconds, setCreateTimeSeconds] = useState<number>(0); // event time to edit for the modal
 
@@ -64,7 +64,7 @@ const EventLog = () => {
                     {context.match.events.sort((a,b)=>b.time-a.time).map((e,i)=>(
                         <tr key={e.id} className={i % 2 == 1 ? 'bg-white bg-opacity-5' : ''}>
                             <td>{context.match.events.length - i}</td>
-                            <td>{MatchEvent[e.event]}</td>
+                            <td>{MatchEventNames[e.event]}</td>
                             <td>{matchTimeAsString(e.time)}</td>
                             <td>
                                 <IconButton color="primary" onClick={()=>setEventToEdit(e.id)} disabled={NonEditableEvents.includes(e.event)}>
@@ -106,7 +106,7 @@ const EventLog = () => {
                                     !isNaN(e[0] as any)
                                     && !NonEditableEvents.includes(parseInt(e[0]))
                                 ).map(([key, value])=>(
-                                    <MenuItem value={key} key={key}>{value}</MenuItem>
+                                    <MenuItem value={key} key={key}>{MatchEventNames[parseInt(key)]}</MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
@@ -172,7 +172,7 @@ const EventLog = () => {
                                     !isNaN(e[0] as any) 
                                     && !NonEditableEvents.includes(parseInt(e[0]))
                                 ).map(([key, value])=>(
-                                    <MenuItem value={key} key={key}>{value}</MenuItem>
+                                    <MenuItem value={key} key={key}>{MatchEventNames[parseInt(key)]}</MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
@@ -223,7 +223,7 @@ const EventLog = () => {
                         <span>
                             Event:&nbsp;
                             <span className="text-primary font-bold">
-                                {MatchEvent[context.match.getEventById(eventToDelete)?.event||0]}
+                                {MatchEventNames[context.match.getEventById(eventToDelete)?.event||0]}
                             </span>
                         </span>
                         <span>
