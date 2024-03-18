@@ -128,9 +128,9 @@ const PreMatch = () => {
                 </Alert>
             }
             <span className="my-4 max-w-md text-center text-secondary">
-                Reminder that it is ok to make mistakes! The data is collected my humans and read by humans, 
+                Reminder that it is ok to make mistakes! The data is collected by humans and read by humans, 
                 they know if there was a slight error or if something is accidentally recorded at the wrong 
-                time. Whats important is the scores and count of events. The general timing, pickup data, amplify, 
+                time. Whats important is the scores and count of events. Everything else like timing, pickup data, amplify, 
                 and defended-on, isn't super important, and its ok if you forget to record that stuff.
             </span>
         </div>
