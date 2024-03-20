@@ -39,7 +39,7 @@ const manifest: Partial<ManifestOptions> = {
 }
 
 const includeAssets = ['index.html', '*.{js,css,html}', '**/*.{js,css,html}', 'fonts/*.woff2', 'imgs/*.png', 'protobuf/*.proto']
-const ignoreAssets = ['**/*.map', 'imgs/crescendo_field_render_full.png']
+const ignoreAssets = ['**/*.map']
 
 // https://vitejs.dev/config/
 export default defineConfig({
