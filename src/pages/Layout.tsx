@@ -1,23 +1,6 @@
-import { useContext, useEffect } from "react";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import SettingsContext from "../components/context/SettingsContext";
+import { Outlet, NavLink } from "react-router-dom";
 
 const Layout = () => {
-
-    const navigate = useNavigate();
-
-    const settings = useContext(SettingsContext);
-
-    // If the app is not installed, redirect to the install page
-    useEffect(() => {
-        if (import.meta.env.DEV) return; // Don't redirect in dev mode
-        if (settings?.bypassInstall) return;
-
-        if (!window.matchMedia('(display-mode: standalone)').matches) {
-            navigate('/');
-        }
-    }, []);
-
     return (
         <div className="w-full h-dvh relative flex flex-col overflow-hidden">
             <div className="w-full h-full overflow-y-auto">
