@@ -283,7 +283,7 @@ const AnalyticsPage = () => {
                                 total={matches.length} 
                                 plot={plotPropsOf(plotFunctions.park)}
                             />
-                            <PerMatchStatistic name="Human Player Scored" 
+                            <PerMatchStatistic name={team !== "8248" ? "Human Player Scored" : "Soren Scored"}
                                 desc="The notes scored by the human player at the end of the game. Only counts for the times this team's human player is at the Amp."
                                 {...humanPlayerPerformancePerMatch()}
                                 plot={plotPropsOf(plotFunctions.humanPlayerScored)}
