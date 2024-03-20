@@ -71,7 +71,7 @@ const plotFunctions = {
     },
     park: {
         name: "Park",
-        color: "#FF5722",
+        color: "#6f7cb0",
         matchCount: (match, auto, teleop) => match.climb!==ClimbResult.None ? 1 : 0,
     },
     humanPlayerScored: {

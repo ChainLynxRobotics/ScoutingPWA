@@ -79,12 +79,12 @@ const PreMatch = () => {
                         }}
                         label="Select Match">
                         {settings.matches.map((match) => {
-                            return <MenuItem value={match.matchId+""}><b>{match.matchId}</b></MenuItem>;
+                            return <MenuItem key={match.matchId} value={match.matchId}><b>{match.matchId}</b></MenuItem>;
                         })}
                     </Select>
                 </FormControl>
             </h1>
-            <span className="mb-8 max-w-md text-center text-secondary">If this is the wrong match, use the Next and Previous buttons on the schedule part of the settings page.</span>
+            <span className="mb-8 max-w-md text-center text-secondary">If this is the wrong match, use the select menu above or the settings to make sure it is correct!</span>
             <FormControl sx={{ m: 1, minWidth: 224 }}>
                 <InputLabel id="human-player-location-label">
                     {context.meta.teamNumber != 8248 ? `${context.meta.teamNumber}'s Human Player Location` : `Soren's Location`}
@@ -127,6 +127,12 @@ const PreMatch = () => {
                     <div>Set your name in <Link to='/settings'><u>settings</u></Link> to track your contributions!</div>
                 </Alert>
             }
+            <span className="my-4 max-w-md text-center text-secondary">
+                Reminder that it is ok to make mistakes! The data is collected by humans and read by humans, 
+                they know if there was a slight error or if something is accidentally recorded at the wrong 
+                time. Whats important is the scores and count of events. Everything else like timing, pickup data, amplify, 
+                and defended-on, isn't super important, and its ok if you forget to record that stuff.
+            </span>
         </div>
         </>
     );

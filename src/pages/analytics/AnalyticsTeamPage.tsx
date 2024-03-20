@@ -98,7 +98,7 @@ const AnalyticsPage = () => {
 
     return (
         <>
-            <h1 className="text-xl mb-4 flex items-center gap-2">
+            <h1 className="text-xl mb-2 flex items-center gap-2">
                 <span>Analytics for </span>
                 <b>Team </b>
                 <FormControl variant="standard" sx={{ minWidth: 120 }}>
@@ -126,6 +126,8 @@ const AnalyticsPage = () => {
                 </FormControl>
             </h1>
 
+            <a href={`https://www.thebluealliance.com/team/${team}`} target="_blank" rel="noreferrer" className="text-sm mb-4 text-blue-400 underline hover:text-blue-500 transition">View on The Blue Alliance</a>
+
             {hasLoaded===undefined || hasLoaded!==team ?
                 <div className="w-full h-full flex items-center justify-center">Loading...</div>
             :
@@ -133,7 +135,15 @@ const AnalyticsPage = () => {
             <Statistic name="Matches Scouted">
                 {matches.length}
             </Statistic>
-            <div className="text-secondary text-sm">"P.M." = "Per Match"</div>
+            <div className="mt-2 flex flex-col items-center text-secondary text-sm">
+                <div>"P.M." = "Per Match"</div>
+                <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined">query_stats</span> = Tap to show on graph
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined">info</span> = Tap for more info
+                </div>
+            </div>
 
             <div className="w-full mt-4 px-2 pb-12 flex flex-wrap gap-8 justify-center">
                 
@@ -141,7 +151,7 @@ const AnalyticsPage = () => {
                     <CardContent>
                         <h2 className="text-xl font-bold">Pre Match:</h2>
                         <div className="pl-4 mt-4">
-                            <div>Human Player Location:</div>
+                            <div>{team !== "8248" ? "Human Player Location:" : "Soren's Location:"}</div>
                             <PieChart
                                 series={[{ data: [
                                     { id: 1, value: matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.None).length, label: "Not on Field" },
@@ -273,7 +283,7 @@ const AnalyticsPage = () => {
                                 total={matches.length} 
                                 plot={plotPropsOf(plotFunctions.park)}
                             />
-                            <PerMatchStatistic name="Human Player Scored" 
+                            <PerMatchStatistic name={team !== "8248" ? "Human Player Scored" : "Soren Scored"}
                                 desc="The notes scored by the human player at the end of the game. Only counts for the times this team's human player is at the Amp."
                                 {...humanPlayerPerformancePerMatch()}
                                 plot={plotPropsOf(plotFunctions.humanPlayerScored)}

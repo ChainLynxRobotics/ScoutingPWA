@@ -1,7 +1,6 @@
 import JSZip from "jszip";
 import { MatchData, MatchEventData } from "../types/MatchData";
 import {stringify} from 'csv-stringify/browser/esm/sync';
-import FileSaver from 'file-saver';
 import MatchDatabase from "./MatchDatabase";
 import ClimbResult from "../enums/ClimbResult";
 import MatchResult from "../enums/MatchResult";
@@ -10,12 +9,13 @@ import MatchEvent from "../enums/MatchEvent";
 import AllianceColor from "../enums/AllianceColor";
 
 /**
- * Takes saved data and downloads it as a zip file to the user's computer in csv files.
+ * Takes saved data and returns it as a blob zip file to be downloaded to a users computer. Includes both csv and json forms of the data.
  * 
  * @param matchData - List of match entries, usually you would get this from the database.
  * @param events - List of event entries, again you would get this from the database.
+ * @returns A blob representing the zip file data
  */
-async function downloadDataAsZip(matchData: MatchData[], events: MatchEventData[]) {
+async function exportDataAsZip(matchData: MatchData[], events: MatchEventData[]) {
 
     if (matchData.length == 0 || events.length == 0) throw new Error("No data to export");
 
@@ -57,8 +57,7 @@ async function downloadDataAsZip(matchData: MatchData[], events: MatchEventData[
 
 
     const blob = await zip.generateAsync({type: "blob"});
-    const date = new Date();
-    FileSaver.saveAs(blob, `FRC-Scouting-Data-${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}.zip`);
+    return blob;
 }
 
 /**
@@ -83,6 +82,6 @@ async function importDataFromZip(file: File) {
 }
 
 export default {
-    downloadDataAsZip,
+    exportDataAsZip,
     importDataFromZip
 }

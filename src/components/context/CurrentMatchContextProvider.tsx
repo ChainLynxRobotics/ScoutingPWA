@@ -16,8 +16,9 @@ export default function CurrentMatchContextProvider({children}: {children: React
     const [scoutingData, setScoutingData] = useState<{matchId: string, teamNumber: number, allianceColor: AllianceColor} | undefined>(undefined);
 
     const [hasUpdate, setHasUpdate] = useState(false);
-    const [shouldAutoUpdate, setShouldAutoUpdate] = useState(true);
     const [updateNextRender, setUpdateNextRender] = useState(true); // Update on page load
+
+    const [showConfetti, setShowConfetti] = useState(false); // Show confetti on data submit
 
 
     /**
@@ -53,11 +54,7 @@ export default function CurrentMatchContextProvider({children}: {children: React
     }
 
     useEffect(() => {
-        if (shouldAutoUpdate) {
-            update();
-        } else {
-            setHasUpdate(true);
-        }
+        setHasUpdate(true);
     }, [settings.currentMatchIndex, settings.clientId, settings.matches]);
 
     useEffect(() => {
@@ -67,7 +64,7 @@ export default function CurrentMatchContextProvider({children}: {children: React
     }, [updateNextRender]);
 
     return (
-        <CurrentMatchContext.Provider value={{setHasUpdate, hasUpdate, update, incrementAndUpdate, shouldAutoUpdate, setShouldAutoUpdate}}>
+        <CurrentMatchContext.Provider value={{setHasUpdate, hasUpdate, update, incrementAndUpdate, showConfetti, setShowConfetti}}>
             <ConditionalWrapper 
                 condition={scoutingData} 
                 wrapper={(children) => 
@@ -83,4 +80,13 @@ export default function CurrentMatchContextProvider({children}: {children: React
             </ConditionalWrapper>
         </CurrentMatchContext.Provider>
     );
+}
+
+export type CurrentMatchContextType = {
+    setHasUpdate: (hasUpdate: boolean)=>void,
+    hasUpdate: boolean,
+    update: ()=>void,
+    incrementAndUpdate: ()=>void,
+    showConfetti: boolean,
+    setShowConfetti: (show: boolean)=>void
 }

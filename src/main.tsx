@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './index.css'
@@ -44,6 +44,23 @@ const darkTheme = createTheme({
 });
 
 export default function App() {
+
+  useEffect(() => {
+    async function lockScreen() {
+      try {
+        const screen: any = window.screen;
+
+        screen.lockOrientationUniversal = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
+
+        if ('lock' in screen.orientation) await (screen.orientation as any).lock('portrait-primary');
+        else if (screen.lockOrientationUniversal) screen.lockOrientationUniversal('portrait-primary');
+        else console.error("Orientation lock not supported");
+      } catch (e) {
+          console.error("Error trying to lock orientation", e);
+      }
+    }
+    lockScreen();
+  }, []);
 
   return (
     <ThemeProvider theme={darkTheme}>

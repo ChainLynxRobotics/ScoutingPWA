@@ -1,5 +1,5 @@
 import { Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchData, MatchIdentifier } from "../types/MatchData";
 import QrCodeType from "../enums/QrCodeType";
@@ -9,8 +9,12 @@ import MatchDataIO from "../util/MatchDataIO";
 import useLocalStorageState from "../util/localStorageState";
 import matchCompare from "../util/matchCompare";
 import Divider from "../components/Divider";
+import FileSaver from "file-saver";
+import SettingsContext from "../components/context/SettingsContext";
 
 const DataPage = () => {
+
+    const settings = useContext(SettingsContext);
 
     const { generateQrCodes, QRCodeList, QRCodeScanner } = QrCodeDataTransfer(onData);
 
@@ -83,7 +87,10 @@ const DataPage = () => {
         const _matches = await MatchDatabase.getAllMatches();
         const _events = await MatchDatabase.getAllEvents();
 
-        MatchDataIO.downloadDataAsZip(_matches, _events);
+        const blob = await MatchDataIO.exportDataAsZip(_matches, _events);
+        const date = new Date();
+        FileSaver.saveAs(blob, 
+            `Scouting Data - ${settings?.scoutName || 'No Name'} - ${date.toISOString()}.zip`);
     }
 
     const fileUpload = useRef<HTMLInputElement>(null);

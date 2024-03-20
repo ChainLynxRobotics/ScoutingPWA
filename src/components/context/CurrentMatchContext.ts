@@ -1,13 +1,5 @@
 import { createContext } from "react";
-
-export type CurrentMatchContextType = {
-    setHasUpdate: (hasUpdate: boolean)=>void,
-    hasUpdate: boolean,
-    update: ()=>void,
-    incrementAndUpdate: ()=>void,
-    shouldAutoUpdate: boolean,
-    setShouldAutoUpdate: (autoUpdate: boolean)=>void,
-}
+import { CurrentMatchContextType } from "./CurrentMatchContextProvider";
 
 const CurrentMatchContext = createContext<CurrentMatchContextType|undefined>(undefined);
 
