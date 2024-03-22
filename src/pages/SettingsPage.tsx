@@ -93,7 +93,7 @@ const SettingsPage = () => {
                 id="competition-id" 
                 label="Competition ID" 
                 value={settings.competitionId} 
-                onChange={(e)=>settings.setCompetitionId(e.target.value)} 
+                onChange={(e)=>{settings.setCompetitionId(e.target.value); settings.setCompetitionIdLastUpdated(Date.now())}} 
                 variant="outlined"
             />
             <FormHelperText>Make sure this matches the blue alliance url and everybody else's devices!</FormHelperText>

@@ -4,7 +4,7 @@
  * The competition id, used to identify the competition in the blue alliance API
  * ### REMEMBER TO CHANGE THIS FOR EACH COMPETITION ### (however it can be overridden on the settings page)
  */
-export const DEFAULT_COMPETITION_ID = "2024wasno";
+export const DEFAULT_COMPETITION_ID = "2024wasam";
 
 /** 
  * The number of seconds in a match

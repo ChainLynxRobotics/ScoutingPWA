@@ -1,13 +1,13 @@
-import { ReactElement } from "react";
+import { ReactElement, useEffect } from "react";
 import useLocalStorageState from "../../util/localStorageState";
 import SettingsContext from "./SettingsContext";
 
 
 export default function SettingsContextProvider({defaultCompetitionId, children}: {defaultCompetitionId: string, children: ReactElement}) {
 
-    const [bypassInstall, setBypassInstall] = useLocalStorageState<boolean>(false, "bypassInstall"); // Used to bypass the install
-
     const [competitionId, setCompetitionId] = useLocalStorageState<string>(defaultCompetitionId, "competitionId");
+    const [competitionIdLastUpdated, setCompetitionIdLastUpdated] = useLocalStorageState<number>(0, "competitionIdLastUpdated"); // Used to determine if the competitionId should auto be set to the default, aka if the custom competitionId is old
+
     const [clientId, setClientId] = useLocalStorageState<number>(0, "clientId"); // From 0-5
     const [scoutName, setScoutName] = useLocalStorageState<string>("", "scoutName"); // The name of the scout, to be submitted with the data
     
@@ -17,7 +17,17 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
     const [currentMatchIndex, setCurrentMatchIndex] = useLocalStorageState<number>(0, "nextMatch"); // The current match being, used to determine what match to show on the main page
 
     const [starredTeams, setStarredTeams] = useLocalStorageState<number[]>([], "starredTeams"); // Special teams we want to know about, used on the analytics page
+    const [analyticsCurrentCompetitionOnly, setAnalyticsCurrentCompetitionOnly] = useLocalStorageState<boolean>(true, "analyticsCurrentCompetitionOnly"); // Whether or not to only show data from the current competition
 
+    useEffect(() => {
+        // If the competitionId is over 7 days old, set it to the default
+        if (competitionIdLastUpdated < Date.now() - 1000 * 60 * 60 * 24 * 7) {
+            setCompetitionId(defaultCompetitionId);
+            setCompetitionIdLastUpdated(Date.now());
+            console.log("CompetitionId was old, setting to the default: "+defaultCompetitionId);
+        }
+    }, [competitionIdLastUpdated, setCompetitionId, defaultCompetitionId]);
+    
     const addMatch = (match: ScheduledMatch) => {
         setMatches([...matches, match]);
     }
@@ -51,16 +61,18 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
     }
 
     const value = {
-        bypassInstall,
-        setBypassInstall,
         competitionId,
         setCompetitionId,
+        competitionIdLastUpdated,
+        setCompetitionIdLastUpdated,
+
         clientId,
         setClientId,
         scoutName,
         setScoutName,
         fieldRotated,
         setFieldRotated,
+        
         matches,
         setMatches,
         currentMatchIndex,
@@ -73,6 +85,8 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
 
         starredTeams,
         setStarredTeams,
+        analyticsCurrentCompetitionOnly,
+        setAnalyticsCurrentCompetitionOnly,
     }
 
     return (
@@ -85,11 +99,11 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
 // The following types are used to define the value of the SettingsContext.Provider
 
 export type SettingsStateData = {
-    bypassInstall: boolean;
-    setBypassInstall: (bypassInstall: boolean) => void;
-
     competitionId: string;
     setCompetitionId: (competitionId: string) => void;
+    competitionIdLastUpdated: number;
+    setCompetitionIdLastUpdated: (competitionIdLastUpdated: number) => void;
+
     clientId: number;
     setClientId: (clientId: number) => void;
     scoutName: string;
@@ -109,6 +123,8 @@ export type SettingsStateData = {
 
     starredTeams: number[];
     setStarredTeams: (starredTeams: number[]) => void;
+    analyticsCurrentCompetitionOnly: boolean;
+    setAnalyticsCurrentCompetitionOnly: (analyticsCurrentCompetitionOnly: boolean) => void;
 }
 
 export type ScheduledMatch = {

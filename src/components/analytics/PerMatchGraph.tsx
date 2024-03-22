@@ -60,8 +60,9 @@ export default function PerMatchGraph(props: PerMatchGraph) {
     return (
         <LineChart
             xAxis={[{ 
-                data: props.matches.map((match)=>match.matchId.match(/[^_]+$/)?.join('') || ''), 
+                data: props.matches.map((match)=>match.matchId), 
                 scaleType: "point",
+                valueFormatter: (matchId)=>matchId.match(/[^_]+$/)?.join('') || ''
             }]}
             series={series}
             height={300 + labelHeight}

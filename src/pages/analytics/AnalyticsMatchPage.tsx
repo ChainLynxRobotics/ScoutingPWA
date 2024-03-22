@@ -1,21 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { MatchData, MatchEventData } from "../../types/MatchData";
 import MatchDatabase from "../../util/MatchDatabase";
 import { FormControl, Select, MenuItem } from "@mui/material";
+import SettingsContext from "../../components/context/SettingsContext";
 
 export default function AnalyticsMatchPage() {
 
     const { matchId } = useParams();
     const navigate = useNavigate();
+    const settings = useContext(SettingsContext);
+
     const [matchList, setMatchList] = useState<string[]|undefined>(undefined);
 
+    const analyticsCompetition = settings?.analyticsCurrentCompetitionOnly ? settings?.competitionId : undefined;
     useEffect(() => {
         async function loadMatches() {
-            setMatchList(await MatchDatabase.getUniqueMatches());
+            setMatchList(await MatchDatabase.getUniqueMatches(analyticsCompetition));
         }
         loadMatches();
-    }, []);
+    }, [analyticsCompetition]);
 
     const [hasLoaded, setHasLoaded] = useState(false);
     const [matches, setMatches] = useState<MatchData[]>([]);
