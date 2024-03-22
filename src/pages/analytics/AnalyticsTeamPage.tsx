@@ -26,12 +26,13 @@ const AnalyticsPage = () => {
 
     const settings = useContext(SettingsContext);
 
+    const analyticsCompetition = settings?.analyticsCurrentCompetitionOnly ? settings?.competitionId : undefined;
     useEffect(() => {
         async function loadTeams() {
-            setTeamList(await MatchDatabase.getUniqueTeams());
+            setTeamList(await MatchDatabase.getUniqueTeams(analyticsCompetition));
         }
         loadTeams();
-    }, []);
+    }, [analyticsCompetition]);
 
     const [hasLoaded, setHasLoaded] = useState<string|undefined>(undefined);
     const [matches, setMatches] = useState<MatchData[]>([]);
@@ -45,22 +46,21 @@ const AnalyticsPage = () => {
 
     const [plotsEnabled, setPlotsEnabled] = useLocalStorageState<string[]>([], "analyticsPlotsEnabled");
 
-
     useEffect(() => {
         if (hasLoaded===team) return;
         // Load matches for team
         async function loadMatches() {
             if (!team) return;
-            const matches = await MatchDatabase.getMatchesByTeam(parseInt(team));
+            const matches = await MatchDatabase.getMatchesByTeam(parseInt(team), analyticsCompetition);
             matches.sort((a, b) => matchCompare(a.matchId, b.matchId));
-            const events = await MatchDatabase.getEventsByTeam(parseInt(team));
+            const events = await MatchDatabase.getEventsByTeam(parseInt(team), analyticsCompetition);
             events.sort((a, b) => a.time - b.time);
             setMatches(matches);
             setEvents(events);
             setHasLoaded(team);
         }
         loadMatches();
-    }, [team]);
+    }, [team, analyticsCompetition]);
 
     function humanPlayerPerformancePerMatch(): {avg: number, min: number, max: number} {
         var sum = 0, min = 0, max = 0, total = 0;

@@ -134,16 +134,18 @@ async function getAllEvents() {
 /**
  * Retrieves all unique team numbers in the database
  * 
+ * @param competitionId - The competition id to filter by (optional)
  * @returns - A list of all the team numbers in the database
  */
-async function getUniqueTeams() {
+async function getUniqueTeams(competitionId?: string) {
     const db = await tryOpenDatabase();
     const tx = db.transaction(['matches'], 'readonly');
     const index = await tx.objectStore('matches').index('by-team');
 
     const teams: number[] = [];
     for await (const cursor of index.iterate()) {
-        if (!teams.includes(cursor.value.teamNumber)) teams.push(cursor.value.teamNumber);
+        if ((competitionId ? cursor.value.matchId.startsWith(competitionId) : true) && !teams.includes(cursor.value.teamNumber)) 
+            teams.push(cursor.value.teamNumber);
     }
     await tx.done;
     return teams;
@@ -152,16 +154,18 @@ async function getUniqueTeams() {
 /**
  * Retrieves all the different matches in the database
  * 
+ * @param competitionId - The competition id to filter by (optional)
  * @returns - A list of all the different matches in the database
  */
-async function getUniqueMatches() {
+async function getUniqueMatches(competitionId?: string) {
     const db = await tryOpenDatabase();
     const tx = db.transaction(['matches'], 'readonly');
     const index = await tx.objectStore('matches').index('by-matchId');
 
     const matches: string[] = [];
     for await (const cursor of index.iterate()) {
-        if (!matches.includes(cursor.value.matchId)) matches.push(cursor.value.matchId);
+        if ((competitionId ? cursor.value.matchId.startsWith(competitionId) : true) && !matches.includes(cursor.value.matchId))
+            matches.push(cursor.value.matchId);
     }
     await tx.done;
     return matches;
@@ -211,11 +215,26 @@ async function getMatchesByMatchId(matchId: string) {
  * Gets all the matches for a given team number
  * 
  * @param teamNumber - The 4 digit team number to get the matches for
+ * @param competitionId - The competition id to filter by (optional)
  * @returns All the matches for the given team number, does not include events
  */
-async function getMatchesByTeam(teamNumber: number) {
-    const db = await tryOpenDatabase();
-    return db.getAllFromIndex('matches', 'by-team', teamNumber);
+async function getMatchesByTeam(teamNumber: number, competitionId?: string) {
+    if (!competitionId) {
+        const db = await tryOpenDatabase();
+        return db.getAllFromIndex('matches', 'by-team', teamNumber);
+    } else {
+        const db = await tryOpenDatabase();
+        const tx = db.transaction(['matches'], 'readonly');
+        const index = await tx.objectStore('matches').index('by-team');
+
+        const matches: MatchData[] = [];
+        for await (const cursor of index.iterate(teamNumber)) {
+            if (cursor.value.matchId.startsWith(competitionId))
+                matches.push(cursor.value);
+        }
+        await tx.done;
+        return matches;
+    }
 }
 
 /**
@@ -237,11 +256,26 @@ async function getEventsByMatch(matchId: string, teamNumber?: number) {
  * Gets all the events for a given team number
  * 
  * @param teamNumber - The 4 digit team number to get the events for
+ * @param competitionId - The competition id to filter by (optional)
  * @returns - All the events for the given team number
  */
-async function getEventsByTeam(teamNumber: number) {
-    const db = await tryOpenDatabase();
-    return db.getAllFromIndex('events', 'by-team', teamNumber);
+async function getEventsByTeam(teamNumber: number, competitionId?: string) {
+    if (!competitionId) {
+        const db = await tryOpenDatabase();
+        return db.getAllFromIndex('events', 'by-team', teamNumber);
+    } else {
+        const db = await tryOpenDatabase();
+        const tx = db.transaction(['events'], 'readonly');
+        const index = await tx.objectStore('events').index('by-team');
+
+        const events: MatchEventData[] = [];
+        for await (const cursor of index.iterate(teamNumber)) {
+            if (cursor.value.matchId.startsWith(competitionId))
+                events.push(cursor.value);
+        }
+        await tx.done;
+        return events;
+    }
 }
 
 async function deleteMatch(matchId: string, teamNumber: number) {
@@ -265,9 +299,10 @@ async function deleteMatch(matchId: string, teamNumber: number) {
 /**
  * Gets the number of matches each scout has submitted
  * 
+ * @param competitionId - The competition id to filter by (optional)
  * @returns - A map of scoutName to the number of matches they have scouted
  */
-async function getContributions() {
+async function getContributions(competitionId?: string) {
     const db = await tryOpenDatabase();
 
     const tx = db.transaction(['matches'], 'readonly');
@@ -275,6 +310,8 @@ async function getContributions() {
 
     const people: {[key: string]: number} = {};
     for await (const cursor of store.iterate()) {
+        if (competitionId && !cursor.value.matchId.startsWith(competitionId)) continue;
+        
         let name = (cursor.value.scoutName||'').trim()
         if (name) {
             if (!people[cursor.value.scoutName]) people[cursor.value.scoutName] = 0;

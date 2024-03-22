@@ -1,4 +1,4 @@
-import { Button, Card, FormControl, MenuItem, Select, TextField } from "@mui/material";
+import { Button, Card, Checkbox, FormControl, FormControlLabel, MenuItem, Select, TextField } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import MatchDatabase from "../../util/MatchDatabase";
 import { Link } from "react-router-dom";
@@ -19,11 +19,12 @@ const AnalyticsPage = () => {
 
     const [analyticsMatchIndex, setAnalyticsMatchIndex] = useLocalStorageState(settings?.currentMatchIndex||0, "analyticsMatchIndex");
 
+    const analyticsCompetition = settings?.analyticsCurrentCompetitionOnly ? settings?.competitionId : undefined;
     useEffect(() => {
-        MatchDatabase.getUniqueTeams().then(setTeamList);
-        MatchDatabase.getUniqueMatches().then((matches)=>setMatchList(matches.sort(matchCompare)));
-        MatchDatabase.getContributions().then((contributors)=>setContributors(contributors));
-    }, []);
+        MatchDatabase.getUniqueTeams(analyticsCompetition).then(setTeamList);
+        MatchDatabase.getUniqueMatches(analyticsCompetition).then((matches)=>setMatchList(matches.sort(matchCompare)));
+        MatchDatabase.getContributions(analyticsCompetition).then((contributors)=>setContributors(contributors));
+    }, [analyticsCompetition]);
 
     function setCurrentMatch(matchId: string) {
         if (!settings) return;
@@ -51,6 +52,16 @@ const AnalyticsPage = () => {
                 onChange={(e)=>setSearch(e.target.value)}
             />
         </div>
+        {settings && 
+            <FormControlLabel 
+                control={
+                    <Checkbox value={settings.analyticsCurrentCompetitionOnly} 
+                        onChange={(event)=>settings.setAnalyticsCurrentCompetitionOnly(event.target.checked)} />
+                }
+                label="Only show data from the current competition" 
+                className="mt-4 text-sm text-secondary"
+            />
+        }
         <div className="w-full max-w-md flex flex-col">
 
             <h2 className="text-lg font-bold mt-4">Starred Teams</h2>
@@ -99,7 +110,7 @@ const AnalyticsPage = () => {
             <h2 className="text-lg font-bold mt-4">Matches Scouted</h2>
             <div className="flex flex-col gap-2 my-4 px-4">
                 {Object.entries(contributors).sort((a, b)=>b[1]-a[1]).map((contributor) => (
-                    <Card variant="outlined" className="flex justify-between items-center">
+                    <Card key={contributor[0]} variant="outlined" className="flex justify-between items-center">
                         <div className="text-lg font-bold px-2">{contributor[0]}</div>
                         <div className="text-xl font-cold px-2"><code>{contributor[1]}</code></div>
                     </Card>
