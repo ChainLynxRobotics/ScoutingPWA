@@ -157,7 +157,7 @@ const DataPage = () => {
             }
         </div>
 
-        <div className="fixed bottom-16 left-0 right-0 z-50 flex justify-center items-center">
+        <div className="fixed bottom-[calc(64px+var(--sab))] left-0 right-0 z-50 flex justify-center items-center">
             <div className="flex flex-wrap gap-2 justify-center items-center">
                 <Button 
                     color="primary"
@@ -245,8 +245,8 @@ const DataPage = () => {
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => {setQrOpen(false); setScannedMatches([...scannedMatches, ...matches!!.map((match) => match.matchId)])}}><span style={{color: "green"}}>SCAN FINISHED</span></Button>
-                <Button onClick={() => {setQrOpen(false)}}><span style={{color: "red"}}>CANCEL</span></Button>
+                <Button size="large" onClick={() => {setQrOpen(false); setScannedMatches([...scannedMatches, ...matches!!.map((match) => match.matchId)])}}><span style={{color: "green"}}>SCAN FINISHED</span></Button>
+                <Button size="large" onClick={() => {setQrOpen(false)}}><span style={{color: "red"}}>CANCEL</span></Button>
             </DialogActions>
         </Dialog>
 
@@ -269,7 +269,7 @@ const DataPage = () => {
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => {setScannerOpen(false)}}>Close</Button>
+                <Button size="large" onClick={() => {setScannerOpen(false)}}>Close</Button>
             </DialogActions>
         </Dialog>
 

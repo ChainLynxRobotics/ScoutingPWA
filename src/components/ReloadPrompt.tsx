@@ -26,7 +26,7 @@ function ReloadPrompt() {
   return (
     <div>
       { (offlineReady || needRefresh)
-        && <div className="fixed left-0 bottom-0 m-4 p-3">
+        && <div className="fixed left-0 z-[999] bottom-0 m-4 p-3">
             <Alert severity="info" variant="filled" onClose={() => close()}>
                 <div className="">
                     { offlineReady

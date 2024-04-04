@@ -367,7 +367,7 @@ const AnalyticsPage = () => {
                     </div>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={()=>setNotesOpen(false)}>Close</Button>
+                    <Button size="large" onClick={()=>setNotesOpen(false)}>Close</Button>
                 </DialogActions>
             </Dialog>
             </>

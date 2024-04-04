@@ -52,16 +52,18 @@ const AnalyticsPage = () => {
                 onChange={(e)=>setSearch(e.target.value)}
             />
         </div>
-        {settings && 
-            <FormControlLabel 
-                control={
-                    <Checkbox value={settings.analyticsCurrentCompetitionOnly} 
-                        onChange={(event)=>settings.setAnalyticsCurrentCompetitionOnly(event.target.checked)} />
-                }
-                label="Only show data from the current competition" 
-                className="mt-4 text-sm text-secondary"
-            />
-        }
+        <div className="flex items-center text-center">
+            {settings && 
+                <FormControlLabel 
+                    control={
+                        <Checkbox value={settings.analyticsCurrentCompetitionOnly} 
+                            onChange={(event)=>settings.setAnalyticsCurrentCompetitionOnly(event.target.checked)} />
+                    }
+                    label="Current Competition Only" 
+                    className="mt-4 text-sm text-secondary"
+                />
+            }
+        </div>
         <div className="w-full max-w-md flex flex-col">
 
             <h2 className="text-lg font-bold mt-4">Starred Teams</h2>

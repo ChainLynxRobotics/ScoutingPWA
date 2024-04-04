@@ -184,7 +184,7 @@ const SettingsPage = () => {
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => {setQrOpen(false)}}>Close</Button>
+                <Button size="large" onClick={() => {setQrOpen(false)}}>Close</Button>
             </DialogActions>
         </Dialog>
 
@@ -206,7 +206,7 @@ const SettingsPage = () => {
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => {setScannerOpen(false)}}>Close</Button>
+                <Button size="large" onClick={() => {setScannerOpen(false)}}>Close</Button>
             </DialogActions>
         </Dialog>
     </div>
