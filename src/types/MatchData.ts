@@ -1,33 +1,10 @@
+import { MatchDataFields } from "../DataValues";
 import AllianceColor from "../enums/AllianceColor";
-import ClimbResult from "../enums/ClimbResult";
-import HumanPlayerLocation from "../enums/HumanPlayerLocation";
 import MatchEvent from "../enums/MatchEvent";
-import MatchResult from "../enums/MatchResult";
 
 export type MatchIdentifier = {
     matchId: string; // This should be the full match id, including the competition id
     teamNumber: number;
-}
-
-export type MatchData = {
-    matchId: string; // This should be the full match id, including the competition id
-    teamNumber: number;
-    allianceColor: AllianceColor;
-    // pre
-    humanPlayerLocation: HumanPlayerLocation;
-    preload: boolean;
-    // during match
-    
-    // post
-    climb: ClimbResult;
-    defense: number;
-    humanPlayerPerformance: number;
-    matchResult: MatchResult;
-    // meta
-    notes: string;
-    scoutName: string;
-    matchStart: number;
-    submitTime: number;
 }
 
 export type MatchEventData = {
@@ -36,3 +13,23 @@ export type MatchEventData = {
     event: MatchEvent;
     time: number;
 };
+
+/**
+ * This is the "header" data that is always available in the MatchDataContext.
+ * This data is constant for the match.
+ */
+export type MatchDataHeader = MatchIdentifier & {
+    allianceColor: AllianceColor;
+}
+
+/**
+ * This is the "footer" data that is appended to the match data during submission.
+ * This does not get stored in the MatchDataContext, but is available in the MatchData object.
+ */
+export type MatchDataFooter = {
+    scoutName: string, // Scout name is here because its not in MatchDataContext, but as in the SettingsContext
+    matchStart: number,
+    submitTime: number,
+}
+
+export type MatchData = MatchDataHeader & MatchDataFields & MatchDataFooter;

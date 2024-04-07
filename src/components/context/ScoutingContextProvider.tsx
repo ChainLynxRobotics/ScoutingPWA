@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import SettingsContext from "./SettingsContext";
 import MatchResult from "../../enums/MatchResult";
 import ClimbResult from "../../enums/ClimbResult";
+import { MatchDataHeader } from "../../types/MatchData";
 
 /**
  * This function is used to create a new ScoutingStateData object, which is used to store/update all the data that is collected during a match.
@@ -333,11 +334,7 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
  */
 export type ScoutingContextType = {
     // Meta data
-    meta: {
-        matchId: string,
-        teamNumber: number,
-        allianceColor: AllianceColor,
-    }
+    meta: MatchDataHeader,
 
     // Pre//match
     pre: {
