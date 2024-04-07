@@ -1,7 +1,7 @@
 {
-  "name": "scoutingpwa",
+  "name": "chainlynx-scouting",
   "private": true,
-  "version": "1.2.2",
+  "version": "2024.2.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
