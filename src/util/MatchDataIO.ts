@@ -1,10 +1,7 @@
 import JSZip from "jszip";
 import { MatchData, MatchEventData } from "../types/MatchData";
-import csv from 'csv-stringify/browser/esm/sync';
+import { stringify } from 'csv-stringify/browser/esm/sync';
 import MatchDatabase from "./MatchDatabase";
-import ClimbResult from "../enums/ClimbResult";
-import MatchResult from "../enums/MatchResult";
-import HumanPlayerLocation from "../enums/HumanPlayerLocation";
 import MatchEvent from "../enums/MatchEvent";
 import AllianceColor from "../enums/AllianceColor";
 import { MatchDataFieldInformation, MatchDataFields } from "../DataValues";
@@ -42,7 +39,7 @@ async function exportDataAsZip(matchData: MatchData[], events: MatchEventData[])
 
     var zip = new JSZip();
     zip.file("raw/MatchData.json", JSON.stringify(matchData, undefined, 2))
-    zip.file("raw/MatchData.csv", csv.stringify(
+    zip.file("raw/MatchData.csv", stringify(
         serializedMatchData,
         {
             header: true,
@@ -54,7 +51,7 @@ async function exportDataAsZip(matchData: MatchData[], events: MatchEventData[])
         }
     ));
     zip.file("raw/MatchEvents.json", JSON.stringify(events, undefined, 2))
-    zip.file("raw/MatchEvents.csv", csv.stringify(
+    zip.file("raw/MatchEvents.csv", stringify(
         events.map((entry) => ({
             ...entry,
             event: MatchEvent[entry.event]
