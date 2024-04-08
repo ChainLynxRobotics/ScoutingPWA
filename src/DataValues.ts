@@ -4,8 +4,10 @@ import MatchResult from "./enums/MatchResult"
 
 /**
  * This is the data that is stored in the MatchDataContext, and only gets stored once per match (unlike events).
+ * 
  * These are the fields that are filled out by the user.
- * These fields should also change with every season.
+ * 
+ * ### >>> These fields should change with every season. <<<
  */
 export type MatchDataFields = {
     humanPlayerLocation: HumanPlayerLocation,
@@ -17,6 +19,11 @@ export type MatchDataFields = {
     notes: string,
 }
 
+/**
+ * This is the information about each field in the MatchDataFields object.
+ * 
+ * This is used for display purposes, state initialization, and serialization.
+ */
 export const MatchDataFieldInformation: Readonly<MatchDataFieldInformationRecord> = {
     humanPlayerLocation: {
         name: "Human Player Location",
@@ -50,6 +57,12 @@ export const MatchDataFieldInformation: Readonly<MatchDataFieldInformationRecord
     },
 }
 
+//================================================================================================
+//       Not: To edit different events, check out the {@link enums/MatchEvent} enum
+//================================================================================================
+
+
+// *** DO NOT EDIT BELOW THIS LINE ***
 
 // This makes sure the MatchDataFields and MatchDataFieldInformation are in sync
 type MatchDataFieldInformationRecord = {
