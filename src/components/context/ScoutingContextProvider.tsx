@@ -2,54 +2,40 @@ import { ReactElement, useContext, useEffect, useRef, useState } from "react"
 import { AUTO_DURATION, BOOST_DURATION, MATCH_DURATION } from "../../constants"
 import MatchEvent, { NonEditableEvents, NonRemovableEvents } from "../../enums/MatchEvent";
 import AllianceColor from "../../enums/AllianceColor";
-import HumanPlayerLocation from "../../enums/HumanPlayerLocation";
 import ScoutingContext from "./ScoutingContext";
 import MatchDatabase from "../../util/MatchDatabase";
 import CurrentMatchContext from "./CurrentMatchContext";
 import { useNavigate } from "react-router-dom";
 import SettingsContext from "./SettingsContext";
-import MatchResult from "../../enums/MatchResult";
-import ClimbResult from "../../enums/ClimbResult";
-import { MatchDataHeader } from "../../types/MatchData";
+import { MatchDataFieldInformation, MatchDataFields } from "../../DataValues";
 
-/**
- * This function is used to create a new ScoutingStateData object, which is used to store/update all the data that is collected during a match.
- * This basically acts as a state object, but with a lot of extra functionality to make it easier to work with the data.
- * 
- * @param matchId - The match id that this data is for, will be used to identify the match in the database later
- * @param teamNumber - The team number that this data is for
- * @param allianceColor - The alliance color (used mostly for display, but still required) that this data is for
- * 
- * @returns - A ScoutingStateData object that should be used in a context provider to allow access to the data throughout the app
- */
-export default function ScoutingContextProvider({children, matchId, teamNumber, allianceColor}: {children: ReactElement, matchId: string, teamNumber: number, allianceColor: AllianceColor}) {
+
+function getScoutingContextData(matchId: string, teamNumber: number, allianceColor: AllianceColor) {
     const navigate = useNavigate();
     const settings = useContext(SettingsContext);
     if (!settings) throw new Error("SettingsContext not found");
     const currentMatchContext = useContext(CurrentMatchContext);
 
-    // Pre
-    const [humanPlayerLocation, setHumanPlayerLocation] = useState<HumanPlayerLocation>(HumanPlayerLocation.None)
-    const [preload, setPreload] = useState<boolean>(false)
-    const [notes, setNotes] = useState<string>("")
-    // Match data
+    // ****************************************************
+    //           Perennial data and functions
+    // ****************************************************
+
+    const [matchFields, setMatchFields] = useState<MatchDataFields>(()=>{
+        // Get the default values for all the fields
+        const fields: any = {};
+        let field: keyof MatchDataFields;
+        for (field in MatchDataFieldInformation) {
+            fields[field] = MatchDataFieldInformation[field].defaultValue;
+        }
+        return fields;
+    });
+
+    // Match context info
+    const [matchStart, setMatchStart] = useState<number>(0)
     const [matchActive, setMatchActive] = useState<boolean>(false)
     const [inAuto, setInAuto] = useState<boolean>(true) // We start in auto
     const eventCounter = useRef(0);
     const [events, setEvents] = useState<Array<ScoutingContextEventData>>([])
-    const [isBeingDefendedOn, setIsBeingDefendedOn] = useState<boolean>(false)
-    const [isBoostActive, setIsBoostActive] = useState<boolean>(false)
-    const [attemptedCooperation, setAttemptedCooperation] = useState<boolean>(false)
-    const [specialAuto, setSpecialAuto] = useState<boolean>(false) // This is crossing the line in auto
-
-    const [matchStart, setMatchStart] = useState<number>(0)
-    const [boostEnd, setBoostEnd] = useState<number>(0);
-
-    // Post Match
-    const [climb, setClimb] = useState<ClimbResult>(ClimbResult.None);
-    const [defense, setDefense] = useState<number>(3);
-    const [humanPlayerPerformance, setHumanPlayerPerformance] = useState<number>(0);
-    const [matchResult, setMatchResult] = useState<MatchResult>(MatchResult.Loss);
 
     const getTime = () => {
         if (!matchActive) {
@@ -159,6 +145,57 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
         }
     }, [matchStart, events]);
 
+    // Submit the match data to the database
+    const submit = async () => {
+        const existing = await MatchDatabase.getMatchByIdentifier(settings.competitionId+"_"+matchId, teamNumber);
+        if (existing) return alert("Match data already submitted! Make sure you have the right match number selected in the settings!");
+        try {
+            await MatchDatabase.saveToDatabase(
+                {
+                    // Header data
+                    matchId: settings.competitionId+"_"+matchId,
+                    teamNumber,
+                    allianceColor,
+                    // Custom fields
+                    ...matchFields,
+                    // Footer data
+                    scoutName: settings.scoutName,
+                    matchStart,
+                    submitTime: Date.now()
+                },
+                events.map(e=>{
+                    return {
+                        matchId: settings.competitionId+"_"+matchId,
+                        teamNumber,
+                        event: e.event,
+                        time: e.time
+                    }
+                
+                })
+            );
+            currentMatchContext?.incrementAndUpdate();
+            currentMatchContext?.setShowConfetti(true);
+            navigate("/scout");
+        } catch (e) {
+            console.error(e);
+            alert("Failed to submit match data: "+e);
+        }
+    }
+
+
+    // ****************************************************
+    //         Season-specific states and functions
+    // ****************************************************
+
+    // Custom context values for season-specific data
+    // Remember to return these under the custom key in the return statement
+
+    const [isBeingDefendedOn, setIsBeingDefendedOn] = useState<boolean>(false)
+    const [isBoostActive, setIsBoostActive] = useState<boolean>(false)
+    const [boostEnd, setBoostEnd] = useState<number>(0);
+    const [attemptedCooperation, setAttemptedCooperation] = useState<boolean>(false)
+    const [specialAuto, setSpecialAuto] = useState<boolean>(false) // This is crossing the line in auto
+
     // Use our own setIsBeingDefendedOn function so we can add the isBeingDefendedOnStart and isBeingDefendedOnEnd events
     const setIsBeingDefendedOnWithEvents = (isBeingDefendedOnVal: boolean) => {
         // If we are being defended on and were not before, add an isBeingDefendedOnStart event
@@ -228,59 +265,20 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
         }
     }, [boostEnd, events]);
 
-    const submit = async () => {
-        const existing = await MatchDatabase.getMatchByIdentifier(settings.competitionId+"_"+matchId, teamNumber);
-        if (existing) return alert("Match data already submitted! Make sure you have the right match number selected in the settings!");
-        try {
-            await MatchDatabase.saveToDatabase(
-                {
-                    matchId: settings.competitionId+"_"+matchId,
-                    teamNumber,
-                    allianceColor,
-                    humanPlayerLocation,
-                    preload,
-                    climb,
-                    defense,
-                    humanPlayerPerformance,
-                    matchResult,
-                    notes,
-                    scoutName: settings.scoutName,
-                    matchStart,
-                    submitTime: Date.now()
-                },
-                events.map(e=>{
-                    return {
-                        matchId: settings.competitionId+"_"+matchId,
-                        teamNumber,
-                        event: e.event,
-                        time: e.time
-                    }
-                
-                })
-            );
-            currentMatchContext?.incrementAndUpdate();
-            currentMatchContext?.setShowConfetti(true);
-            navigate("/scout");
-        } catch (e) {
-            console.error(e);
-            alert("Failed to submit match data: "+e);
-        }
+
+    // ****************************************************
+    //           Return the state and functions
+    // ****************************************************
+
+    // This function is used to create a field setter function for each fields in the MatchDataFields object
+    function fieldSetter<T extends keyof MatchDataFields>(field: T, value: MatchDataFields[T]) {
+        setMatchFields({...matchFields, [field]: value});
     }
 
-    const contextData = {
-        meta: {
-            matchId,
-            teamNumber,
-            allianceColor
-        },
-        pre: {
-            humanPlayerLocation,
-            setHumanPlayerLocation,
-            preload,
-            setPreload,
-            notes,
-            setNotes,
-        },
+    return {
+        matchId,
+        teamNumber,
+        allianceColor,
         match: {
             startMatch,
             endMatch,
@@ -294,6 +292,8 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
             getEventById,
             editEventById,
             removeEventById,
+        },
+        custom: { // Return custom context values for season-specific data and functions
             isBeingDefendedOn,
             setIsBeingDefendedOn: setIsBeingDefendedOnWithEvents,
             isBoostActive,
@@ -304,19 +304,25 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
             specialAuto,
             setSpecialAuto: setSpecialAutoWithEvents
         },
-        post: {
-            climb,
-            setClimb,
-            defense,
-            setDefense,
-            humanPlayerPerformance,
-            setHumanPlayerPerformance,
-            matchResult,
-            setMatchResult,
-            submit
+        fields: {
+            ...matchFields,
+            set: fieldSetter
         },
+        submit
     }
+}
 
+/**
+ * This function is used to create a new ScoutingContextProvider object, which is used to store/update all the data that is collected during a match.
+ * 
+ * @param matchId - The match id that this data is for, will be used to identify the match in the database later
+ * @param teamNumber - The team number that this data is for
+ * @param allianceColor - The alliance color (used mostly for display, but still required) that this data is for
+ * 
+ * @returns A ContextProvider that allows its children to access the scouting context data and functions with `useContext(ScoutingContext);`
+ */
+export default function ScoutingContextProvider({children, matchId, teamNumber, allianceColor}: {children: ReactElement, matchId: string, teamNumber: number, allianceColor: AllianceColor}) {
+    const contextData = getScoutingContextData(matchId, teamNumber, allianceColor);
     return (
         <ScoutingContext.Provider value={contextData}>
             {children}
@@ -324,87 +330,10 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
     );
 }
 
-
-// The following types are used in the ScoutingContext value
-
 /**
- * Contains all the data that is collected during a match
- * Note: None of these functions will add events to the events array (except for addEvent), 
- * for example setIsBeingDefendedOn(boolean) will not add isBeingDefendedOnStart or isBeingDefendedOnEnd events
+ * This is the context type for ScoutingContext, which is all the data that can be accessed from the context
  */
-export type ScoutingContextType = {
-    // Meta data
-    meta: MatchDataHeader,
-
-    // Pre//match
-    pre: {
-        humanPlayerLocation: HumanPlayerLocation,
-        setHumanPlayerLocation: (humanPlayerLocation: HumanPlayerLocation) => void,
-        preload: boolean,
-        setPreload: (preload: boolean) => void,
-        notes: string,
-        setNotes: (notes: string) => void,
-    }
-
-
-    // Events
-    match: {
-        /**
-         * Note: Will add startMatch event
-         */
-        startMatch: () => void,
-        /**
-         * Note: Will add endMatch event
-         */
-        endMatch: () => void,
-        matchActive: boolean,
-        matchStart: number,
-        inAuto: boolean,
-        /**
-         * Note: Will add the autoEnd event if we are leaving auto (or remove it if we are re-entering auto due to misclick)
-         */
-        setIsAuto: (isAuto: boolean) => void,
-        getTime: () => number, // Epoch time relative to start of match
-        events: Array<ScoutingContextEventData>,
-        addEvent: (event: MatchEvent, time: number) => void,
-        getEventById: (id: number) => ScoutingContextEventData | undefined,
-        editEventById: (id: number, event: MatchEvent, time: number) => void,
-        removeEventById: (id: number) => void,
-
-        isBeingDefendedOn: boolean,
-        /**
-         * Note: Will add isBeingDefendedOnStart and isBeingDefendedOnEnd events
-         */
-        setIsBeingDefendedOn: (isBeingDefended: boolean) => void,
-        isBoostActive: boolean,
-        /**
-         * Note: Will add boostStart and boostEnd events, and automatically add the boostEnd event after a certain amount of time
-         */
-        setIsBoostActive: (isBoostActive: boolean) => void,
-        boostEnd: number,
-        attemptedCooperation: boolean
-        /**
-         * Note: This will add the specialCoop event when set to true and remove the event from the timeline if set to false
-         */
-        setAttemptedCooperation: (attemptedCooperation: boolean) => void,
-        specialAuto: boolean,
-        setSpecialAuto: (specialAuto: boolean) => void
-    }
-    
-
-    post: {
-        climb: ClimbResult,
-        setClimb: (climbLocation: ClimbResult) => void,
-        defense: number,
-        setDefense: (defense: number) => void,
-        humanPlayerPerformance: number,
-        setHumanPlayerPerformance: (humanPlayerPerformance: number) => void,
-        matchResult: MatchResult,
-        setMatchResult: (matchResult: MatchResult) => void,
-        submit: () => void
-    }
-
-}
+export type ScoutingContextType = ReturnType<typeof getScoutingContextData>;
 
 /**
  * Used to represent an event and correlated data that happens during a match

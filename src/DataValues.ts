@@ -29,6 +29,7 @@ export const MatchDataFieldInformation: Readonly<MatchDataFieldInformationRecord
     climb: {
         name: "Climb",
         defaultValue: ClimbResult.None,
+        serialize: (value) => ClimbResult[value],
     },
     defense: {
         name: "Defense",
@@ -41,6 +42,7 @@ export const MatchDataFieldInformation: Readonly<MatchDataFieldInformationRecord
     matchResult: {
         name: "Match Result",
         defaultValue: MatchResult.Loss,
+        serialize: (value) => MatchResult[value],
     },
     notes: {
         name: "Notes",

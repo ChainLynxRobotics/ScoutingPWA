@@ -1,12 +1,13 @@
 import JSZip from "jszip";
 import { MatchData, MatchEventData } from "../types/MatchData";
-import {stringify} from 'csv-stringify/browser/esm/sync';
+import csv from 'csv-stringify/browser/esm/sync';
 import MatchDatabase from "./MatchDatabase";
 import ClimbResult from "../enums/ClimbResult";
 import MatchResult from "../enums/MatchResult";
 import HumanPlayerLocation from "../enums/HumanPlayerLocation";
 import MatchEvent from "../enums/MatchEvent";
 import AllianceColor from "../enums/AllianceColor";
+import { MatchDataFieldInformation, MatchDataFields } from "../DataValues";
 
 /**
  * Takes saved data and returns it as a blob zip file to be downloaded to a users computer. Includes both csv and json forms of the data.
@@ -19,18 +20,30 @@ async function exportDataAsZip(matchData: MatchData[], events: MatchEventData[])
 
     if (matchData.length == 0 || events.length == 0) throw new Error("No data to export");
 
-    var zip = new JSZip();
-    zip.file("raw/MatchData.json", JSON.stringify(matchData, undefined, 2))
-    zip.file("raw/MatchData.csv", stringify(
-        matchData.map((entry) => ({
-            ...entry,
+    var serializedMatchData = [];
+    for (const entry of matchData) {
+        serializedMatchData.push({
+            // This might be the weird code ive ever written, but it works so I'm not changing it
+            // Basically, it goes through each entry in the object, and if the key is in the MatchDataFieldInformation object, it serializes it
+            ...Object.fromEntries(Object.entries(entry).map(([key, value]) => {
+                if (key in MatchDataFieldInformation) {
+                    const info = MatchDataFieldInformation[key as keyof MatchDataFields];
+                    return [key, (info.serialize as (value: any)=>string)?.(value) || value];
+                }
+                return [key, value];
+            })),
+            // This is for the perennial values that are always in the data
             allianceColor: AllianceColor[entry.allianceColor],
-            climb: ClimbResult[entry.climb],
-            matchResult: MatchResult[entry.matchResult],
-            humanPlayerLocation: HumanPlayerLocation[entry.humanPlayerLocation],
             matchStart: new Date(entry.matchStart).toISOString(),
             submitTime: new Date(entry.submitTime).toISOString()
-        })),
+        });
+    }
+
+
+    var zip = new JSZip();
+    zip.file("raw/MatchData.json", JSON.stringify(matchData, undefined, 2))
+    zip.file("raw/MatchData.csv", csv.stringify(
+        serializedMatchData,
         {
             header: true,
             columns: Object.keys(matchData[0]),
@@ -41,7 +54,7 @@ async function exportDataAsZip(matchData: MatchData[], events: MatchEventData[])
         }
     ));
     zip.file("raw/MatchEvents.json", JSON.stringify(events, undefined, 2))
-    zip.file("raw/MatchEvents.csv", stringify(
+    zip.file("raw/MatchEvents.csv", csv.stringify(
         events.map((entry) => ({
             ...entry,
             event: MatchEvent[entry.event]

@@ -2,11 +2,17 @@ import { MatchDataFields } from "../DataValues";
 import AllianceColor from "../enums/AllianceColor";
 import MatchEvent from "../enums/MatchEvent";
 
+/**
+ * This pair is used to identify any one match data object, and should be unique.
+ */
 export type MatchIdentifier = {
     matchId: string; // This should be the full match id, including the competition id
     teamNumber: number;
 }
 
+/**
+ * This is the data that is used for each event that happens in a match.
+ */
 export type MatchEventData = {
     matchId: string; // This should be the full match id, including the competition id
     teamNumber: number;
