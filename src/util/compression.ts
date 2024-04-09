@@ -28,7 +28,7 @@ export async function compressBytes(bytes: Uint8Array) {
  * @returns The base64 string representing the data
  */
 export function toBase64(data: Uint8Array) {
-    return Buffer.from(data).toString('base64');
+    return btoa(String.fromCharCode.apply(null, data as unknown as number[]));
 }
 
 /**
@@ -38,7 +38,7 @@ export function toBase64(data: Uint8Array) {
  * @returns The bytes it represents
  */
 export function fromBase64(base64String: string): Uint8Array {
-    return Buffer.from(base64String, 'base64');
+    return new Uint8Array(atob(base64String).split("").map(c=>c.charCodeAt(0)));
 }
 
 /**
