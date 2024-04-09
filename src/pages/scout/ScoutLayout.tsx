@@ -56,7 +56,7 @@ const ScoutPage = () => {
     }
     
     function skipAuto() {
-        context?.match.setIsAuto(false);
+        context?.match.setInAuto(false);
     }
 
     function endMatch() {
