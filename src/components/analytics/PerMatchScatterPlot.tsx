@@ -42,15 +42,6 @@ export default function PerMatchGraph(props: PerMatchGraph) {
     }, [props.matches, props.teleopEvents]);
 
 
-    function matchTimeAsStr(time: number) {
-        return Math.floor(time/1000 / 60)+":"+(time/1000 % 60).toFixed(0).padStart(2, '0');
-    }
-    
-    function matchIdAsStr(i: number) {
-        return props.matches[i]?.matchId.match(/[^_]+$/)?.join('') || '';
-    }
-
-
     // Formats and executes the list of data functions into a database for the graph
     const series: ScatterSeriesType[] = useMemo(() => {
         const series = props.plots.filter(plot=>plot.matchTimes!==undefined).map((plot): ScatterSeriesType => {
@@ -64,12 +55,12 @@ export default function PerMatchGraph(props: PerMatchGraph) {
                     return acc;
                 }, []),
                 valueFormatter(value) {
-                    return `${matchTimeAsStr(value.x)} ${matchIdAsStr(value.y)}`;
+                    return `${matchTimeAsStr(value.x)} ${matchIdAsStr(props.matches[value.y].matchId)}`;
                 }
             }
         });
         return series;
-    }, [props]);
+    }, [props, autoEventsByMatch, teleopEventsByMatch]);
 
     const labelHeight = Math.floor(props.plots.filter(plot=>plot.matchTimes!==undefined).length / 3) * 32 + 64;
 
@@ -94,4 +85,12 @@ export default function PerMatchGraph(props: PerMatchGraph) {
             margin={{ top: labelHeight }}
         />
     )
+}
+
+function matchTimeAsStr(time: number) {
+    return Math.floor(time/1000 / 60)+":"+(time/1000 % 60).toFixed(0).padStart(2, '0');
+}
+
+function matchIdAsStr(fullMatchId: string) {
+    return fullMatchId.match(/[^_]+$/)?.join('') || '';
 }

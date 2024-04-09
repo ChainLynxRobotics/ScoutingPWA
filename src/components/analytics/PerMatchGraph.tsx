@@ -53,7 +53,7 @@ export default function PerMatchGraph(props: PerMatchGraph) {
             }
         });
         return series;
-    }, [props]);
+    }, [props, autoEventsByMatch, teleopEventsByMatch]);
 
     const labelHeight = Math.floor(props.plots.length / 3) * 32 + 64;
 

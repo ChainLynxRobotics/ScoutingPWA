@@ -46,7 +46,7 @@ const MatchSchedule = () => {
                 setModelRed3(match.red3);
             }
         }
-    }, [matchToEdit]);
+    }, [matchToEdit, settings?.matches]);
 
     const createMatch = () => {
         if (!settings) return;

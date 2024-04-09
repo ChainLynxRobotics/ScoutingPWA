@@ -60,10 +60,10 @@ const AnalyticsPage = () => {
             setHasLoaded(team);
         }
         loadMatches();
-    }, [team, analyticsCompetition]);
+    }, [team, analyticsCompetition, hasLoaded]);
 
     function humanPlayerPerformancePerMatch(): {avg: number, min: number, max: number} {
-        var sum = 0, min = 0, max = 0, total = 0;
+        let sum = 0, min = 0, max = 0, total = 0;
         matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Amp).forEach(match=> {
             const count = match.humanPlayerPerformance;
             sum += count;

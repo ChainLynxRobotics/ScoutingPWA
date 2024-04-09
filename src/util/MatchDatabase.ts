@@ -22,9 +22,9 @@ interface MatchDatabaseSchema extends DBSchema {
     };
 }
 
-var dbCache: IDBPDatabase<MatchDatabaseSchema> | null = null;
+let dbCache: IDBPDatabase<MatchDatabaseSchema> | null = null;
 
-var dbOpenCallback: null|Promise<IDBPDatabase<MatchDatabaseSchema>> = null;
+let dbOpenCallback: null|Promise<IDBPDatabase<MatchDatabaseSchema>> = null;
 /**
  * Tries to open the database, if it is already open it will return the cached database
  * If a database open is already in effect, will return the promise to the already existing open operation
@@ -312,7 +312,7 @@ async function getContributions(competitionId?: string) {
     for await (const cursor of store.iterate()) {
         if (competitionId && !cursor.value.matchId.startsWith(competitionId)) continue;
         
-        let name = (cursor.value.scoutName||'').trim()
+        const name = (cursor.value.scoutName||'').trim()
         if (name) {
             if (!people[cursor.value.scoutName]) people[cursor.value.scoutName] = 0;
             people[cursor.value.scoutName]++;

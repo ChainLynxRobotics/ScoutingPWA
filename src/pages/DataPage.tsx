@@ -11,6 +11,7 @@ import matchCompare from "../util/matchCompare";
 import Divider from "../components/Divider";
 import FileSaver from "file-saver";
 import SettingsContext from "../components/context/SettingsContext";
+import { QRCodeData } from "../types/QRCodeData";
 
 const DataPage = () => {
 
@@ -46,6 +47,7 @@ const DataPage = () => {
             
             const data = {
                 qrType: QrCodeType.MatchData,
+                version: APP_VERSION,
                 matches: matches,
                 events: events,
             };
@@ -60,8 +62,8 @@ const DataPage = () => {
     }
 
     // Decodes a fully assembled qr code and imports the match data
-    async function onData(data: any) {
-        if (data.qrType !== QrCodeType.MatchData) throw new Error("QR Codes do not contain match data");
+    async function onData(data: QRCodeData) {
+        if (data.qrType !== QrCodeType.MatchData || !data.matches || !data.events) throw new Error("QR Codes do not contain match data");
         
         await MatchDatabase.importData(data.matches, data.events);
 
@@ -107,7 +109,7 @@ const DataPage = () => {
 
     return (
     <div className="w-full flex flex-col items-center text-center">
-        <h1 className="text-xl mb-4 pt-4 font-bold">Saved matches <Button onClick={() => {setScannedMatches(matches!!.map((match) => match.matchId))}}>Archive All</Button></h1>
+        <h1 className="text-xl mb-4 pt-4 font-bold">Saved matches <Button onClick={() => {setScannedMatches(matches!.map((match) => match.matchId))}}>Archive All</Button></h1>
         <div className="w-full max-w-lg">
             {matches?.filter((match) => !scannedMatches.includes(match.matchId)).map((game) =>
                 <div className="mx-5 my-2" key={game.matchId+"-"+game.teamNumber}>
@@ -141,7 +143,7 @@ const DataPage = () => {
                         <div className="flex items-center justify-between p-2">
                             <span className=""><code>{game.matchId}</code> - Team <code>{game.teamNumber}</code></span>
                             <div>
-                                <IconButton onClick={()=>{let localScannedMatches = scannedMatches; localScannedMatches.splice(localScannedMatches.indexOf(game.matchId), 1); setScannedMatches(localScannedMatches); updateMatches()}}>
+                                <IconButton onClick={()=>{const localScannedMatches = scannedMatches; localScannedMatches.splice(localScannedMatches.indexOf(game.matchId), 1); setScannedMatches(localScannedMatches); updateMatches()}}>
                                     <span className="material-symbols-outlined">unarchive</span>
                                 </IconButton>
                                 <IconButton onClick={()=>setToDelete(game)}>
@@ -245,7 +247,7 @@ const DataPage = () => {
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button size="large" onClick={() => {setQrOpen(false); setScannedMatches([...scannedMatches, ...matches!!.map((match) => match.matchId)])}}><span style={{color: "green"}}>SCAN FINISHED</span></Button>
+                <Button size="large" onClick={() => {setQrOpen(false); setScannedMatches([...scannedMatches, ...matches!.map((match) => match.matchId)])}}><span style={{color: "green"}}>SCAN FINISHED</span></Button>
                 <Button size="large" onClick={() => {setQrOpen(false)}}><span style={{color: "red"}}>CANCEL</span></Button>
             </DialogActions>
         </Dialog>

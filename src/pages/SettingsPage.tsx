@@ -6,11 +6,11 @@ import QrCodeDataTransfer from "../components/QrCodeDataTransfer";
 import QrCodeType from "../enums/QrCodeType";
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormHelperText, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import Divider from "../components/Divider";
+import { QRCodeData } from "../types/QRCodeData";
 
 const SettingsPage = () => {
 
     const settings = useContext(SettingsContext);
-    if (!settings) return (<ErrorPage msg="Settings context not found?!?!?!" />)
 
     // QR code sending and receiving
     const { generateQrCodes, QRCodeList, QRCodeScanner } = QrCodeDataTransfer(onQrData);
@@ -33,6 +33,7 @@ const SettingsPage = () => {
         if (!settings) return;
         const data = {
             qrType: QrCodeType.Schedule,
+            version: APP_VERSION,
             schedule: settings.matches,
             scheduleData: {
                 fieldRotated: settings.fieldRotated,
@@ -44,8 +45,9 @@ const SettingsPage = () => {
         setQrOpen(true);
     }
 
-    function onQrData(data: any) {
-        if (data.qrType !== QrCodeType.Schedule) throw new Error("QR Codes do not contain schedule data");
+    function onQrData(data: QRCodeData) {
+        if (data.qrType !== QrCodeType.Schedule || !data.schedule || !data.scheduleData) 
+            throw new Error("QR Codes do not contain schedule data");
         if (!settings) return;
         settings.setMatches(data.schedule);
         const scheduleData = data.scheduleData;
@@ -57,6 +59,7 @@ const SettingsPage = () => {
         setScannerOpen(false);
     }
 
+    if (!settings) return (<ErrorPage msg="Settings context not found?!?!?!" />)
     return (
     <div className="w-full flex flex-col items-center gap-5 px-4">
         <h1 className="text-2xl font-bold mt-4">Settings</h1>

@@ -4,6 +4,7 @@ import { numOfEvents, timesOfEvents } from "./analyticsUtil";
 import ClimbResult from "../../enums/ClimbResult";
 import { MatchData, MatchEventData } from "../../types/MatchData";
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const plotFunctions = {
     notePreload: {
         name: "Note Preloaded",

@@ -1,4 +1,4 @@
-import { ReactElement, useContext, useEffect, useRef, useState } from "react"
+import { ReactElement, useCallback, useContext, useEffect, useRef, useState } from "react"
 import { AUTO_DURATION, BOOST_DURATION, MATCH_DURATION } from "../../constants"
 import MatchEvent, { NonEditableEvents, NonRemovableEvents } from "../../enums/MatchEvent";
 import AllianceColor from "../../enums/AllianceColor";
@@ -9,8 +9,17 @@ import { useNavigate } from "react-router-dom";
 import SettingsContext from "./SettingsContext";
 import { MatchDataFieldInformation, MatchDataFields } from "../../DataValues";
 
-
-function getScoutingContextData(matchId: string, teamNumber: number, allianceColor: AllianceColor) {
+/**
+ * Gets the ScoutingContextProvider data.
+ * 
+ * This is a separate method so I can get the return type to use in the ScoutingContext.
+ * 
+ * @param matchId - The matchId to get the context states for
+ * @param teamNumber - The teamNumber to get the context states for
+ * @param allianceColor - The team color to get the context states for
+ * @returns An object representing what the ScoutingContextProvider will provide
+ */
+function useScoutingContextData(matchId: string, teamNumber: number, allianceColor: AllianceColor) {
     const navigate = useNavigate();
     const settings = useContext(SettingsContext);
     if (!settings) throw new Error("SettingsContext not found");
@@ -22,7 +31,7 @@ function getScoutingContextData(matchId: string, teamNumber: number, allianceCol
 
     const [matchFields, setMatchFields] = useState<MatchDataFields>(()=>{
         // Get the default values for all the fields
-        const fields: any = {};
+        const fields: any = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
         let field: keyof MatchDataFields;
         for (field in MatchDataFieldInformation) {
             fields[field] = MatchDataFieldInformation[field].defaultValue;
@@ -37,25 +46,25 @@ function getScoutingContextData(matchId: string, teamNumber: number, allianceCol
     const eventCounter = useRef(0);
     const [events, setEvents] = useState<Array<ScoutingContextEventData>>([])
 
-    const getTime = () => {
+    const getTime = useCallback(() => {
         if (!matchActive) {
             return 0;
         }
         return Date.now() - matchStart;
-    }
+    }, [matchActive, matchStart]);
 
-    const addEvent = (event: MatchEvent, time: number) => {
+    const addEvent = useCallback((event: MatchEvent, time: number) => {
         setEvents([...events, {id: eventCounter.current, event, time}]);
         console.log("Recording event "+MatchEvent[event]+" at time "+time+"ms with id "+eventCounter.current, events);
         eventCounter.current++;
-    }
+    }, [events]);
 
-    const getEventById = (id: number) => {
+    const getEventById = useCallback((id: number) => {
         return events.find((event) => event.id === id);
-    }
+    }, [events]);
 
-    const editEventById = (id: number, event: MatchEvent, time: number) => {
-        var eventIndex = events.findIndex((event) => event.id === id);
+    const editEventById = useCallback((id: number, event: MatchEvent, time: number) => {
+        const eventIndex = events.findIndex((event) => event.id === id);
         if (eventIndex === -1) {
             console.warn("Attempted to edit event that doesn't exist");
             return;
@@ -64,13 +73,13 @@ function getScoutingContextData(matchId: string, teamNumber: number, allianceCol
             console.warn("Attempted to edit non-editable event "+MatchEvent[events[eventIndex].event]);
             return;
         }
-        var newEvents = [...events];
+        const newEvents = [...events];
         newEvents[eventIndex] = {id, event, time};
         setEvents(newEvents);
-    }
+    }, [events]);
 
-    const removeEventById = (id: number) => {
-        var event = getEventById(id);
+    const removeEventById = useCallback((id: number) => {
+        const event = getEventById(id);
         if (!event) {
             console.warn("Attempted to remove event that doesn't exist");
             return;
@@ -80,9 +89,9 @@ function getScoutingContextData(matchId: string, teamNumber: number, allianceCol
             return;
         }
         setEvents(events.filter((event) => event.id !== id));
-    }
+    }, [events, getEventById]);
 
-    const startMatch = () => {
+    const startMatch = useCallback(() => {
         if (!matchStart) {
             setMatchStart(Date.now());
             addEvent(MatchEvent.matchStart, 0);
@@ -92,25 +101,15 @@ function getScoutingContextData(matchId: string, teamNumber: number, allianceCol
             setEvents(events.filter(e=>e.event!=MatchEvent.matchEnd));
             setMatchActive(true);
         }
-    }
+    }, [matchStart, matchActive, addEvent, events]);
 
-    const endMatch = () => {
-        // For all toggles, reset them back to their default state
-        if (isBeingDefendedOn) {
-            addEvent(MatchEvent.defendedOnEnd, getTime());
-            setIsBeingDefendedOn(false);
-        }
-        if (isBoostActive) {
-            addEvent(MatchEvent.specialBoostEnd, getTime());
-            setIsBoostActive(false);
-        }
-
+    const endMatch = useCallback(() => {
         addEvent(MatchEvent.matchEnd, getTime());
         setMatchActive(false);
-    }
+    }, [addEvent, getTime]);
 
     // Use our own setIsAuto function so we can add the autoEnd event
-    const setIsAuto = (inAutoVal: boolean) => {
+    const setInAutoWithEvents = useCallback((inAutoVal: boolean) => {
         // If we are in auto and leaving it, add an autoEnd event
         if (inAuto && !inAutoVal) {
             addEvent(MatchEvent.autoEnd, getTime());
@@ -119,19 +118,19 @@ function getScoutingContextData(matchId: string, teamNumber: number, allianceCol
             setEvents(events.filter((event) => event.event !== MatchEvent.autoEnd));
         }
         setInAuto(inAutoVal);
-    }
+    }, [inAuto, events, addEvent, getTime]);
 
     // Automatically disable auto after a certain amount of time
     useEffect(() => {
         if (matchStart && Date.now() < matchStart + AUTO_DURATION * 1000) {
             const timeout = setTimeout(() => {
                 if (inAuto) {
-                    setIsAuto(false);
+                    setInAutoWithEvents(false);
                 }
             }, matchStart + AUTO_DURATION * 1000 - Date.now());
             return () => clearTimeout(timeout);
         }
-    }, [matchStart, events]);
+    }, [matchStart, events, inAuto, setInAutoWithEvents]);
 
     // Automatically end the match after a certain amount of time
     useEffect(() => {
@@ -143,7 +142,7 @@ function getScoutingContextData(matchId: string, teamNumber: number, allianceCol
             }, matchStart + MATCH_DURATION * 1000 - Date.now());
             return () => clearTimeout(timeout);
         }
-    }, [matchStart, events]);
+    }, [matchStart, events, endMatch, matchActive]);
 
     // Submit the match data to the database
     const submit = async () => {
@@ -263,7 +262,22 @@ function getScoutingContextData(matchId: string, teamNumber: number, allianceCol
             }, matchStart + boostEnd - Date.now());
             return () => clearTimeout(timeout);
         }
-    }, [boostEnd, events]);
+    }, [boostEnd, events, isBoostActive, matchStart]);
+
+    // At the end of the match, reset toggles
+    useEffect(()=> {
+        if (!matchActive && matchStart) {
+            // For all toggles, reset them back to their default state
+            if (isBeingDefendedOn) {
+                addEvent(MatchEvent.defendedOnEnd, getTime());
+                setIsBeingDefendedOn(false);
+            }
+            if (isBoostActive) {
+                addEvent(MatchEvent.specialBoostEnd, getTime());
+                setIsBoostActive(false);
+            }
+        }
+    }, [matchActive, matchStart, isBeingDefendedOn, isBoostActive, addEvent, getTime]);
 
 
     // ****************************************************
@@ -285,7 +299,7 @@ function getScoutingContextData(matchId: string, teamNumber: number, allianceCol
             matchActive,
             matchStart,
             inAuto,
-            setIsAuto,
+            setInAuto: setInAutoWithEvents,
             getTime,
             events,
             addEvent,
@@ -322,7 +336,7 @@ function getScoutingContextData(matchId: string, teamNumber: number, allianceCol
  * @returns A ContextProvider that allows its children to access the scouting context data and functions with `useContext(ScoutingContext);`
  */
 export default function ScoutingContextProvider({children, matchId, teamNumber, allianceColor}: {children: ReactElement, matchId: string, teamNumber: number, allianceColor: AllianceColor}) {
-    const contextData = getScoutingContextData(matchId, teamNumber, allianceColor);
+    const contextData = useScoutingContextData(matchId, teamNumber, allianceColor);
     return (
         <ScoutingContext.Provider value={contextData}>
             {children}
@@ -333,7 +347,7 @@ export default function ScoutingContextProvider({children, matchId, teamNumber, 
 /**
  * This is the context type for ScoutingContext, which is all the data that can be accessed from the context
  */
-export type ScoutingContextType = ReturnType<typeof getScoutingContextData>;
+export type ScoutingContextType = ReturnType<typeof useScoutingContextData>;
 
 /**
  * Used to represent an event and correlated data that happens during a match

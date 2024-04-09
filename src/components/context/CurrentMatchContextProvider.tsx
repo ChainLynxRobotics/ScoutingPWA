@@ -1,4 +1,4 @@
-import { ReactElement, useContext, useEffect, useState } from "react";
+import { ReactElement, useCallback, useContext, useEffect, useState } from "react";
 import SettingsContext from "./SettingsContext";
 import AllianceColor from "../../enums/AllianceColor";
 import CurrentMatchContext from "./CurrentMatchContext";
@@ -25,7 +25,7 @@ export default function CurrentMatchContextProvider({children}: {children: React
      * Updates the current match being scouting, may clear any in-progress data. 
      * This function should be called after prompting to user to update after changing schedules settings.
      */
-    const update = (): void => {
+    const update = useCallback(() => {
         if (settings.matches.length == 0 || settings.currentMatchIndex >= settings.matches.length) {
             console.error("No matches to scout");
             setScoutingData(undefined);
@@ -36,8 +36,8 @@ export default function CurrentMatchContextProvider({children}: {children: React
         const index = (settings.currentMatchIndex + settings.clientId) % 6;
 
         // ALternate between red and blue teams for each scout
-        var team: number = [match.blue1, match.red1, match.blue2, match.red2, match.blue3, match.red3][index];
-        var color: AllianceColor = (index % 2 == 0) ? AllianceColor.Blue : AllianceColor.Red;
+        const team: number = [match.blue1, match.red1, match.blue2, match.red2, match.blue3, match.red3][index];
+        const color: AllianceColor = (index % 2 == 0) ? AllianceColor.Blue : AllianceColor.Red;
 
         setScoutingData({
             matchId: match.matchId,
@@ -45,8 +45,7 @@ export default function CurrentMatchContextProvider({children}: {children: React
             allianceColor: color
         });
         setHasUpdate(false);
-        
-    }
+    }, [settings]);
 
     const incrementAndUpdate = () => {
         settings.setCurrentMatchIndex(settings.currentMatchIndex + 1);
@@ -61,12 +60,12 @@ export default function CurrentMatchContextProvider({children}: {children: React
         if (!updateNextRender) return;
         update();
         setUpdateNextRender(false);
-    }, [updateNextRender]);
+    }, [updateNextRender, update]);
 
     return (
         <CurrentMatchContext.Provider value={{setHasUpdate, hasUpdate, update, incrementAndUpdate, showConfetti, setShowConfetti}}>
             <ConditionalWrapper 
-                condition={scoutingData} 
+                condition={scoutingData !== undefined} 
                 wrapper={(children) => 
                 <ScoutingContextProvider key={scoutingData?.matchId || '' + "-" + scoutingData?.teamNumber || 0}
                     matchId={scoutingData?.matchId || ''} 

@@ -29,7 +29,7 @@ export function timesOfEvents(events: MatchEventData[], ...eventsToFilter: ME[])
  * @returns the average, minimum, and maximum number of events per match
  */
 export function perMatchStats(matches: MatchData[], events: MatchEventData[], ...eventsToFilter: ME[]): {avg: number, min: number, max: number} {
-    var sum = 0, min = Infinity, max = 0, total = 0;
+    let sum = 0, min = Infinity, max = 0, total = 0;
     matches.forEach(match=> {
         const count = events.filter(e=>match.matchId===e.matchId).filter(e=>eventsToFilter.includes(e.event)).length;
         sum += count;

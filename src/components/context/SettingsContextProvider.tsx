@@ -26,7 +26,7 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
             setCompetitionIdLastUpdated(Date.now());
             console.log("CompetitionId was old, setting to the default: "+defaultCompetitionId);
         }
-    }, [competitionIdLastUpdated, setCompetitionId, defaultCompetitionId]);
+    }, [competitionIdLastUpdated, setCompetitionId, defaultCompetitionId, setCompetitionIdLastUpdated]);
     
     const addMatch = (match: ScheduledMatch) => {
         setMatches([...matches, match]);
