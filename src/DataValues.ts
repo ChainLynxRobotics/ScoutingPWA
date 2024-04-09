@@ -8,6 +8,8 @@ import MatchResult from "./enums/MatchResult"
  * These are the fields that are filled out by the user.
  * 
  * ### >>> These fields should change with every season. <<<
+ * 
+ * When you change these, remember to change the ProtoBuf file as well! **`/public/protobuf/data_transfer.proto`**
  */
 export type MatchDataFields = {
     humanPlayerLocation: HumanPlayerLocation,
