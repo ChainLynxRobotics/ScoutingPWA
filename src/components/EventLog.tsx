@@ -28,7 +28,7 @@ const EventLog = () => {
                 setEditTimeSeconds(Math.floor(event.time / 1000 % 60));
             }
         }
-    }, [eventToEdit]);
+    }, [eventToEdit, context]);
 
     function createEvent() {
         context?.match.addEvent(createName, (createTimeMinutes||0) * 60 * 1000 + (createTimeSeconds||0) * 1000);
@@ -103,9 +103,9 @@ const EventLog = () => {
                                 onChange={(e)=>{setCreateName(parseInt(e.target.value) as MatchEvent)}}
                             >
                                 {Object.entries(MatchEvent).filter((e) => 
-                                    !isNaN(e[0] as any)
+                                    !isNaN(e[0] as unknown as number)
                                     && !NonEditableEvents.includes(parseInt(e[0]))
-                                ).map(([key, value])=>(
+                                ).map(([key])=>(
                                     <MenuItem value={key} key={key}>{MatchEventNames[parseInt(key)]}</MenuItem>
                                 ))}
                             </Select>
@@ -169,9 +169,9 @@ const EventLog = () => {
                                     <MenuItem value={editName+""} disabled>{MatchEvent[editName]}</MenuItem>
                                 }
                                 {Object.entries(MatchEvent).filter((e) => 
-                                    !isNaN(e[0] as any) 
+                                    !isNaN(e[0] as unknown as number) 
                                     && !NonEditableEvents.includes(parseInt(e[0]))
-                                ).map(([key, value])=>(
+                                ).map(([key])=>(
                                     <MenuItem value={key} key={key}>{MatchEventNames[parseInt(key)]}</MenuItem>
                                 ))}
                             </Select>

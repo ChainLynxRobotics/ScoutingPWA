@@ -1,34 +1,40 @@
 import protobuf from "protobufjs";
 import { useRef, useState } from "react";
-import { compressMessageToBase64Gzip, decompressMessageFromBase64Gzip } from "../util/stringCompression";
+import { compressBytes, decompressBytes, fromBase64, toBase64 } from "../util/compression";
 import QRCode from "react-qr-code";
 import { QrScanner } from "@yudiel/react-qr-scanner";
+import { QRCodeData } from "../types/QRCodeData";
 
 export const QR_CHUNK_SIZE = 256;
 export const QR_PROTOCOL_REGEX = /^scoutingdata:(\d+)\/(\d+):(.+)$/;
 
-export default function QrCodeDataTransfer(onReceiveData: (data: any) => void) {
+export default function QrCodeDataTransfer(onReceiveData: (data: QRCodeData) => void) {
 
     const [outQrData, setOutQrData] = useState<string[]>([]);
     const inQrData = useRef<string[]>([]);
     const [inQrStatus, setInQrStatus] = useState<{count: number, total: number}>({count: 0, total: 0});
     const isDecoding = useRef(false);
 
-    async function generateQrCodes(data: any) {
+    async function generateQrCodes(data: QRCodeData) {
         const protos = await protobuf.load("/protobuf/data_transfer.proto");
-        var DataTransfer = protos.lookupType("DataTransfer");
+        const DataTransfer = protos.lookupType("DataTransfer");
 
-        var errMsg = DataTransfer.verify(data);
+        const errMsg = DataTransfer.verify(data);
         if (errMsg) throw Error(errMsg);
 
         const protoData = DataTransfer.create(data);
-        const compressed = await compressMessageToBase64Gzip(protoData, DataTransfer);
-        console.log("Compressed Length: ", compressed.length, "Chunks: ", Math.ceil(compressed.length / QR_CHUNK_SIZE));
-        var outData = new Array(Math.ceil(compressed.length / QR_CHUNK_SIZE)).fill("");
-        for (let i = 0; i < Math.ceil(compressed.length / QR_CHUNK_SIZE); i++) { // Breaks up the data into QR_CHUNK_SIZE character chunks
+        const compressed = await compressBytes(DataTransfer.encode(protoData).finish());
+        const base64 = toBase64(compressed);
+
+        console.log("Compressed Length: ", base64.length, "Chunks: ", Math.ceil(base64.length / QR_CHUNK_SIZE));
+
+        // Breaks up the data into QR_CHUNK_SIZE character chunks
+        const outData = new Array(Math.ceil(base64.length / QR_CHUNK_SIZE)).fill("");
+        for (let i = 0; i < Math.ceil(base64.length / QR_CHUNK_SIZE); i++) {
             // Store the chunk with its index and total chunks in the qr data array
-            outData[i] = 'scoutingdata:'+(i+1)+'/'+outData.length+':'+compressed.slice(i*QR_CHUNK_SIZE, (i+1)*QR_CHUNK_SIZE);
+            outData[i] = 'scoutingdata:'+(i+1)+'/'+outData.length+':'+base64.slice(i*QR_CHUNK_SIZE, (i+1)*QR_CHUNK_SIZE);
         }
+
         setOutQrData(outData);
     }
 
@@ -37,10 +43,11 @@ export default function QrCodeDataTransfer(onReceiveData: (data: any) => void) {
         console.log("Decoding: ", data);
         try {
             const protos = await protobuf.load("/protobuf/data_transfer.proto");
-            var DataTransfer = protos.lookupType("DataTransfer");
+            const DataTransfer = protos.lookupType("DataTransfer");
 
-            const message = await decompressMessageFromBase64Gzip(data, DataTransfer);
-            const object = DataTransfer.toObject(message);
+            const bytes = await decompressBytes(fromBase64(data));
+            const message = DataTransfer.decode(bytes);
+            const object = DataTransfer.toObject(message) as QRCodeData;
             
             await onReceiveData(object);
         } catch (e) {
@@ -57,7 +64,7 @@ export default function QrCodeDataTransfer(onReceiveData: (data: any) => void) {
         isDecoding.current = true;
         try {
             console.log("Read: ", data);
-            var regexData = QR_PROTOCOL_REGEX.exec(data); // The regex to match the qr code protocol
+            const regexData = QR_PROTOCOL_REGEX.exec(data); // The regex to match the qr code protocol
             if (regexData === null) throw new Error("Invalid QR Code Data");
             const chunk = parseInt(regexData[1]); // The chunk number (1 indexed)
             const totalChunks = parseInt(regexData[2]); // The total number of chunks

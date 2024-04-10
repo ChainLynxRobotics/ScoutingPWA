@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const CountUp = ({start}: {start: number}) => {
 
-    const [_tick, setTick] = useState(0);
+    const [, setTick] = useState(0);
 
     useEffect(() => {
         const interval = setInterval(() => {

@@ -24,7 +24,7 @@ export async function getSchedule(competitionId: string): Promise<ScheduledMatch
 
     const matches: ScheduledMatch[] = json
         .sort((a, b)=>(matchCompare(a.key, b.key)))
-        .map((match: any): ScheduledMatch => {
+        .map((match: any): ScheduledMatch => { // eslint-disable-line @typescript-eslint/no-explicit-any
             return {
                 matchId: match.key.substring(competitionId.length+1),
                 blue1: parseInt(match.alliances.blue.team_keys[0].substring(3)),

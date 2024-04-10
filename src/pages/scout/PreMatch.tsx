@@ -3,7 +3,6 @@ import MenuItem from "@mui/material/MenuItem/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select/Select";
 import { useContext, useEffect, useRef } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
-import NoMatchAvailable from "./NoMatchAvailable";
 import FormControl from "@mui/material/FormControl/FormControl";
 import { Alert, Button, Checkbox, FormControlLabel, FormGroup, TextField } from "@mui/material";
 import { Link, NavLink, useNavigate } from "react-router-dom";
@@ -20,20 +19,20 @@ const PreMatch = () => {
     if (!settings) throw new Error("Settings context not found?!?!?!");
 
     const context = useContext(ScoutingContext);
-    if (!context) return (<NoMatchAvailable />);
+    if (!context) throw new Error("Scouting context not found.");
 
     const handleHumanPlayerLocationChange = (event: SelectChangeEvent) => {
-        context.pre.setHumanPlayerLocation(parseInt(event.target.value) as HumanPlayerLocation);
+        context.fields.set("humanPlayerLocation", parseInt(event.target.value) as HumanPlayerLocation);
     };
 
     const handlePreloadChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        context.pre.setPreload(event.target.checked);
+        context.fields.set("preload", event.target.checked);
     }
 
     const handleNotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!context) return;
         if (event.target.value.length <= MAX_NOTE_LENGTH) {
-            context.pre.setNotes(event.target.value);
+            context.fields.set("notes", event.target.value);
         }
     }
 
@@ -43,7 +42,7 @@ const PreMatch = () => {
         if (context.match.matchActive && !wasMatchActive.current) {
             navigate("/scout/during");
         }
-    }, [context.match.matchActive]);
+    }, [context.match.matchActive, navigate]);
 
     return (
         <>
@@ -64,17 +63,17 @@ const PreMatch = () => {
         <div className="w-full max-w-xl mx-auto flex flex-col items-center px-4">
             <h1 className="text-lg font-bold my-2">
                 You are scouting&nbsp;
-                <span className={`font-bold ${context.meta.allianceColor == AllianceColor.Red ? 'text-red-400' : 'text-blue-400'}`}>
-                    {context.meta.teamNumber}
+                <span className={`font-bold ${context.allianceColor == AllianceColor.Red ? 'text-red-400' : 'text-blue-400'}`}>
+                    {context.teamNumber}
                 </span>
                 <span> in match </span>
                 <FormControl variant="standard">
                     <Select
                         labelId="match-select-label"
                         id="match-select"
-                        value={context.meta.matchId}
+                        value={context.matchId}
                         onChange={(event) => {
-                            let index = settings.matches.map((match) => match.matchId+"").indexOf(event.target.value);
+                            const index = settings.matches.map((match) => match.matchId+"").indexOf(event.target.value);
                             settings?.setCurrentMatchIndex(index);
                         }}
                         label="Select Match">
@@ -87,12 +86,12 @@ const PreMatch = () => {
             <span className="mb-8 max-w-md text-center text-secondary">If this is the wrong match, use the select menu above or the settings to make sure it is correct!</span>
             <FormControl sx={{ m: 1, minWidth: 224 }}>
                 <InputLabel id="human-player-location-label">
-                    {context.meta.teamNumber != 8248 ? `${context.meta.teamNumber}'s Human Player Location` : `Soren's Location`}
+                    {context.teamNumber != 8248 ? `${context.teamNumber}'s Human Player Location` : `Soren's Location`}
                 </InputLabel>
                 <Select
                     labelId="human-player-location-label"
                     id="human-player-location"
-                    value={context.pre.humanPlayerLocation+""}
+                    value={context.fields.humanPlayerLocation+""}
                     onChange={handleHumanPlayerLocationChange}
                     label="Human Player Location"
                 >
@@ -105,7 +104,7 @@ const PreMatch = () => {
             <FormGroup>
                 <FormControlLabel 
                     control={<Checkbox id="preload" 
-                    value={context.pre.preload} 
+                    value={context.fields.preload} 
                     onChange={handlePreloadChange} />} 
                     label="Note Preloaded" 
                 />
@@ -117,7 +116,7 @@ const PreMatch = () => {
                 multiline
                 rows={6}
                 fullWidth
-                value={context.pre.notes}
+                value={context.fields.notes}
                 onChange={handleNotesChange}
             />
             <div className="h-4"></div> {/* Spacer */}

@@ -28,7 +28,7 @@ const AnalyticsPage = () => {
 
     function setCurrentMatch(matchId: string) {
         if (!settings) return;
-        let index = settings.matches.findIndex(match=>match.matchId===matchId);
+        const index = settings.matches.findIndex(match=>match.matchId===matchId);
         if (index!==-1) setAnalyticsMatchIndex(index);
     }
 

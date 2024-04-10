@@ -48,11 +48,11 @@ export default function App() {
   useEffect(() => {
     async function lockScreen() {
       try {
-        const screen: any = window.screen;
+        const screen: any = window.screen; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         screen.lockOrientationUniversal = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
 
-        if ('lock' in screen.orientation) await (screen.orientation as any).lock('portrait-primary');
+        if ('lock' in screen.orientation) await (screen.orientation as any).lock('portrait-primary'); // eslint-disable-line @typescript-eslint/no-explicit-any
         else if (screen.lockOrientationUniversal) screen.lockOrientationUniversal('portrait-primary');
         else console.error("Orientation lock not supported");
       } catch (e) {

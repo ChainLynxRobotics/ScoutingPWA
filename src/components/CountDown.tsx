@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const CountDown = ({end}: {end: number}) => {
 
-    const [_tick, setTick] = useState(0); // Used for re-rendering component only
+    const [, setTick] = useState(0); // Used for re-rendering component only
 
     useEffect(() => {
         const interval = setInterval(() => {
