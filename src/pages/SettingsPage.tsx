@@ -2,19 +2,19 @@ import ErrorPage from "./ErrorPage";
 import { useContext, useState } from "react";
 import SettingsContext from "../components/context/SettingsContext";
 import MatchSchedule from "../components/MatchSchedule";
-import QrCodeDataTransfer from "../components/QrCodeDataTransfer";
 import QrCodeType from "../enums/QrCodeType";
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormHelperText, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import Divider from "../components/Divider";
 import { QRCodeData } from "../types/QRCodeData";
+import QrCodeList from "../components/qr/QrCodeList";
+import QrCodeScanner from "../components/qr/QrCodeScanner";
 
 const SettingsPage = () => {
 
     const settings = useContext(SettingsContext);
 
     // QR code sending and receiving
-    const { generateQrCodes, QRCodeList, QRCodeScanner } = QrCodeDataTransfer(onQrData);
-    const [qrOpen, setQrOpen] = useState(false);
+    const [qrData, setQrData] = useState<QRCodeData>();
     const [scannerOpen, setScannerOpen] = useState(false);
 
     const [infoOpen, setInfoOpen] = useState(false);
@@ -41,8 +41,7 @@ const SettingsPage = () => {
                 currentMatch: settings.currentMatchIndex
             }
         };
-        generateQrCodes(data);
-        setQrOpen(true);
+        setQrData(data);
     }
 
     function onQrData(data: QRCodeData) {
@@ -170,8 +169,8 @@ const SettingsPage = () => {
         
         {/* Share match popup */}
         <Dialog
-            open={qrOpen}
-            onClose={() => {setQrOpen(false)}}
+            open={qrData !== undefined}
+            onClose={() => {setQrData(undefined)}}
             aria-labelledby="share-dialog-title"
             fullScreen
         >
@@ -182,12 +181,12 @@ const SettingsPage = () => {
                 <div className="w-full flex flex-col items-center">
                     <div className="w-full max-w-md">
                         <p className="text-center">Scan the following QR code(s) on copy this schedule onto other devices</p>
-                        <QRCodeList />
+                        {qrData && <QrCodeList data={qrData} />}
                     </div>
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button size="large" onClick={() => {setQrOpen(false)}}>Close</Button>
+                <Button size="large" onClick={() => {setQrData(undefined)}}>Close</Button>
             </DialogActions>
         </Dialog>
 
@@ -203,8 +202,8 @@ const SettingsPage = () => {
             </DialogTitle>
             <DialogContent>
                 <div className="w-full flex flex-col items-center">
-                    <div className="w-full max-w-md">
-                        <QRCodeScanner />
+                    <div className="w-full max-w-xl">
+                        <QrCodeScanner onReceiveData={onQrData} />
                     </div>
                 </div>
             </DialogContent>

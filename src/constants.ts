@@ -37,3 +37,9 @@ export const TBA_API_BASE = "https://www.thebluealliance.com/api/v3";
  * The API key for the blue alliance, YES I KNOW THIS IS PUBLIC, i have to finish this project by tomorrow and i need sleep
  */
 export const TBA_API_KEY = "LDcEXFW8I1T9JKMmfMCog29Ilyw45pdHgKUY7dNosZmoxOjs1MIO7B7yG8IMHDRQ";
+
+/**
+ * The max size of each chunk of data in the qr code, in characters of base64 data.
+ * Larger number means less chunks, but more data per chunk (larger qr codes, harder to scan).
+ */
+export const QR_CHUNK_SIZE = 256;

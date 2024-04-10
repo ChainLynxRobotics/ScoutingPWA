@@ -3,7 +3,6 @@ import { useContext, useEffect, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchData, MatchIdentifier } from "../types/MatchData";
 import QrCodeType from "../enums/QrCodeType";
-import QrCodeDataTransfer from "../components/QrCodeDataTransfer";
 import AllianceColor from "../enums/AllianceColor";
 import MatchDataIO from "../util/MatchDataIO";
 import useLocalStorageState from "../util/localStorageState";
@@ -12,19 +11,19 @@ import Divider from "../components/Divider";
 import FileSaver from "file-saver";
 import SettingsContext from "../components/context/SettingsContext";
 import { QRCodeData } from "../types/QRCodeData";
+import QrCodeList from "../components/qr/QrCodeList";
+import QrCodeScanner from "../components/qr/QrCodeScanner";
 
 const DataPage = () => {
 
     const settings = useContext(SettingsContext);
-
-    const { generateQrCodes, QRCodeList, QRCodeScanner } = QrCodeDataTransfer(onData);
 
     const [matches, setMatches] = useState<MatchIdentifier[]|undefined>(undefined);
     const [toDelete, setToDelete] = useState<MatchIdentifier|undefined>(undefined);
     const [toDeleteData, setToDeleteData] = useState<MatchData|undefined>(undefined);
     const [scannedMatches, setScannedMatches] = useLocalStorageState<string[]>([], "scannedMatches"); 
 
-    const [qrOpen, setQrOpen] = useState(false);
+    const [qrData, setQrData] = useState<QRCodeData>(); // Signals the qr code data to be generated
     const [scannerOpen, setScannerOpen] = useState(false);
 
     const [infoOpen, setInfoOpen] = useState(false);
@@ -52,9 +51,7 @@ const DataPage = () => {
                 events: events,
             };
 
-            await generateQrCodes(data);
-            
-            setQrOpen(true);
+            setQrData(data);
         } catch (e) {
             console.error(e);
             alert(e);
@@ -229,8 +226,8 @@ const DataPage = () => {
 
         {/* Share match data popup */}
         <Dialog
-            open={qrOpen}
-            onClose={() => {setQrOpen(false)}}
+            open={qrData !== undefined}
+            onClose={() => {setQrData(undefined)}}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
             fullScreen
@@ -242,13 +239,13 @@ const DataPage = () => {
                 <div className="w-full flex flex-col items-center">
                     <div className="w-full max-w-md">
                         <p className="text-center">Scan the following QR code(s) on another device to import match data</p>
-                        <QRCodeList />
+                        {qrData && <QrCodeList data={qrData} />}
                     </div>
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button size="large" onClick={() => {setQrOpen(false); setScannedMatches([...scannedMatches, ...matches!.map((match) => match.matchId)])}}><span style={{color: "green"}}>SCAN FINISHED</span></Button>
-                <Button size="large" onClick={() => {setQrOpen(false)}}><span style={{color: "red"}}>CANCEL</span></Button>
+                <Button size="large" onClick={() => {setQrData(undefined); setScannedMatches([...scannedMatches, ...matches!.map((match) => match.matchId)])}}><span style={{color: "green"}}>SCAN FINISHED</span></Button>
+                <Button size="large" onClick={() => {setQrData(undefined)}}><span style={{color: "red"}}>CANCEL</span></Button>
             </DialogActions>
         </Dialog>
 
@@ -265,8 +262,8 @@ const DataPage = () => {
             </DialogTitle>
             <DialogContent>
                 <div className="w-full flex flex-col items-center">
-                    <div className="w-full max-w-md">
-                        <QRCodeScanner />
+                    <div className="w-full max-w-lg">
+                        {scannerOpen ? <QrCodeScanner onReceiveData={onData} /> : ''}
                     </div>
                 </div>
             </DialogContent>
