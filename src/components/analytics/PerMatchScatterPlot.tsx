@@ -68,7 +68,7 @@ export default function PerMatchGraph(props: PerMatchGraph) {
         <ScatterChart
             yAxis={[{ 
                 data: props.matches.map((match, i)=>i), 
-                valueFormatter: matchIdAsStr,
+                valueFormatter: (i)=>matchIdAsStr(props.matches[i].matchId),
                 scaleType: "point",
                 reverse: true,
             }]}
@@ -92,5 +92,6 @@ function matchTimeAsStr(time: number) {
 }
 
 function matchIdAsStr(fullMatchId: string) {
-    return fullMatchId.match(/[^_]+$/)?.join('') || '';
+    console.log(fullMatchId);
+    return fullMatchId?.match(/[^_]+$/)?.join('') || '';
 }
