@@ -1,8 +1,7 @@
-import { AppBar, Box, Button, Card, Checkbox, FormControl, FormControlLabel, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Select, Tab, Tabs, TextField, tableCellClasses } from "@mui/material";
+import { AppBar, Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Paper, Select, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import MatchDatabase from "../../util/MatchDatabase";
-import { Link, useNavigate } from "react-router-dom";
-import Divider from "../../components/Divider";
+import { useNavigate } from "react-router-dom";
 import matchCompare from "../../util/matchCompare";
 import SettingsContext from "../../components/context/SettingsContext";
 import useLocalStorageState from "../../util/localStorageState";
@@ -13,6 +12,7 @@ const AnalyticsPage = () => {
 
     const [search, setSearch] = useLocalStorageState('', 'analyticsSearch');
     const [tab, setTab] = useState(0);
+    const [contributorsOpen, setContributorsOpen] = useState<boolean>(false);
 
     const [teamList, setTeamList] = useState<number[]>([]);
     const [matchList, setMatchList] = useState<string[]>([]);
@@ -78,16 +78,42 @@ const AnalyticsPage = () => {
                 />
             }
         </div>
+        <div className="flex items-center text-center">
+            {settings && 
+                <FormControlLabel 
+                    control={
+                        <Checkbox value={currentMatchOnly} 
+                            onChange={(event, checked)=>setCurrentMatchOnly(checked)} />
+                    }
+                    label={
+                        <span>
+                            This match only:&nbsp;
+                            <Select
+                                variant="standard"
+                                labelId="match-select-label"
+                                id="match-select"
+                                value={settings?.matches[analyticsMatchIndex]?.matchId}
+                                onChange={(event) => setCurrentMatch(event.target.value)}
+                                label="Select Match">
+                                {settings?.matches.map((match) => (
+                                    <MenuItem key={match.matchId} value={match.matchId}><b>{match.matchId}</b></MenuItem>
+                                ))}
+                            </Select>
+                        </span>
+                    }
+                    className="text-sm text-secondary"
+                />
+            }
+        </div>
 
         <div className="w-full max-w-md mt-4 bg-black bg-opacity-20">
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }} component={Paper}>
                 <AppBar position="static">
                     <Tabs value={tab} onChange={(e,val)=>setTab(val)} variant="fullWidth" aria-label="basic tabs example">
                         <Tab label="Teams" id="analytics-tab-0" aria-controls="analytics-tabpanel-1" />
                         <Tab label="Matches" id="analytics-tab-1" aria-controls="analytics-tabpanel-1" />
                     </Tabs>
                 </AppBar>
-            </Box>
             <div role="tabpanel" hidden={tab!==0} id="analytics-tabpanel-0" aria-labelledby="analytics-tab-0">
                 <List>
                     {sortedTeamList.map((team) => (
@@ -108,22 +134,48 @@ const AnalyticsPage = () => {
                     }
                 </List>
             </div>
+            </Box>
         </div>
 
-        <div className="w-full max-w-md flex flex-col">
-
-            <Divider />
-
-            <h2 className="text-lg font-bold mt-4">Matches Scouted</h2>
-            <div className="flex flex-col gap-2 my-4 px-4">
-                {Object.entries(contributors).sort((a, b)=>b[1]-a[1]).map((contributor) => (
-                    <Card key={contributor[0]} variant="outlined" className="flex justify-between items-center">
-                        <div className="text-lg font-bold px-2">{contributor[0]}</div>
-                        <div className="text-xl font-cold px-2"><code>{contributor[1]}</code></div>
-                    </Card>
-                ))}
-            </div>
+        <div className="py-8">
+            <Button variant="contained" color="secondary" onClick={()=>setContributorsOpen(true)}>Scouter Statistics</Button>
         </div>
+
+        <Dialog 
+            open={contributorsOpen} 
+            onClose={()=>setContributorsOpen(false)}
+            aria-labelledby="contributors-dialog-title"
+            maxWidth="xs"
+            fullWidth
+        >
+            <DialogTitle id="contributors-dialog-title">Scouter Statistics</DialogTitle>
+            <DialogContent>
+                <TableContainer component={Paper}>
+                    <Table aria-label="Contributors list">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Scout Name</TableCell>
+                                <TableCell align="right">Matches Scouted</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {Object.entries(contributors).sort((a, b)=>b[1]-a[1]).map((row) => (
+                                <TableRow
+                                    key={row[0]}
+                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                >
+                                    <TableCell component="th" scope="row">{row[0]}</TableCell>
+                                    <TableCell align="right">{row[1]}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={()=>setContributorsOpen(false)}>Close</Button>
+            </DialogActions>
+        </Dialog>
     </div>
     )
 }

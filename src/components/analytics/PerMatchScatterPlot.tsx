@@ -92,6 +92,5 @@ function matchTimeAsStr(time: number) {
 }
 
 function matchIdAsStr(fullMatchId: string) {
-    console.log(fullMatchId);
     return fullMatchId?.match(/[^_]+$/)?.join('') || '';
 }
