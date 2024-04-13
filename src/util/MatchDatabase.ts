@@ -1,5 +1,6 @@
 import { DBSchema, IDBPDatabase, openDB } from "idb";
 import { MatchData, MatchEventData, MatchIdentifier } from "../types/MatchData";
+import { matchIncludes } from "./matchCompare";
 
 interface MatchDatabaseSchema extends DBSchema {
     matches: {
@@ -296,6 +297,26 @@ async function deleteMatch(matchId: string, teamNumber: number) {
     );
 }
 
+async function deleteMatches(matches: MatchIdentifier[]) {
+    const db = await tryOpenDatabase();
+    
+    const tx = db.transaction(['matches', 'events'], 'readwrite');
+    const matchStore = tx.objectStore('matches');
+    const eventStore = tx.objectStore('events');
+    
+    for await (const cursor of matchStore.iterate()) {
+        if (matchIncludes(matches, cursor.value)) {
+            await matchStore.delete(cursor.primaryKey);
+        }
+    }
+    for await (const cursor of eventStore.iterate()) {
+        if (matchIncludes(matches, cursor.value)) {
+            await eventStore.delete(cursor.primaryKey);
+        }
+    }
+    await tx.done;
+}
+
 /**
  * Gets the number of matches each scout has submitted
  * 
@@ -337,5 +358,6 @@ export default {
     getEventsByMatch,
     getEventsByTeam,
     deleteMatch,
+    deleteMatches,
     getContributions,
 }

@@ -1,20 +1,24 @@
 import { useState, ChangeEvent, useMemo } from "react";
 import { MatchIdentifier } from "../types/MatchData";
-import { Checkbox, CircularProgress, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Toolbar, Tooltip, Typography } from "@mui/material";
+import { Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Toolbar, Tooltip, Typography } from "@mui/material";
 import { alpha } from '@mui/material/styles';
+import useLocalStorageState from "../util/localStorageState";
 
 interface DataListProps {
     matches: MatchIdentifier[]|undefined, 
-    setMatches: (matches: MatchIdentifier[]|undefined) => void, 
     scanned: MatchIdentifier[], 
-    setScanned: (scanned: MatchIdentifier[]) => void 
+    deleteItems: (match: MatchIdentifier[]) => void,
+    markScanned: (match: MatchIdentifier[]) => void,
+    markNew: (match: MatchIdentifier[]) => void,
 }
 
-export default function DataList({ matches, setMatches, scanned, setScanned }: DataListProps) {
+export default function DataList({ matches, scanned, deleteItems, markScanned, markNew }: DataListProps) {
 
     const [selected, setSelected] = useState<MatchIdentifier[]>([]);
     const [page, setPage] = useState(0);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useLocalStorageState(10, "dataPageSize");
+
+    const [confirmDelete, setConfirmDelete] = useState(false);
 
     const handleSelectAll = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
@@ -41,6 +45,24 @@ export default function DataList({ matches, setMatches, scanned, setScanned }: D
         setPage(0);
     }
 
+    const handleDelete = () => {
+        deleteItems(selected);
+        setSelected([]);
+        setConfirmDelete(false);
+    }
+
+    const handleMarkScanned = () => {
+        markScanned(selected);
+        setSelected([]);
+    }
+
+    const handleMarkNew = () => {
+        markNew(selected);
+        setSelected([]);
+    }
+
+    // Util stuff
+
     const isSelected = (match: MatchIdentifier) => {
         return selected.some(m => match.matchId === m.matchId && match.teamNumber === m.teamNumber);
     }
@@ -48,19 +70,18 @@ export default function DataList({ matches, setMatches, scanned, setScanned }: D
         return scanned.some(m => match.matchId === m.matchId && match.teamNumber === m.teamNumber);
     }
 
-
     const visibleMatches = useMemo(()=>
         matches?.slice(page * pageSize, (page + 1) * pageSize) || []
     , [matches, page, pageSize]);
 
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * pageSize - (matches?.length||0)) : 0;
+    const emptyRows = Math.max(0, (1 + page) * pageSize - (matches?.length||0));
 
-    if (!matches) {
+    if (matches===undefined) {
         return <CircularProgress color="inherit" />
     }
     return (
         <>
-        <Paper sx={{ width: '100%', mb: 2 }}>
+        <Paper className="w-full text-left">
             <Toolbar
                 sx={{
                     pl: { sm: 2 },
@@ -92,8 +113,18 @@ export default function DataList({ matches, setMatches, scanned, setScanned }: D
                 )}
                 {selected.length > 0 ? (
                     <>
+                        <Tooltip title="Mark as already scanned">
+                            <IconButton onClick={handleMarkScanned}>
+                                <span className="material-symbols-outlined">mark_email_read</span>
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Mark as new">
+                            <IconButton onClick={handleMarkNew}>
+                                <span className="material-symbols-outlined">mark_email_unread</span>
+                            </IconButton>
+                        </Tooltip>
                         <Tooltip title="Delete">
-                            <IconButton>
+                            <IconButton onClick={()=>setConfirmDelete(true)}>
                                 <span className="material-symbols-outlined text-red-400">delete</span>
                             </IconButton>
                         </Tooltip>
@@ -111,9 +142,9 @@ export default function DataList({ matches, setMatches, scanned, setScanned }: D
                                     onChange={handleSelectAll}
                                 />
                             </TableCell>
-                            <TableCell>Status</TableCell>
+                            <TableCell padding="checkbox">Status</TableCell>
                             <TableCell>Match ID</TableCell>
-                            <TableCell>Team Number</TableCell>
+                            <TableCell>Team #</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -133,9 +164,9 @@ export default function DataList({ matches, setMatches, scanned, setScanned }: D
                                     <TableCell padding="checkbox">
                                         <Checkbox checked={isItemSelected} />
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell padding="checkbox">
                                         {!isItemScanned ? (
-                                            <b>New</b>
+                                            <span>New</span>
                                         ) : 
                                             ''
                                         }
@@ -158,11 +189,29 @@ export default function DataList({ matches, setMatches, scanned, setScanned }: D
                 component="div"
                 count={matches.length}
                 rowsPerPage={pageSize}
+                labelRowsPerPage="Per page"
                 page={page}
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={handlePageSizeChange}
             />
         </Paper>
+        {/* Confirm delete data popup */}
+        <Dialog 
+            open={confirmDelete} 
+            onClose={()=>setConfirmDelete(false)}
+            aria-labelledby="delete-dialog-title"
+            fullWidth
+            maxWidth="sm"
+        >
+            <DialogTitle id="delete-dialog-title">Are you sure you would like to delete {selected.length} match{selected.length == 1 ? '' : 'es'}?</DialogTitle>
+            <DialogContent>
+                <div className="mt-4 text-secondary">This delete action cannot be undone</div>
+            </DialogContent>
+            <DialogActions>
+                <Button color="inherit" size="large" onClick={()=>setConfirmDelete(false)}>Cancel</Button>
+                <Button color="error" size="large" onClick={handleDelete} autoFocus>Delete</Button>
+            </DialogActions>
+        </Dialog>
         </>
     )
 }
