@@ -13,6 +13,7 @@ import SettingsContext from "../components/context/SettingsContext";
 import { QRCodeData } from "../types/QRCodeData";
 import QrCodeList from "../components/qr/QrCodeList";
 import QrCodeScanner from "../components/qr/QrCodeScanner";
+import DataList from "../components/DataList";
 
 const DataPage = () => {
 
@@ -154,6 +155,10 @@ const DataPage = () => {
             {matches?.filter((match) => scannedMatches.includes(match.matchId)).length === 0 && 
                 <div className="text-center text-secondary">No matches archived</div>
             }
+        </div>
+
+        <div className="max-w-lg w-full mb-16">
+            <DataList matches={matches} setMatches={setMatches} scanned={matches||[]} setScanned={(scanned)=>{}} /> {/* TODO: actually implement this */}
         </div>
 
         <div className="fixed bottom-[calc(64px+var(--sab))] left-0 right-0 z-50 flex justify-center items-center">
