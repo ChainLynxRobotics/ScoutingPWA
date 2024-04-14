@@ -4,6 +4,7 @@ import protobuf from "protobufjs";
 import { compressBytes, toBase64 } from "../../util/compression";
 import QRCode from "react-qr-code";
 import { QR_CHUNK_SIZE } from "../../constants";
+import { CircularProgress } from "@mui/material";
 
 export default function QrCodeList({data}: {data: QRCodeData}) {
 
@@ -49,7 +50,10 @@ export default function QrCodeList({data}: {data: QRCodeData}) {
                     </div>
                 })
             : 
-                <p>Loading...</p>
+                <div className="text-center mt-8">
+                    <CircularProgress color="inherit" />
+                    <p className="opacity-75">Generating QR Codes...</p>
+                </div>
             }
         </div>
     )

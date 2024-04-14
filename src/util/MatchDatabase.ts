@@ -306,12 +306,12 @@ async function deleteMatches(matches: MatchIdentifier[]) {
     
     for await (const cursor of matchStore.iterate()) {
         if (matchIncludes(matches, cursor.value)) {
-            await matchStore.delete(cursor.primaryKey);
+            matchStore.delete(cursor.primaryKey);
         }
     }
     for await (const cursor of eventStore.iterate()) {
         if (matchIncludes(matches, cursor.value)) {
-            await eventStore.delete(cursor.primaryKey);
+            eventStore.delete(cursor.primaryKey);
         }
     }
     await tx.done;

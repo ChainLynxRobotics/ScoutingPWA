@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
+import { Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import { useContext, useEffect, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchIdentifier } from "../types/MatchData";
@@ -25,6 +25,8 @@ const DataPage = () => {
 
     const [infoOpen, setInfoOpen] = useState(false);
 
+    const [loading, setLoading] = useState(false);
+
     async function updateMatches() {
         const matches = await MatchDatabase.getAllMatchIdentifiers();
         setMatches(matches.sort((a, b) => -matchCompare(a.matchId, b.matchId)));
@@ -35,11 +37,12 @@ const DataPage = () => {
     }, []);
 
     async function openQrData() {
+        setLoading(true);
         try {
             const matches = (await MatchDatabase.getAllMatches()).filter((match) => !matchIncludes(scanned, match));
             const events = (await MatchDatabase.getAllEvents()).filter((event) => !matchIncludes(scanned, event));
             
-            if (matches.length === 0 && events.length === 0) return alert("No new data to share");
+            if (matches.length === 0 && events.length === 0) throw new Error("No new data to share");
             
             const data = {
                 qrType: QrCodeType.MatchData,
@@ -53,25 +56,31 @@ const DataPage = () => {
             console.error(e);
             alert(e);
         }
+        setLoading(false);
     }
 
     // Decodes a fully assembled qr code and imports the match data
     async function onData(data: QRCodeData) {
         if (data.qrType !== QrCodeType.MatchData || !data.matches || !data.events) throw new Error("QR Codes do not contain match data");
-        
-        await MatchDatabase.importData(data.matches, data.events);
-
         setScannerOpen(false);
-        updateMatches();
+        
+        setLoading(true);
+        await MatchDatabase.importData(data.matches, data.events);
+        await updateMatches();
+        setLoading(false);
     }
 
     async function exportData() {
         if (matches?.length === 0) return alert("No data to export");
+
+        setLoading(true);
         const _matches = await MatchDatabase.getAllMatches();
         const _events = await MatchDatabase.getAllEvents();
 
         const blob = await MatchDataIO.exportDataAsZip(_matches, _events);
         const date = new Date();
+        setLoading(false);
+
         FileSaver.saveAs(blob, 
             `Scouting Data - ${settings?.scoutName || 'No Name'} - ${date.toISOString()}.zip`);
     }
@@ -84,14 +93,18 @@ const DataPage = () => {
         const file = fileUpload.current?.files?.item(0);
         if (!file) return;
 
+        setLoading(true);
         await MatchDataIO.importDataFromZip(file);
-        updateMatches();
+        await updateMatches();
+        setLoading(false);
     }
 
 
     async function deleteItems(selected: MatchIdentifier[]) {
+        setLoading(true);
         await MatchDatabase.deleteMatches(selected);
-        updateMatches();
+        await updateMatches();
+        setLoading(false);
     }
 
     function markNew(selected: MatchIdentifier[]) {
@@ -204,8 +217,20 @@ const DataPage = () => {
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button size="large" onClick={() => {setQrData(undefined); setScanned(matches||[])}}><span style={{color: "green"}}>SCAN FINISHED</span></Button>
-                <Button size="large" onClick={() => {setQrData(undefined)}}><span style={{color: "red"}}>CANCEL</span></Button>
+                <Button 
+                    size="large" 
+                    onClick={() => {setQrData(undefined); setScanned(matches||[])}} 
+                    color="success"
+                >
+                    Scan Finished
+                </Button>
+                <Button 
+                    size="large" 
+                    onClick={() => {setQrData(undefined)}} 
+                    color="error"
+                >
+                    Cancel
+                </Button>
             </DialogActions>
         </Dialog>
 
@@ -231,6 +256,13 @@ const DataPage = () => {
                 <Button size="large" onClick={() => {setScannerOpen(false)}}>Close</Button>
             </DialogActions>
         </Dialog>
+
+        <Backdrop
+            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={loading}
+        >
+            <CircularProgress color="inherit" />
+        </Backdrop>
     </div>
     );
 };
