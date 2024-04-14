@@ -1,4 +1,4 @@
-import { Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
+import { Alert, AlertColor, Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Snackbar } from "@mui/material";
 import { useContext, useEffect, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchIdentifier } from "../types/MatchData";
@@ -27,9 +27,12 @@ const DataPage = () => {
 
     const [loading, setLoading] = useState(false);
 
+    const [toast, setToast] = useState<{msg: string, severity: AlertColor}|undefined>();
+
     async function updateMatches() {
         const matches = await MatchDatabase.getAllMatchIdentifiers();
         setMatches(matches.sort((a, b) => -matchCompare(a.matchId, b.matchId)));
+        return matches;
     }
 
     useEffect(() => {
@@ -54,7 +57,7 @@ const DataPage = () => {
             setQrData(data);
         } catch (e) {
             console.error(e);
-            alert(e);
+            setToast({msg: e+"", severity: "error"});
         }
         setLoading(false);
     }
@@ -65,8 +68,16 @@ const DataPage = () => {
         setScannerOpen(false);
         
         setLoading(true);
-        await MatchDatabase.importData(data.matches, data.events);
-        await updateMatches();
+        try {
+            let matchCount = matches?.length || 0;
+            await MatchDatabase.importData(data.matches, data.events);
+            let newMatches = await updateMatches();
+            matchCount = newMatches.length - matchCount;
+            setToast({msg: `Imported ${matchCount} matches ${data.matches.length !== matchCount ? `(${data.matches.length-matchCount} duplicates were omitted)` : ''}`, severity: "success"});
+        } catch (e) {
+            console.error(e);
+            setToast({msg: e+"", severity: "error"});
+        }
         setLoading(false);
     }
 
@@ -74,15 +85,20 @@ const DataPage = () => {
         if (matches?.length === 0) return alert("No data to export");
 
         setLoading(true);
-        const _matches = await MatchDatabase.getAllMatches();
-        const _events = await MatchDatabase.getAllEvents();
+        try {
+            const _matches = await MatchDatabase.getAllMatches();
+            const _events = await MatchDatabase.getAllEvents();
 
-        const blob = await MatchDataIO.exportDataAsZip(_matches, _events);
-        const date = new Date();
+            const blob = await MatchDataIO.exportDataAsZip(_matches, _events);
+            const date = new Date();
+
+            FileSaver.saveAs(blob, 
+                `Scouting Data - ${settings?.scoutName || 'No Name'} - ${date.toISOString()}.zip`);
+        } catch (e) {
+            console.error(e);
+            setToast({msg: e+"", severity: "error"});
+        }
         setLoading(false);
-
-        FileSaver.saveAs(blob, 
-            `Scouting Data - ${settings?.scoutName || 'No Name'} - ${date.toISOString()}.zip`);
     }
 
     const fileUpload = useRef<HTMLInputElement>(null);
@@ -94,16 +110,29 @@ const DataPage = () => {
         if (!file) return;
 
         setLoading(true);
-        await MatchDataIO.importDataFromZip(file);
-        await updateMatches();
+        try {
+            let matchCount = matches?.length || 0;
+            await MatchDataIO.importDataFromZip(file);
+            let newMatches = await updateMatches();
+            matchCount = newMatches.length - matchCount;
+            setToast({msg: `Imported ${matchCount} new matches`, severity: "success"});
+        } catch (e) {
+            console.error(e);
+            setToast({msg: e+"", severity: "error"});
+        }
         setLoading(false);
     }
 
 
     async function deleteItems(selected: MatchIdentifier[]) {
         setLoading(true);
-        await MatchDatabase.deleteMatches(selected);
-        await updateMatches();
+        try {
+            await MatchDatabase.deleteMatches(selected);
+            await updateMatches();
+        } catch (e) {
+            console.error(e);
+            setToast({msg: e+"", severity: "error"});
+        }
         setLoading(false);
     }
 
@@ -263,6 +292,22 @@ const DataPage = () => {
         >
             <CircularProgress color="inherit" />
         </Backdrop>
+
+        <Snackbar 
+            open={!!toast}
+            autoHideDuration={6000}
+            onClose={()=>setToast(undefined)}
+            anchorOrigin={{vertical: "bottom", horizontal: "center"}}
+        >
+            <Alert 
+                severity={toast?.severity} 
+                variant="filled"
+                onClose={()=>setToast(undefined)}
+                sx={{width: "100%"}}
+            >
+                {toast?.msg}
+            </Alert>
+        </Snackbar>
     </div>
     );
 };
