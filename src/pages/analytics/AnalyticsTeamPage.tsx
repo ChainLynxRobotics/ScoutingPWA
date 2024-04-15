@@ -13,7 +13,7 @@ import ClimbResult from "../../enums/ClimbResult";
 import { autoEvents, numOfEvents, perMatchStats, teleopEvents } from "../../util/analytics/analyticsUtil";
 import matchCompare from "../../util/matchCompare";
 import PerMatchGraph from "../../components/analytics/PerMatchGraph";
-import useLocalStorageState from "../../util/localStorageState";
+import useLocalStorageState from "../../components/hooks/localStorageState";
 import plotFunctions, { PlotDefinition } from "../../util/analytics/analyticsPlotFunctions";
 import PerMatchScatterPlot from "../../components/analytics/PerMatchScatterPlot";
 import SettingsContext from "../../components/context/SettingsContext";

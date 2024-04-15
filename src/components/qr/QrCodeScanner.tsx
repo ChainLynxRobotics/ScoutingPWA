@@ -3,10 +3,13 @@ import QrScanner from "qr-scanner";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { decompressBytes, fromBase64 } from "../../util/compression";
 import { QRCodeData } from "../../types/QRCodeData";
+import useToastNotification from "../hooks/toastNotification";
 
 export const QR_PROTOCOL_REGEX = /^scoutingdata:(\d+)\/(\d+):(.+)$/;
 
 export default function QrCodeScanner({onReceiveData}: {onReceiveData: (data: QRCodeData) => void}) {
+
+    const [toastNotification, setToast] = useToastNotification();
 
     const inQrData = useRef<string[]>([]);
     const [inQrStatus, setInQrStatus] = useState<{count: number, total: number}>({count: 0, total: 0});
@@ -26,7 +29,7 @@ export default function QrCodeScanner({onReceiveData}: {onReceiveData: (data: QR
             await onReceiveData(object);
         } catch (e) {
             console.error("Error receiving qr code data", e);
-            alert(e);
+            setToast(e+"", "error");
             inQrData.current = [];
             setInQrStatus({count: 0, total: 0});
         }
@@ -58,7 +61,7 @@ export default function QrCodeScanner({onReceiveData}: {onReceiveData: (data: QR
             }
         } catch (e) {
             console.error("Error decoding qr code", e);
-            alert(e);
+            setToast(e+"", "error");
         }
         isDecoding.current = false;
     }, [decodeFullQrCode]);
@@ -71,6 +74,7 @@ export default function QrCodeScanner({onReceiveData}: {onReceiveData: (data: QR
                     {inQrStatus.count}/{inQrStatus.total || '?'} scanned
                 </div>
             : ''}
+            {toastNotification}
         </div>
     );
 }

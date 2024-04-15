@@ -2,7 +2,7 @@ import { useState, ChangeEvent, useMemo } from "react";
 import { MatchIdentifier } from "../types/MatchData";
 import { Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Toolbar, Tooltip, Typography } from "@mui/material";
 import { alpha } from '@mui/material/styles';
-import useLocalStorageState from "../util/localStorageState";
+import useLocalStorageState from "./hooks/localStorageState";
 
 interface DataListProps {
     matches: MatchIdentifier[]|undefined, 

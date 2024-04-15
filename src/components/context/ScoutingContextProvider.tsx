@@ -147,38 +147,33 @@ function useScoutingContextData(matchId: string, teamNumber: number, allianceCol
     // Submit the match data to the database
     const submit = async () => {
         const existing = await MatchDatabase.getMatchByIdentifier(settings.competitionId+"_"+matchId, teamNumber);
-        if (existing) return alert("Match data already submitted! Make sure you have the right match number selected in the settings!");
-        try {
-            await MatchDatabase.saveToDatabase(
-                {
-                    // Header data
+        if (existing) throw new Error("Match data already submitted! Make sure you have the right match number selected!");
+        await MatchDatabase.saveToDatabase(
+            {
+                // Header data
+                matchId: settings.competitionId+"_"+matchId,
+                teamNumber,
+                allianceColor,
+                // Custom fields
+                ...matchFields,
+                // Footer data
+                scoutName: settings.scoutName,
+                matchStart,
+                submitTime: Date.now()
+            },
+            events.map(e=>{
+                return {
                     matchId: settings.competitionId+"_"+matchId,
                     teamNumber,
-                    allianceColor,
-                    // Custom fields
-                    ...matchFields,
-                    // Footer data
-                    scoutName: settings.scoutName,
-                    matchStart,
-                    submitTime: Date.now()
-                },
-                events.map(e=>{
-                    return {
-                        matchId: settings.competitionId+"_"+matchId,
-                        teamNumber,
-                        event: e.event,
-                        time: e.time
-                    }
-                
-                })
-            );
-            currentMatchContext?.incrementAndUpdate();
-            currentMatchContext?.setShowConfetti(true);
-            navigate("/scout");
-        } catch (e) {
-            console.error(e);
-            alert("Failed to submit match data: "+e);
-        }
+                    event: e.event,
+                    time: e.time
+                }
+            
+            })
+        );
+        currentMatchContext?.incrementAndUpdate();
+        currentMatchContext?.setShowConfetti(true);
+        navigate("/scout");
     }
 
 

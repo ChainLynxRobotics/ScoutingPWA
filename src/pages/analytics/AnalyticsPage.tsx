@@ -4,7 +4,7 @@ import MatchDatabase from "../../util/MatchDatabase";
 import { useNavigate } from "react-router-dom";
 import matchCompare from "../../util/matchCompare";
 import SettingsContext from "../../components/context/SettingsContext";
-import useLocalStorageState from "../../util/localStorageState";
+import useLocalStorageState from "../../components/hooks/localStorageState";
 
 const AnalyticsPage = () => {
 

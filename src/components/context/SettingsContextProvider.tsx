@@ -1,5 +1,5 @@
 import { ReactElement, useEffect } from "react";
-import useLocalStorageState from "../../util/localStorageState";
+import useLocalStorageState from "../hooks/localStorageState";
 import SettingsContext from "./SettingsContext";
 
 

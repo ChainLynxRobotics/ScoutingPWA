@@ -15,9 +15,15 @@ import { MAX_NOTE_LENGTH } from "../../constants";
 import MatchResult from "../../enums/MatchResult";
 import ClimbResult from "../../enums/ClimbResult";
 import Divider from "../../components/Divider";
+import useToastNotification from "../../components/hooks/toastNotification";
+import { Backdrop, CircularProgress } from "@mui/material";
 
 const PostMatch = () => {
     const context = useContext(ScoutingContext);
+
+    const [toastNotification, setToast] = useToastNotification();
+    const [loading, setLoading] = useState<boolean>(false);
+    
     const [defenseHover, setDefenseHover] = useState<number>(-1);
 
     const ratings: { [index: number]: string } = {
@@ -32,6 +38,17 @@ const PostMatch = () => {
         if (!context) return;
         if (event.target.value.length <= MAX_NOTE_LENGTH) {
             context.fields.set("notes", event.target.value);
+        }
+    }
+
+    function submit() {
+        if (context) {
+            setLoading(true);
+            context.submit().catch((e) => {
+                setToast(e.message, "error");
+            }).finally(() => {
+                setLoading(false);
+            });
         }
     }
 
@@ -136,7 +153,7 @@ const PostMatch = () => {
                     variant="contained" 
                     color="success" 
                     size="large" 
-                    onClick={context.submit} 
+                    onClick={submit} 
                     disabled={!(context.match.matchStart > 0 && !context.match.matchActive)}
                 >
                     Submit
@@ -150,6 +167,15 @@ const PostMatch = () => {
                 <EventLog />
             </div>
         </div>
+
+        {/* Loading spinner */}
+        <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={loading}
+        >
+            <CircularProgress color="inherit" />
+        </Backdrop>
+        {toastNotification}
         </>
     );
 };

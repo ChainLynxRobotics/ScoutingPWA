@@ -4,7 +4,7 @@ import MatchDatabase from "../util/MatchDatabase";
 import { MatchIdentifier } from "../types/MatchData";
 import QrCodeType from "../enums/QrCodeType";
 import MatchDataIO from "../util/MatchDataIO";
-import useLocalStorageState from "../util/localStorageState";
+import useLocalStorageState from "../components/hooks/localStorageState";
 import matchCompare, { matchIncludes } from "../util/matchCompare";
 import FileSaver from "file-saver";
 import SettingsContext from "../components/context/SettingsContext";
@@ -12,6 +12,7 @@ import { QRCodeData } from "../types/QRCodeData";
 import QrCodeList from "../components/qr/QrCodeList";
 import QrCodeScanner from "../components/qr/QrCodeScanner";
 import DataList from "../components/DataList";
+import useToastNotification from "../components/hooks/toastNotification";
 
 const DataPage = () => {
 
@@ -27,7 +28,7 @@ const DataPage = () => {
 
     const [loading, setLoading] = useState(false);
 
-    const [toast, setToast] = useState<{msg: string, severity: AlertColor}|undefined>();
+    const [ToastComponent, setToast] = useToastNotification();
 
     async function updateMatches() {
         const matches = await MatchDatabase.getAllMatchIdentifiers();
@@ -57,7 +58,7 @@ const DataPage = () => {
             setQrData(data);
         } catch (e) {
             console.error(e);
-            setToast({msg: e+"", severity: "error"});
+            setToast(e+"", "error");
         }
         setLoading(false);
     }
@@ -73,16 +74,16 @@ const DataPage = () => {
             await MatchDatabase.importData(data.matches, data.events);
             let newMatches = await updateMatches();
             matchCount = newMatches.length - matchCount;
-            setToast({msg: `Imported ${matchCount} matches ${data.matches.length !== matchCount ? `(${data.matches.length-matchCount} duplicates were omitted)` : ''}`, severity: "success"});
+            setToast(`Imported ${matchCount} matches ${data.matches.length !== matchCount ? `(${data.matches.length-matchCount} duplicates were omitted)` : ''}`, "success");
         } catch (e) {
             console.error(e);
-            setToast({msg: e+"", severity: "error"});
+            setToast(e+"", "error");
         }
         setLoading(false);
     }
 
     async function exportData() {
-        if (matches?.length === 0) return alert("No data to export");
+        if (matches?.length === 0) return setToast("No data to export", "error");
 
         setLoading(true);
         try {
@@ -96,7 +97,7 @@ const DataPage = () => {
                 `Scouting Data - ${settings?.scoutName || 'No Name'} - ${date.toISOString()}.zip`);
         } catch (e) {
             console.error(e);
-            setToast({msg: e+"", severity: "error"});
+            setToast(e+"", "error");
         }
         setLoading(false);
     }
@@ -115,10 +116,10 @@ const DataPage = () => {
             await MatchDataIO.importDataFromZip(file);
             let newMatches = await updateMatches();
             matchCount = newMatches.length - matchCount;
-            setToast({msg: `Imported ${matchCount} new matches`, severity: "success"});
+            setToast(`Imported ${matchCount} new matches`, "success");
         } catch (e) {
             console.error(e);
-            setToast({msg: e+"", severity: "error"});
+            setToast(e+"", "error");
         }
         setLoading(false);
     }
@@ -131,7 +132,7 @@ const DataPage = () => {
             await updateMatches();
         } catch (e) {
             console.error(e);
-            setToast({msg: e+"", severity: "error"});
+            setToast(e+"", "error");
         }
         setLoading(false);
     }
@@ -293,21 +294,7 @@ const DataPage = () => {
             <CircularProgress color="inherit" />
         </Backdrop>
 
-        <Snackbar 
-            open={!!toast}
-            autoHideDuration={6000}
-            onClose={()=>setToast(undefined)}
-            anchorOrigin={{vertical: "bottom", horizontal: "center"}}
-        >
-            <Alert 
-                severity={toast?.severity} 
-                variant="filled"
-                onClose={()=>setToast(undefined)}
-                sx={{width: "100%"}}
-            >
-                {toast?.msg}
-            </Alert>
-        </Snackbar>
+        {ToastComponent}
     </div>
     );
 };

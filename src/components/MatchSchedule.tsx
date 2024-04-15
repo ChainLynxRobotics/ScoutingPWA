@@ -1,9 +1,10 @@
 import { useContext, useEffect, useState } from "react";
-import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, TextField, FormHelperText, InputAdornment } from "@mui/material";
+import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, TextField, FormHelperText, InputAdornment, Backdrop, CircularProgress } from "@mui/material";
 import SettingsContext from "./context/SettingsContext";
 import ErrorPage from "../pages/ErrorPage";
 import { getSchedule } from "../util/blueAllianceApi";
 import Divider from "./Divider";
+import useToastNotification from "./hooks/toastNotification";
 
 const MatchSchedule = () => {
 
@@ -12,6 +13,9 @@ const MatchSchedule = () => {
     const [matchToEdit, setMatchToEdit] = useState<string|undefined>(undefined); // id of match to edit for the modal, -1 if none
     const [matchToDelete, setMatchToDelete] = useState<string|undefined>(undefined); // id of match to delete for the modal, -1 if none
     const [matchCreateOpen, setMatchCreateOpen] = useState<boolean>(false); // if the create match modal is open
+
+    const [toastNotification, setToast] = useToastNotification();
+    const [loading, setLoading] = useState<boolean>(false);
 
     const [modelId, setModelId] = useState<string>("");
     const [modelBlue1, setModelBlue1] = useState<number>(0);
@@ -50,8 +54,8 @@ const MatchSchedule = () => {
 
     const createMatch = () => {
         if (!settings) return;
-        if (!modelId) return alert("Match ID cannot be empty");
-        if (settings.matches.find((m)=>m.matchId === modelId)) return alert("Match ID already exists");
+        if (!modelId) return setToast("Match ID cannot be empty", "error");
+        if (settings.matches.find((m)=>m.matchId === modelId)) return setToast("Match ID already exists", "error");
         
         settings.addMatch({
             matchId: modelId,
@@ -68,7 +72,7 @@ const MatchSchedule = () => {
     const editMatch = () => {
         if (!settings) return;
         if (!matchToEdit) return;
-        if (matchToEdit != modelId && settings.matches.find((m)=>m.matchId === modelId)) return alert("Match ID already exists");
+        if (matchToEdit != modelId && settings.matches.find((m)=>m.matchId === modelId)) return setToast("Match ID already exists", "error");
         
         settings.editMatch(matchToEdit, {
             matchId: modelId,
@@ -105,12 +109,16 @@ const MatchSchedule = () => {
     const downloadMatches = () => {
         if (!settings) return;
 
+        setLoading(true);
         getSchedule(settings.competitionId).then((matches) => {
             settings.setMatches(matches);
             settings.setCurrentMatchIndex(Math.min(settings.currentMatchIndex, matches.length));
+            setToast("Schedule downloaded from blue alliance", "success");
         }).catch((err) => {
             console.error("Failed to get schedule from blue alliance", err);
-            alert(err);
+            setToast(err, "error");
+        }).finally(() => {
+            setLoading(false);
         });
     }
 
@@ -297,6 +305,16 @@ const MatchSchedule = () => {
                     <Button color="error" onClick={deleteMatch} autoFocus>Delete</Button>
                 </DialogActions>
             </Dialog>
+
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={loading}
+                onClick={()=>setLoading(false)} /* clicking will close the long loading indicator, but it will still continue to download matches in the background */
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
+
+            {toastNotification}
         </div>
     );
 };
