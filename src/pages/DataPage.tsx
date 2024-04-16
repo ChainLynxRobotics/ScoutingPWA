@@ -114,6 +114,7 @@ const DataPage = () => {
         try {
             let matchCount = matches?.length || 0;
             const data = await MatchDataIO.importDataFromZip(file);
+            await MatchDatabase.importData(data.matches, data.events);
             const newMatches = await updateMatches();
             matchCount = newMatches.length - matchCount;
             enqueueSnackbar(`Imported ${matchCount} matches ${data.matches.length !== matchCount ? `(${data.matches.length-matchCount} duplicates were omitted)` : ''}`, {variant: "success"});

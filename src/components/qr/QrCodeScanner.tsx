@@ -13,6 +13,7 @@ export default function QrCodeScanner({onReceiveData}: {onReceiveData: (data: QR
 
     const inQrData = useRef<string[]>([]);
     const [inQrStatus, setInQrStatus] = useState<{count: number, total: number}>({count: 0, total: 0});
+    const [inQrMissingChunks, setInQrMissingChunks] = useState<number[]>([]); // The chunks that are missing [1 indexed]
     const isDecoding = useRef(false);
 
     // Decodes a fully assembled qr code and imports the match data
@@ -53,6 +54,14 @@ export default function QrCodeScanner({onReceiveData}: {onReceiveData: (data: QR
             inQrData.current[chunk-1] = regexData[3];
             setInQrStatus({count: inQrData.current.filter(v=>v!=="").length, total: totalChunks});
 
+            // Find any indexes that have been skipped over in scanning and add them to the missing chunks
+            const highestChunk = Math.max(findLastIndex(inQrData.current, v => v !== ""), 0);
+            const missingChunks = [];
+            for (let i = 0; i < highestChunk; i++) {
+                if (inQrData.current[i] === "") missingChunks.push(i+1);
+            }
+            setInQrMissingChunks(missingChunks);
+
             if (inQrData.current.filter(v=>v!=="").length === totalChunks) {
                 // If we have all the chunks, decode the qr code
                 await decodeFullQrCode(inQrData.current.join(""));
@@ -71,7 +80,7 @@ export default function QrCodeScanner({onReceiveData}: {onReceiveData: (data: QR
             <InternalQrCodeScanner onDecode={decodeQrCodeChunk} />
             {inQrStatus.total ? 
                 <div className="absolute bottom-0 right-0 text-white bg-black bg-opacity-50 px-4 py-2">
-                    {inQrStatus.count}/{inQrStatus.total || '?'} scanned
+                    {inQrStatus.count}/{inQrStatus.total || '?'} scanned {inQrMissingChunks.length ? `(Missing ${inQrMissingChunks.join(", ")})` : ''}
                 </div>
             : ''}
         </div>
@@ -106,5 +115,14 @@ function InternalQrCodeScanner({onDecode}: {onDecode: (data: QrScanner.ScanResul
     return (
         <video ref={videoEl}></video>
     );
+}
+
+function findLastIndex<T>(array: T[], predicate: (value: T, index: number, obj: T[]) => boolean) {
+    for (let i = array.length - 1; i >= 0; i--) {
+        if (predicate(array[i], i, array)) {
+            return i;
+        }
+    }
+    return -1;
 }
 
