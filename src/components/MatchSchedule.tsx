@@ -1,9 +1,7 @@
 import { useContext, useEffect, useState } from "react";
-import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, TextField, FormHelperText, InputAdornment, Backdrop, CircularProgress } from "@mui/material";
+import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, TextField, FormHelperText, InputAdornment } from "@mui/material";
 import SettingsContext from "./context/SettingsContext";
 import ErrorPage from "../pages/ErrorPage";
-import { getSchedule } from "../util/blueAllianceApi";
-import Divider from "./Divider";
 import { useSnackbar } from "notistack";
 
 const MatchSchedule = () => {
@@ -15,7 +13,6 @@ const MatchSchedule = () => {
     const [matchCreateOpen, setMatchCreateOpen] = useState<boolean>(false); // if the create match modal is open
 
     const {enqueueSnackbar} = useSnackbar();
-    const [loading, setLoading] = useState<boolean>(false);
 
     const [modelId, setModelId] = useState<string>("");
     const [modelBlue1, setModelBlue1] = useState<number>(0);
@@ -106,29 +103,6 @@ const MatchSchedule = () => {
         settings.moveMatchDown(matchToEdit);
     }
 
-    const downloadMatches = () => {
-        if (!settings) return;
-
-        setLoading(true);
-        getSchedule(settings.competitionId).then((matches) => {
-            settings.setMatches(matches);
-            settings.setCurrentMatchIndex(Math.min(settings.currentMatchIndex, matches.length));
-            enqueueSnackbar("Schedule downloaded from blue alliance", {variant: "success"});
-        }).catch((err) => {
-            console.error("Failed to get schedule from blue alliance", err);
-            enqueueSnackbar(err, {variant: "error"});
-        }).finally(() => {
-            setLoading(false);
-        });
-    }
-
-    const deleteAll = () => {
-        if (!settings) return;
-
-        settings.setMatches([]);
-        settings.setCurrentMatchIndex(0);
-    }
-
     if (!settings) return (<ErrorPage msg="Settings context not found?!?!?!" />);
     
     return (
@@ -171,17 +145,8 @@ const MatchSchedule = () => {
                 <div className="w-full mt-1 text-secondary text-center">No matches scheduled</div>
             }
 
-            <Divider style={{marginTop: "64px"}}/>
-
-            <span className="mt-4 mb-4 italic">Only the host should be pressing the buttons below!</span>
-
-            <div className="flex mt-2 gap-4">
-                <Button variant="outlined" color="primary" size="small" onClick={downloadMatches}>BlueAlliance Download</Button>
+            <div className="flex mt-4">
                 <Button variant="outlined" color="secondary" size="small" onClick={()=>setMatchCreateOpen(true)}>Manual Add</Button>
-            </div>
-
-            <div className="flex mt-4 gap-4">
-                <Button variant="contained" color="error" size="small" onClick={deleteAll}>Delete all scheduled matches</Button>
             </div>
 
             {/* Create match popup */}
@@ -305,14 +270,6 @@ const MatchSchedule = () => {
                     <Button color="error" onClick={deleteMatch} autoFocus>Delete</Button>
                 </DialogActions>
             </Dialog>
-
-            <Backdrop
-                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                open={loading}
-                onClick={()=>setLoading(false)} /* clicking will close the long loading indicator, but it will still continue to download matches in the background */
-            >
-                <CircularProgress color="inherit" />
-            </Backdrop>
         </div>
     );
 };

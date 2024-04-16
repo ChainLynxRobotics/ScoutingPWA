@@ -87,7 +87,7 @@ const AnalyticsPage = () => {
                     }
                     label={
                         <span>
-                            This match only:&nbsp;
+                            Teams in this match: &nbsp;
                             <Select
                                 variant="standard"
                                 labelId="match-select-label"

@@ -3,21 +3,28 @@ import { useContext, useState } from "react";
 import SettingsContext from "../components/context/SettingsContext";
 import MatchSchedule from "../components/MatchSchedule";
 import QrCodeType from "../enums/QrCodeType";
-import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormHelperText, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Backdrop, Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormHelperText, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import Divider from "../components/Divider";
 import { QRCodeData } from "../types/QRCodeData";
 import QrCodeList from "../components/qr/QrCodeList";
 import QrCodeScanner from "../components/qr/QrCodeScanner";
+import { useSnackbar } from "notistack";
+import { getSchedule } from "../util/blueAllianceApi";
 
 const SettingsPage = () => {
 
     const settings = useContext(SettingsContext);
+
+    const [loading, setLoading] = useState(false);
+    const {enqueueSnackbar} = useSnackbar();
 
     // QR code sending and receiving
     const [qrData, setQrData] = useState<QRCodeData>();
     const [scannerOpen, setScannerOpen] = useState(false);
 
     const [infoOpen, setInfoOpen] = useState(false);
+
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
 
     function nextMatch() {
@@ -56,6 +63,32 @@ const SettingsPage = () => {
             settings.setCurrentMatchIndex(scheduleData.currentMatch);
         } else console.warn("No schedule meta data found in qr code");
         setScannerOpen(false);
+    }
+
+    const downloadMatches = () => {
+        if (!settings) return;
+
+        setLoading(true);
+        getSchedule(settings.competitionId).then((matches) => {
+            settings.setMatches(matches);
+            settings.setCurrentMatchIndex(Math.min(settings.currentMatchIndex, matches.length));
+            enqueueSnackbar("Schedule downloaded from blue alliance", {variant: "success"});
+        }).catch((err) => {
+            console.error("Failed to get schedule from blue alliance", err);
+            enqueueSnackbar(err, {variant: "error"});
+        }).finally(() => {
+            setLoading(false);
+        });
+    }
+
+    const deleteAllMatches = () => {
+        if (!settings) return;
+
+        settings.setMatches([]);
+        settings.setCurrentMatchIndex(0);
+
+        setDeleteConfirmOpen(false);
+        enqueueSnackbar("All scheduled matches have been deleted", {variant: "success"});
     }
 
     if (!settings) return (<ErrorPage msg="Settings context not found?!?!?!" />)
@@ -118,6 +151,9 @@ const SettingsPage = () => {
                 <span className="material-symbols-outlined">info</span>
             </IconButton>
         </div>
+        <div className="flex flex-wrap gap-4">
+            <Button variant="outlined" color="primary" onClick={downloadMatches}>Download from BlueAlliance</Button>
+        </div>
         <div className="flex flex-col items-center w-full mb-4 mt-4">
             <div className="flex items-center gap-2 mb-2">
                 <div>Current Match: </div>
@@ -142,6 +178,12 @@ const SettingsPage = () => {
             </div>
             <div className="max-w-sm mb-2 text-center text-secondary text-sm">Tap on the ID column below or use the buttons above to switch to the current match.</div>
             <MatchSchedule />
+
+            <Divider style={{marginTop: "64px"}}/>
+
+            <div className="flex mt-4 mb-12 gap-4">
+                <Button variant="outlined" color="error" size="small" onClick={()=>setDeleteConfirmOpen(true)}>Delete Schedule</Button>
+            </div>
         </div>
 
         {/* Info popup */}
@@ -211,6 +253,34 @@ const SettingsPage = () => {
                 <Button size="large" onClick={() => {setScannerOpen(false)}}>Close</Button>
             </DialogActions>
         </Dialog>
+
+        {/* Delete all matches confirmation */}
+        <Dialog
+            open={deleteConfirmOpen}
+            onClose={() => {setDeleteConfirmOpen(false)}}
+            aria-labelledby="delete-confirm-title"
+        >
+            <DialogTitle id="delete-confirm-title">
+                Reset Match Schedule?
+            </DialogTitle>
+            <DialogContent>
+                <p>Are you sure you want to delete the schedule?</p>
+                <i>(This does not delete the scouting data for those matches)</i>
+            </DialogContent>
+            <DialogActions>
+                <Button size="large" color="error" onClick={deleteAllMatches}>Delete</Button>
+                <Button size="large" color="secondary" onClick={() => {setDeleteConfirmOpen(false)}}>Cancel</Button>
+            </DialogActions>
+        </Dialog>
+
+
+        <Backdrop
+            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={loading}
+            onClick={()=>setLoading(false)} /* clicking will close the long loading indicator, but it will still continue to download matches in the background */
+        >
+            <CircularProgress color="inherit" />
+        </Backdrop>
     </div>
     );
 };
