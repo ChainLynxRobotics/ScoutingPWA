@@ -4,7 +4,7 @@ import SettingsContext from "./context/SettingsContext";
 import ErrorPage from "../pages/ErrorPage";
 import { getSchedule } from "../util/blueAllianceApi";
 import Divider from "./Divider";
-import useToastNotification from "./hooks/toastNotification";
+import { useSnackbar } from "notistack";
 
 const MatchSchedule = () => {
 
@@ -14,7 +14,7 @@ const MatchSchedule = () => {
     const [matchToDelete, setMatchToDelete] = useState<string|undefined>(undefined); // id of match to delete for the modal, -1 if none
     const [matchCreateOpen, setMatchCreateOpen] = useState<boolean>(false); // if the create match modal is open
 
-    const [toastNotification, setToast] = useToastNotification();
+    const {enqueueSnackbar} = useSnackbar();
     const [loading, setLoading] = useState<boolean>(false);
 
     const [modelId, setModelId] = useState<string>("");
@@ -54,8 +54,8 @@ const MatchSchedule = () => {
 
     const createMatch = () => {
         if (!settings) return;
-        if (!modelId) return setToast("Match ID cannot be empty", "error");
-        if (settings.matches.find((m)=>m.matchId === modelId)) return setToast("Match ID already exists", "error");
+        if (!modelId) return enqueueSnackbar("Match ID cannot be empty", {variant: "error"});
+        if (settings.matches.find((m)=>m.matchId === modelId)) return enqueueSnackbar("Match ID already exists", {variant: "error"});
         
         settings.addMatch({
             matchId: modelId,
@@ -72,7 +72,7 @@ const MatchSchedule = () => {
     const editMatch = () => {
         if (!settings) return;
         if (!matchToEdit) return;
-        if (matchToEdit != modelId && settings.matches.find((m)=>m.matchId === modelId)) return setToast("Match ID already exists", "error");
+        if (matchToEdit != modelId && settings.matches.find((m)=>m.matchId === modelId)) return enqueueSnackbar("Match ID already exists", {variant: "error"});
         
         settings.editMatch(matchToEdit, {
             matchId: modelId,
@@ -113,10 +113,10 @@ const MatchSchedule = () => {
         getSchedule(settings.competitionId).then((matches) => {
             settings.setMatches(matches);
             settings.setCurrentMatchIndex(Math.min(settings.currentMatchIndex, matches.length));
-            setToast("Schedule downloaded from blue alliance", "success");
+            enqueueSnackbar("Schedule downloaded from blue alliance", {variant: "success"});
         }).catch((err) => {
             console.error("Failed to get schedule from blue alliance", err);
-            setToast(err, "error");
+            enqueueSnackbar(err, {variant: "error"});
         }).finally(() => {
             setLoading(false);
         });
@@ -313,8 +313,6 @@ const MatchSchedule = () => {
             >
                 <CircularProgress color="inherit" />
             </Backdrop>
-
-            {toastNotification}
         </div>
     );
 };

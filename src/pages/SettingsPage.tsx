@@ -200,7 +200,7 @@ const SettingsPage = () => {
             <DialogTitle id="scan-dialog-title">
                 Collect Schedule Data
             </DialogTitle>
-            <DialogContent>
+            <DialogContent sx={{paddingX: 0}}>
                 <div className="w-full flex flex-col items-center">
                     <div className="w-full max-w-xl">
                         <QrCodeScanner onReceiveData={onQrData} />

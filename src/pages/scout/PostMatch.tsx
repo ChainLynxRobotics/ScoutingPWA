@@ -15,13 +15,13 @@ import { MAX_NOTE_LENGTH } from "../../constants";
 import MatchResult from "../../enums/MatchResult";
 import ClimbResult from "../../enums/ClimbResult";
 import Divider from "../../components/Divider";
-import useToastNotification from "../../components/hooks/toastNotification";
 import { Backdrop, CircularProgress } from "@mui/material";
+import { useSnackbar } from "notistack";
 
 const PostMatch = () => {
     const context = useContext(ScoutingContext);
 
-    const [toastNotification, setToast] = useToastNotification();
+    const {enqueueSnackbar} = useSnackbar();
     const [loading, setLoading] = useState<boolean>(false);
     
     const [defenseHover, setDefenseHover] = useState<number>(-1);
@@ -45,7 +45,7 @@ const PostMatch = () => {
         if (context) {
             setLoading(true);
             context.submit().catch((e) => {
-                setToast(e.message, "error");
+                enqueueSnackbar(e.message, {variant: "error"});
             }).finally(() => {
                 setLoading(false);
             });
@@ -175,7 +175,6 @@ const PostMatch = () => {
         >
             <CircularProgress color="inherit" />
         </Backdrop>
-        {toastNotification}
         </>
     );
 };

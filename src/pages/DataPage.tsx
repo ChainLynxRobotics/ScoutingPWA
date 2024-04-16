@@ -12,7 +12,7 @@ import { QRCodeData } from "../types/QRCodeData";
 import QrCodeList from "../components/qr/QrCodeList";
 import QrCodeScanner from "../components/qr/QrCodeScanner";
 import DataList from "../components/DataList";
-import useToastNotification from "../components/hooks/toastNotification";
+import { useSnackbar } from "notistack";
 
 const DataPage = () => {
 
@@ -28,7 +28,7 @@ const DataPage = () => {
 
     const [loading, setLoading] = useState(false);
 
-    const [ToastComponent, setToast] = useToastNotification();
+    const {enqueueSnackbar} = useSnackbar();
 
     async function updateMatches() {
         const matches = await MatchDatabase.getAllMatchIdentifiers();
@@ -58,7 +58,7 @@ const DataPage = () => {
             setQrData(data);
         } catch (e) {
             console.error(e);
-            setToast(e+"", "error");
+            enqueueSnackbar(e+"", {variant: "error"});
         }
         setLoading(false);
     }
@@ -74,16 +74,16 @@ const DataPage = () => {
             await MatchDatabase.importData(data.matches, data.events);
             let newMatches = await updateMatches();
             matchCount = newMatches.length - matchCount;
-            setToast(`Imported ${matchCount} matches ${data.matches.length !== matchCount ? `(${data.matches.length-matchCount} duplicates were omitted)` : ''}`, "success");
+            enqueueSnackbar(`Imported ${matchCount} matches ${data.matches.length !== matchCount ? `(${data.matches.length-matchCount} duplicates were omitted)` : ''}`, {variant: "success"});
         } catch (e) {
             console.error(e);
-            setToast(e+"", "error");
+            enqueueSnackbar(e+"", {variant: "error"});
         }
         setLoading(false);
     }
 
     async function exportData() {
-        if (matches?.length === 0) return setToast("No data to export", "error");
+        if (matches?.length === 0) return enqueueSnackbar("No data to export", {variant: "error"});
 
         setLoading(true);
         try {
@@ -94,10 +94,10 @@ const DataPage = () => {
             const date = new Date();
 
             FileSaver.saveAs(blob, 
-                `Scouting Data - ${settings?.scoutName || 'No Name'} - ${date.toISOString()}.zip`);
+                `Scouting Data - ${settings?.scoutName || 'No Name'} - ${date.toISOString().replace(/:/g,'-')}.zip`); // replace colons with dashes to avoid file system issues
         } catch (e) {
             console.error(e);
-            setToast(e+"", "error");
+            enqueueSnackbar(e+"", {variant: "error"});
         }
         setLoading(false);
     }
@@ -116,10 +116,10 @@ const DataPage = () => {
             await MatchDataIO.importDataFromZip(file);
             let newMatches = await updateMatches();
             matchCount = newMatches.length - matchCount;
-            setToast(`Imported ${matchCount} new matches`, "success");
+            enqueueSnackbar(`Imported ${matchCount} new matches`, {variant: "success"});
         } catch (e) {
             console.error(e);
-            setToast(e+"", "error");
+            enqueueSnackbar(e+"", {variant: "error"});
         }
         setLoading(false);
     }
@@ -132,7 +132,7 @@ const DataPage = () => {
             await updateMatches();
         } catch (e) {
             console.error(e);
-            setToast(e+"", "error");
+            enqueueSnackbar(e+"", {variant: "error"});
         }
         setLoading(false);
     }
@@ -275,7 +275,7 @@ const DataPage = () => {
             <DialogTitle id="alert-dialog-title">
                 Collect Match Data
             </DialogTitle>
-            <DialogContent>
+            <DialogContent sx={{paddingX: 0}}>
                 <div className="w-full flex flex-col items-center">
                     <div className="w-full max-w-lg">
                         {scannerOpen ? <QrCodeScanner onReceiveData={onData} /> : ''}
@@ -293,8 +293,6 @@ const DataPage = () => {
         >
             <CircularProgress color="inherit" />
         </Backdrop>
-
-        {ToastComponent}
     </div>
     );
 };
