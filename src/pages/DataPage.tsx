@@ -72,7 +72,7 @@ const DataPage = () => {
         try {
             let matchCount = matches?.length || 0;
             await MatchDatabase.importData(data.matches, data.events);
-            let newMatches = await updateMatches();
+            const newMatches = await updateMatches();
             matchCount = newMatches.length - matchCount;
             enqueueSnackbar(`Imported ${matchCount} matches ${data.matches.length !== matchCount ? `(${data.matches.length-matchCount} duplicates were omitted)` : ''}`, {variant: "success"});
         } catch (e) {
@@ -113,10 +113,10 @@ const DataPage = () => {
         setLoading(true);
         try {
             let matchCount = matches?.length || 0;
-            await MatchDataIO.importDataFromZip(file);
-            let newMatches = await updateMatches();
+            const data = await MatchDataIO.importDataFromZip(file);
+            const newMatches = await updateMatches();
             matchCount = newMatches.length - matchCount;
-            enqueueSnackbar(`Imported ${matchCount} new matches`, {variant: "success"});
+            enqueueSnackbar(`Imported ${matchCount} matches ${data.matches.length !== matchCount ? `(${data.matches.length-matchCount} duplicates were omitted)` : ''}`, {variant: "success"});
         } catch (e) {
             console.error(e);
             enqueueSnackbar(e+"", {variant: "error"});

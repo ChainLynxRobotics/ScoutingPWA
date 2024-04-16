@@ -33,7 +33,7 @@ export default function QrCodeScanner({onReceiveData}: {onReceiveData: (data: QR
             inQrData.current = [];
             setInQrStatus({count: 0, total: 0});
         }
-    }, [onReceiveData]);
+    }, [onReceiveData, enqueueSnackbar]);
 
     // Decodes a single qr code, must start with "scoutingdata:"
     const decodeQrCodeChunk = useCallback(async (data: QrScanner.ScanResult) => {
@@ -64,7 +64,7 @@ export default function QrCodeScanner({onReceiveData}: {onReceiveData: (data: QR
             enqueueSnackbar(e+"", {variant: "error"});
         }
         isDecoding.current = false;
-    }, [decodeFullQrCode]);
+    }, [decodeFullQrCode, enqueueSnackbar]);
 
     return (
         <div className="relative">

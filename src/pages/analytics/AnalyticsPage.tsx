@@ -70,7 +70,7 @@ const AnalyticsPage = () => {
             {settings && 
                 <FormControlLabel 
                     control={
-                        <Checkbox value={settings.analyticsCurrentCompetitionOnly} 
+                        <Checkbox checked={settings.analyticsCurrentCompetitionOnly} 
                             onChange={(event)=>settings.setAnalyticsCurrentCompetitionOnly(event.target.checked)} />
                     }
                     label="Current Competition Only" 
@@ -82,7 +82,7 @@ const AnalyticsPage = () => {
             {settings && 
                 <FormControlLabel 
                     control={
-                        <Checkbox value={currentMatchOnly} 
+                        <Checkbox checked={currentMatchOnly} 
                             onChange={(event, checked)=>setCurrentMatchOnly(checked)} />
                     }
                     label={

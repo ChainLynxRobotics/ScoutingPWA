@@ -1,7 +1,6 @@
 import JSZip from "jszip";
 import { MatchData, MatchEventData } from "../types/MatchData";
 import { stringify } from 'csv-stringify/browser/esm/sync';
-import MatchDatabase from "./MatchDatabase";
 import MatchEvent from "../enums/MatchEvent";
 import AllianceColor from "../enums/AllianceColor";
 import { MatchDataFieldInformation, MatchDataFields } from "../DataValues";
@@ -81,14 +80,12 @@ async function importDataFromZip(file: File) {
     const rawMatchData = zip.file("raw/MatchData.json");
     if (!rawMatchData) throw new Error("Could not find match data in zip folder!");
     const matchData = JSON.parse(await rawMatchData.async("string"));
-    console.log(matchData);
 
     const rawEventData = zip.file("raw/MatchEvents.json");
     if (!rawEventData) throw new Error("Could not find match data in zip folder!");
     const events = JSON.parse(await rawEventData.async("string"));
-    console.log(events);
 
-    await MatchDatabase.importData(matchData, events);
+    return {matches: matchData, events};
 }
 
 export default {
