@@ -7,6 +7,7 @@ import SettingsContext from "../../components/context/SettingsContext";
 import useLocalStorageState from "../../components/hooks/localStorageState";
 import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "../../components/StrickModeDroppable";
+import PickList from "../../components/analytics/PickList";
 
 const AnalyticsPage = () => {
 
@@ -22,8 +23,6 @@ const AnalyticsPage = () => {
 
     const [analyticsMatchIndex, setAnalyticsMatchIndex] = useLocalStorageState(settings?.currentMatchIndex||0, "analyticsMatchIndex");
     const [currentMatchOnly, setCurrentMatchOnly] = useLocalStorageState(false, "analyticsCurrentMatchOnly");
-
-    const [pickListIndex, setPickListIndex] = useLocalStorageState<{[key: string]: number[]}>({}, "analyticsPickListIndex"); // Store picklist for each competition id separately
 
     useEffect(() => {
         const analyticsCompetition = settings?.analyticsCurrentCompetitionOnly ? settings?.competitionId : undefined;
@@ -56,52 +55,6 @@ const AnalyticsPage = () => {
             settings?.starredTeams.includes(a) === settings?.starredTeams.includes(b) ? a-b : settings?.starredTeams.includes(a) ? -1 : 1
         );
     }, [teamList, search, currentMatchOnly, settings?.starredTeams, teamsInCurrentMatch]);
-
-
-    // Pick List Stuff
-    const hasUpdatedPickListIndex = useRef(false);
-    const updatePickListIndexTeams = useCallback(async () => {
-        if (hasUpdatedPickListIndex.current) return;
-        if (!settings) return;
-        if (teamList.length == 0) return;
-
-        hasUpdatedPickListIndex.current = true;
-
-        var teams = settings.analyticsCurrentCompetitionOnly ? teamList : await MatchDatabase.getUniqueTeams(settings.competitionId);
-
-        console.log("Updating pick list index for competition", settings.competitionId, teams);
-        
-        const newPickListIndex = {...pickListIndex, [settings.competitionId]: [...new Set([...(pickListIndex[settings.competitionId] || []), ...teams])]};
-        setPickListIndex(newPickListIndex);
-    }, [settings?.competitionId, settings?.analyticsCurrentCompetitionOnly, teamList]);
-
-    useEffect(()=>{
-        updatePickListIndexTeams();
-    }, [updatePickListIndexTeams]);
-
-    const pickList = useMemo(() => {
-        if (!settings) return [];
-        return pickListIndex[settings.competitionId] || [];
-    }, [pickListIndex, settings?.competitionId]);
-
-    const setPickList = useCallback((teams: number[]) => {
-        if (!settings) return;
-        const newPickListIndex = {...pickListIndex, [settings.competitionId]: teams};
-        setPickListIndex(newPickListIndex);
-    }, [pickListIndex, settings?.competitionId]);
-
-    function onDragEnd(result: DropResult) {
-        // dropped outside the list
-        if (!result.destination) return;
-    
-        const items = reorder(
-            pickList,
-            result.source.index,
-            result.destination.index
-        );
-    
-        setPickList(items);
-    }
 
     return (
     <div className="w-full h-full px-4 flex flex-col items-center relative">
@@ -186,35 +139,7 @@ const AnalyticsPage = () => {
                     </List>
                 </div>
                 <div role="tabpanel" hidden={tab!==2} id="analytics-tabpanel-2" aria-labelledby="analytics-tab-2">
-                    <DragDropContext onDragEnd={onDragEnd}>
-                        <StrictModeDroppable droppableId="droppable">
-                            {(provided, snapshot) => (
-                                    <List ref={provided.innerRef} {...provided.droppableProps}>
-                                        {pickList.map((team, index) => (
-                                            <Draggable key={team.toString()} draggableId={team.toString()} index={index}>
-                                                {(provided, snapshot) => (
-                                                    <TeamListItem 
-                                                        team={team} 
-                                                        key={team.toString()} 
-                                                        listItemProps={{ 
-                                                            ref: provided.innerRef, 
-                                                            ...provided.draggableProps, 
-                                                            ...provided.dragHandleProps,
-                                                        }}
-                                                        primaryAction={
-                                                            <ListItemIcon >
-                                                                <span className="material-symbols-outlined">drag_indicator</span>
-                                                            </ListItemIcon>
-                                                        }
-                                                    />
-                                                )}
-                                            </Draggable>
-                                        ))}
-                                        {provided.placeholder}
-                                    </List>
-                            )}
-                        </StrictModeDroppable>
-                    </DragDropContext>
+                    <PickList />
                 </div>
             </Box>
         </div>
@@ -262,7 +187,7 @@ const AnalyticsPage = () => {
     )
 }
 
-const TeamListItem = (props: {team: number, primaryAction?: ReactElement, listItemProps?: ListItemProps}) => {
+export const TeamListItem = (props: {team: number, primaryAction?: ReactElement, listItemProps?: ListItemProps}) => {
 
     const settings = useContext(SettingsContext);
     const navigate = useNavigate();
@@ -292,7 +217,7 @@ const TeamListItem = (props: {team: number, primaryAction?: ReactElement, listIt
             onClick={()=>navigate(`/analytics/team/${props.team}`)}
             {...props.listItemProps}
         >
-            <ListItemButton role={undefined}>
+            <ListItemButton role={undefined} disableRipple>
                 {props.primaryAction}
                 <ListItemIcon onClick={toggleStarred}>
                     <Checkbox
@@ -311,7 +236,7 @@ const TeamListItem = (props: {team: number, primaryAction?: ReactElement, listIt
     )
 }
 
-const MatchListItem = ({matchId}: {matchId: string}) => {
+export const MatchListItem = ({matchId}: {matchId: string}) => {
 
     const navigate = useNavigate();
 
@@ -327,19 +252,11 @@ const MatchListItem = ({matchId}: {matchId: string}) => {
             disablePadding
             onClick={()=>navigate(`/analytics/match/${matchId}`)}
         >
-            <ListItemButton role={undefined}>
+            <ListItemButton role={undefined} disableRipple>
                 <ListItemText id={labelId} primary={<b>{matchId}</b>} />
             </ListItemButton>
         </ListItem>
     )
 }
-
-function reorder<T>(list: T[], startIndex: number, endIndex: number): T[] {
-    const result = Array.from(list);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-  
-    return result;
-};
 
 export default AnalyticsPage;
