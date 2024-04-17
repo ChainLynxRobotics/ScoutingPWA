@@ -1,17 +1,19 @@
-import { AppBar, Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Paper, Select, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField } from "@mui/material";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { AppBar, Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemProps, ListItemText, MenuItem, Paper, Select, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField } from "@mui/material";
+import { ReactElement, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import MatchDatabase from "../../util/MatchDatabase";
 import { useNavigate } from "react-router-dom";
 import matchCompare from "../../util/matchCompare";
 import SettingsContext from "../../components/context/SettingsContext";
 import useLocalStorageState from "../../components/hooks/localStorageState";
+import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
+import { StrictModeDroppable } from "../../components/StrickModeDroppable";
 
 const AnalyticsPage = () => {
 
     const settings = useContext(SettingsContext);
 
     const [search, setSearch] = useLocalStorageState('', 'analyticsSearch');
-    const [tab, setTab] = useState(0);
+    const [tab, setTab] = useLocalStorageState(0, 'analyticsTab');
     const [contributorsOpen, setContributorsOpen] = useState<boolean>(false);
 
     const [teamList, setTeamList] = useState<number[]>([]);
@@ -20,6 +22,8 @@ const AnalyticsPage = () => {
 
     const [analyticsMatchIndex, setAnalyticsMatchIndex] = useLocalStorageState(settings?.currentMatchIndex||0, "analyticsMatchIndex");
     const [currentMatchOnly, setCurrentMatchOnly] = useLocalStorageState(false, "analyticsCurrentMatchOnly");
+
+    const [pickListIndex, setPickListIndex] = useLocalStorageState<{[key: string]: number[]}>({}, "analyticsPickListIndex"); // Store picklist for each competition id separately
 
     useEffect(() => {
         const analyticsCompetition = settings?.analyticsCurrentCompetitionOnly ? settings?.competitionId : undefined;
@@ -52,6 +56,52 @@ const AnalyticsPage = () => {
             settings?.starredTeams.includes(a) === settings?.starredTeams.includes(b) ? a-b : settings?.starredTeams.includes(a) ? -1 : 1
         );
     }, [teamList, search, currentMatchOnly, settings?.starredTeams, teamsInCurrentMatch]);
+
+
+    // Pick List Stuff
+    const hasUpdatedPickListIndex = useRef(false);
+    const updatePickListIndexTeams = useCallback(async () => {
+        if (hasUpdatedPickListIndex.current) return;
+        if (!settings) return;
+        if (teamList.length == 0) return;
+
+        hasUpdatedPickListIndex.current = true;
+
+        var teams = settings.analyticsCurrentCompetitionOnly ? teamList : await MatchDatabase.getUniqueTeams(settings.competitionId);
+
+        console.log("Updating pick list index for competition", settings.competitionId, teams);
+        
+        const newPickListIndex = {...pickListIndex, [settings.competitionId]: [...new Set([...(pickListIndex[settings.competitionId] || []), ...teams])]};
+        setPickListIndex(newPickListIndex);
+    }, [settings?.competitionId, settings?.analyticsCurrentCompetitionOnly, teamList]);
+
+    useEffect(()=>{
+        updatePickListIndexTeams();
+    }, [updatePickListIndexTeams]);
+
+    const pickList = useMemo(() => {
+        if (!settings) return [];
+        return pickListIndex[settings.competitionId] || [];
+    }, [pickListIndex, settings?.competitionId]);
+
+    const setPickList = useCallback((teams: number[]) => {
+        if (!settings) return;
+        const newPickListIndex = {...pickListIndex, [settings.competitionId]: teams};
+        setPickListIndex(newPickListIndex);
+    }, [pickListIndex, settings?.competitionId]);
+
+    function onDragEnd(result: DropResult) {
+        // dropped outside the list
+        if (!result.destination) return;
+    
+        const items = reorder(
+            pickList,
+            result.source.index,
+            result.destination.index
+        );
+    
+        setPickList(items);
+    }
 
     return (
     <div className="w-full h-full px-4 flex flex-col items-center relative">
@@ -110,30 +160,62 @@ const AnalyticsPage = () => {
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }} component={Paper}>
                 <AppBar position="static">
                     <Tabs value={tab} onChange={(e,val)=>setTab(val)} variant="fullWidth" aria-label="basic tabs example">
-                        <Tab label="Teams" id="analytics-tab-0" aria-controls="analytics-tabpanel-1" />
+                        <Tab label="Teams" id="analytics-tab-0" aria-controls="analytics-tabpanel-0" />
                         <Tab label="Matches" id="analytics-tab-1" aria-controls="analytics-tabpanel-1" />
+                        <Tab label="Pick List" id="analytics-tab-2" aria-controls="analytics-tabpanel-2" />
                     </Tabs>
                 </AppBar>
-            <div role="tabpanel" hidden={tab!==0} id="analytics-tabpanel-0" aria-labelledby="analytics-tab-0">
-                <List>
-                    {sortedTeamList.map((team) => (
-                        <TeamListItem team={team} key={team} />
-                    ))}
-                    {sortedTeamList.length===0 &&
-                        <div className="text-center text-secondary my-4">No teams</div>
-                    }
-                </List>
-            </div>
-            <div role="tabpanel" hidden={tab!==1} id="analytics-tabpanel-1" aria-labelledby="analytics-tab-1">
-                <List>
-                    {matchList.map((matchId) => (
-                        <MatchListItem matchId={matchId} key={matchId} />
-                    ))}
-                    {matchList.length===0 &&
-                        <div className="text-center text-secondary my-4">No matches</div>
-                    }
-                </List>
-            </div>
+                <div role="tabpanel" hidden={tab!==0} id="analytics-tabpanel-0" aria-labelledby="analytics-tab-0">
+                    <List>
+                        {sortedTeamList.map((team) => (
+                            <TeamListItem team={team} key={team} />
+                        ))}
+                        {sortedTeamList.length===0 &&
+                            <div className="text-center text-secondary my-4">No teams</div>
+                        }
+                    </List>
+                </div>
+                <div role="tabpanel" hidden={tab!==1} id="analytics-tabpanel-1" aria-labelledby="analytics-tab-1">
+                    <List>
+                        {matchList.map((matchId) => (
+                            <MatchListItem matchId={matchId} key={matchId} />
+                        ))}
+                        {matchList.length===0 &&
+                            <div className="text-center text-secondary my-4">No matches</div>
+                        }
+                    </List>
+                </div>
+                <div role="tabpanel" hidden={tab!==2} id="analytics-tabpanel-2" aria-labelledby="analytics-tab-2">
+                    <DragDropContext onDragEnd={onDragEnd}>
+                        <StrictModeDroppable droppableId="droppable">
+                            {(provided, snapshot) => (
+                                    <List ref={provided.innerRef} {...provided.droppableProps}>
+                                        {pickList.map((team, index) => (
+                                            <Draggable key={team.toString()} draggableId={team.toString()} index={index}>
+                                                {(provided, snapshot) => (
+                                                    <TeamListItem 
+                                                        team={team} 
+                                                        key={team.toString()} 
+                                                        listItemProps={{ 
+                                                            ref: provided.innerRef, 
+                                                            ...provided.draggableProps, 
+                                                            ...provided.dragHandleProps,
+                                                        }}
+                                                        primaryAction={
+                                                            <ListItemIcon >
+                                                                <span className="material-symbols-outlined">drag_indicator</span>
+                                                            </ListItemIcon>
+                                                        }
+                                                    />
+                                                )}
+                                            </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                    </List>
+                            )}
+                        </StrictModeDroppable>
+                    </DragDropContext>
+                </div>
             </Box>
         </div>
 
@@ -180,21 +262,21 @@ const AnalyticsPage = () => {
     )
 }
 
-const TeamListItem = ({team}: {team: number}) => {
+const TeamListItem = (props: {team: number, primaryAction?: ReactElement, listItemProps?: ListItemProps}) => {
 
     const settings = useContext(SettingsContext);
     const navigate = useNavigate();
 
-    const labelId = `team-list-label-${team}`;
+    const labelId = `team-list-label-${props.team}`;
 
     function toggleStarred(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         e.stopPropagation();
         e.preventDefault();
         if (settings) {
-            if (settings.starredTeams.includes(team)) {
-                settings.setStarredTeams(settings.starredTeams.filter(t=>t!==team));
+            if (settings.starredTeams.includes(props.team)) {
+                settings.setStarredTeams(settings.starredTeams.filter(t=>t!==props.team));
             } else {
-                settings.setStarredTeams([...settings.starredTeams, team]);
+                settings.setStarredTeams([...settings.starredTeams, props.team]);
             }
         }
     }
@@ -207,13 +289,15 @@ const TeamListItem = ({team}: {team: number}) => {
                 </IconButton>
             }
             disablePadding
-            onClick={()=>navigate(`/analytics/team/${team}`)}
+            onClick={()=>navigate(`/analytics/team/${props.team}`)}
+            {...props.listItemProps}
         >
             <ListItemButton role={undefined}>
+                {props.primaryAction}
                 <ListItemIcon onClick={toggleStarred}>
                     <Checkbox
                         edge="start"
-                        checked={settings?.starredTeams.indexOf(team) !== -1}
+                        checked={settings?.starredTeams.indexOf(props.team) !== -1}
                         tabIndex={-1}
                         inputProps={{ 'aria-labelledby': labelId }}
                         disableRipple
@@ -221,7 +305,7 @@ const TeamListItem = ({team}: {team: number}) => {
                         checkedIcon={<span className="material-symbols-outlined">star</span>}
                     />
                 </ListItemIcon>
-                <ListItemText id={labelId} primary={<b>{team}</b>} />
+                <ListItemText id={labelId} primary={<b>{props.team}</b>} />
             </ListItemButton>
         </ListItem>
     )
@@ -249,5 +333,13 @@ const MatchListItem = ({matchId}: {matchId: string}) => {
         </ListItem>
     )
 }
+
+function reorder<T>(list: T[], startIndex: number, endIndex: number): T[] {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+  
+    return result;
+};
 
 export default AnalyticsPage;
