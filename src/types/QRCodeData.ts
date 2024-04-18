@@ -15,6 +15,7 @@ export type QRCodeData = {
     }
     pickListData?: {
         pickList: number[],
+        crossedOut: number[],
         competitionId: string
     }
 };

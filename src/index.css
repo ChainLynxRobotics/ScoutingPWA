@@ -160,3 +160,12 @@ input[type=number] {
   appearance: textfield;
   -moz-appearance: textfield;
 }
+
+.strikeout::before {
+  content: " ";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  border-bottom: 1px solid currentColor;
+  width: 100%;
+}

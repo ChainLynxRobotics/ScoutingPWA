@@ -93,12 +93,13 @@ const AnalyticsPage = () => {
                                 variant="standard"
                                 labelId="match-select-label"
                                 id="match-select"
-                                value={settings?.matches[analyticsMatchIndex]?.matchId}
+                                value={settings?.matches[analyticsMatchIndex]?.matchId || ''}
                                 onChange={(event) => setCurrentMatch(event.target.value)}
                                 label="Select Match">
                                 {settings?.matches.map((match) => (
                                     <MenuItem key={match.matchId} value={match.matchId}><b>{match.matchId}</b></MenuItem>
                                 ))}
+                                {settings?.matches.length===0 && <MenuItem key="" value="" disabled>No schedule data</MenuItem>}
                             </Select>
                         </span>
                     }

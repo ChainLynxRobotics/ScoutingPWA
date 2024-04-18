@@ -12,6 +12,11 @@ import QrCodeList from "../qr/QrCodeList";
 import QrCodeScanner from "../qr/QrCodeScanner";
 import { useSnackbar } from "notistack";
 
+type PickListData = {
+    pickList: number[],
+    crossedOut: number[],
+}
+
 export default function PickList() {
     const settings = useContext(SettingsContext);
 
@@ -22,18 +27,21 @@ export default function PickList() {
     const [scannerOpen, setScannerOpen] = useState(false);
 
 
-    const [pickListIndex, setPickListIndex] = useLocalStorageState<{[key: string]: number[]}>({}, "analyticsPickListIndex"); // Store picklist for each competition id separately
+    const [pickListIndex, setPickListIndex] = useLocalStorageState<{[key: string]: PickListData}>({}, "analyticsPickListIndex"); // Store picklist for each competition id separately
 
     // Deal with the picklist for the current competition
-    const pickList = useMemo(() => {
-        if (!settings) return [];
-        return pickListIndex[settings.competitionId] || [];
+    const pickListData = useMemo(() => {
+        if (!settings || !pickListIndex[settings.competitionId]) return {pickList: [], crossedOut: []};
+        return pickListIndex[settings.competitionId];
     }, [pickListIndex, settings]);
     
-    const setPickList = useCallback((teams: number[]) => {
+    const setPickListData = useCallback((data: Partial<PickListData>) => {
         if (!settings) return;
         const newPickListIndex = {...pickListIndex};
-        newPickListIndex[settings.competitionId] = teams;
+        newPickListIndex[settings.competitionId] = {
+            pickList: data.pickList || pickListIndex[settings.competitionId]?.pickList || [], // Keep the old pick list if not provided
+            crossedOut: data.crossedOut || pickListIndex[settings.competitionId]?.crossedOut || [] // Keep the old crossed out list if not provided
+        };
         setPickListIndex(newPickListIndex);
     }, [pickListIndex, setPickListIndex, settings]);
 
@@ -47,23 +55,23 @@ export default function PickList() {
 
             const teams = await MatchDatabase.getUniqueTeams(settings.competitionId);
             
-            const combinedList = [...new Set([...(pickListIndex[settings.competitionId] || []), ...teams])];
-            setPickList(combinedList);
+            const combinedList = [...new Set([...(pickListData.pickList), ...teams])];
+            setPickListData({pickList: combinedList});
         }
         updatePickListIndexTeams()
-    }, [settings, settings?.competitionId, pickListIndex, setPickList]);
+    }, [settings, settings?.competitionId, pickListIndex, setPickListData]);
 
     function onDragEnd(result: DropResult) {
         // dropped outside the list
         if (!result.destination) return;
     
         const items = reorder(
-            pickList,
+            pickListData.pickList,
             result.source.index,
             result.destination.index
         );
     
-        setPickList(items);
+        setPickListData({pickList: items});
     }
 
     const openQrCodes = () => {
@@ -72,7 +80,7 @@ export default function PickList() {
             qrType: QrCodeType.PickList,
             version: APP_VERSION,
             pickListData: {
-                pickList: pickList,
+                ...pickListData,
                 competitionId: settings.competitionId
             }
         };
@@ -83,7 +91,10 @@ export default function PickList() {
         console.log(data);
         if (data.qrType === QrCodeType.PickList && data.pickListData) {
             const newPickListIndex = {...pickListIndex};
-            newPickListIndex[data.pickListData.competitionId] = data.pickListData.pickList;
+            newPickListIndex[data.pickListData.competitionId] = {
+                pickList: data.pickListData.pickList,
+                crossedOut: data.pickListData.crossedOut
+            }
             setPickListIndex(newPickListIndex);
             setScannerOpen(false);
             if (settings?.competitionId !== data.pickListData.competitionId) {
@@ -97,14 +108,25 @@ export default function PickList() {
         }
     }
 
+    const setCrossedOut = (team: number, value: boolean) => {
+        if (!pickListData.crossedOut.includes(team) && value) {
+            setPickListData({crossedOut: [...pickListData.crossedOut, team]});
+        } else if (pickListData.crossedOut.includes(team) && !value) {
+            setPickListData({crossedOut: pickListData.crossedOut.filter(t => t !== team)});
+        }
+    }
+
     return (
         <>
             <DragDropContext onDragEnd={onDragEnd}>
                 <StrictModeDroppable droppableId="droppable">
                     {(provided) => (
                         <List ref={provided.innerRef} {...provided.droppableProps}>
-                            {pickList.map((team, index) => (
-                                <DraggableTeamListItem team={team} index={index} key={team} />
+                            {pickListData.pickList.map((team, index) => (
+                                <DraggableTeamListItem team={team} index={index} key={team} 
+                                    crossedOut={pickListData.crossedOut.includes(team)} 
+                                    setCrossedOut={(value)=>setCrossedOut(team, value)}
+                                />
                             ))}
                             {provided.placeholder}
                         </List>
@@ -168,24 +190,12 @@ export default function PickList() {
     )
 }
 
-const DraggableTeamListItem = (props: {team: number, index: number}) => {
-
-    const settings = useContext(SettingsContext);
+const DraggableTeamListItem = (props: {team: number, index: number, crossedOut: boolean, setCrossedOut: (value: boolean)=>void}) => {
+    
     const navigate = useNavigate();
+    const settings = useContext(SettingsContext);
 
     const labelId = `pick-list-label-${props.team}`;
-
-    function toggleStarred(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        e.stopPropagation();
-        e.preventDefault();
-        if (settings) {
-            if (settings.starredTeams.includes(props.team)) {
-                settings.setStarredTeams(settings.starredTeams.filter(t=>t!==props.team));
-            } else {
-                settings.setStarredTeams([...settings.starredTeams, props.team]);
-            }
-        }
-    }
     
     return (
         <Draggable key={props.team.toString()} draggableId={props.team.toString()} index={props.index}>
@@ -197,33 +207,39 @@ const DraggableTeamListItem = (props: {team: number, index: number}) => {
                         </IconButton>
                     }
                     disablePadding
-                    onClick={()=>navigate(`/analytics/team/${props.team}`)}
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    sx={snapshot.isDragging ? { bgcolor: (theme) => theme.palette.action.hover } : {}}
+                    sx={{
+                        bgcolor: snapshot.isDragging ? (theme) => theme.palette.action.hover : undefined,
+                    }}
                 >
-                    <ListItemButton role={undefined} disableRipple>
+                    <ListItemButton role={undefined} disableRipple onClick={()=>navigate(`/analytics/team/${props.team}`)}>
                         <ListItemIcon >
                             <span className="material-symbols-outlined">drag_indicator</span>
                         </ListItemIcon>
-                        <ListItemIcon onClick={toggleStarred}>
+                        <ListItemIcon onClick={(e)=>{props.setCrossedOut(!props.crossedOut);e.preventDefault();e.stopPropagation()}}>
                             <Checkbox
                                 edge="start"
-                                checked={settings?.starredTeams.indexOf(props.team) !== -1}
+                                checked={props.crossedOut}
                                 tabIndex={-1}
                                 inputProps={{ 'aria-labelledby': labelId }}
                                 disableRipple
-                                icon={<span className="material-symbols-outlined">star_outline</span>}
-                                checkedIcon={<span className="material-symbols-outlined">star</span>}
+                                checkedIcon={<span className="material-symbols-outlined">close</span>}
+                                color="secondary"
                             />
                         </ListItemIcon>
                         <ListItemText id={labelId} primary={
-                            <span className="flex gap-2">
-                                {!snapshot.isDragging && <span className="text-secondary">#{props.index + 1}</span>}
+                            <span className={"flex gap-2"+(props.crossedOut ? " strikeout opacity-50" : "")}>
+                                <span className="text-secondary">#{props.index + 1}:</span>
                                 <b>{props.team}</b>
+                                {settings?.starredTeams.includes(props.team) && 
+                                    <span className="material-symbols-outlined inline-icon text-yellow-300 scale-75">star</span>
+                                }
                             </span>
-                        } />
+                        } 
+                        className="relative"
+                        />
                     </ListItemButton>
                 </ListItem>
             )}

@@ -90,5 +90,7 @@ message ScheduleData {
 
 message PickListData {
     repeated int32 pickList = 1;
-    string competitionId = 2;
+    repeated int32 crossedOut = 2;
+
+    string competitionId = 3;
 }
