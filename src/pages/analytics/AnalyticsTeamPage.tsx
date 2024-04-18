@@ -44,7 +44,10 @@ const AnalyticsPage = () => {
     const [notesOpen, setNotesOpen] = useState(false);
 
 
-    const [plotsEnabled, setPlotsEnabled] = useLocalStorageState<string[]>([], "analyticsPlotsEnabled");
+    const [plotsEnabled, setPlotsEnabled] = useLocalStorageState<string[]>(
+        ["Auto Pickup","Auto Speaker","Auto Amp","Teleop Pickup","Teleop Speaker","Teleop Amp"], // Some default values to start with
+        "analyticsPlotsEnabled"
+    );
 
     useEffect(() => {
         if (hasLoaded===team) return;
