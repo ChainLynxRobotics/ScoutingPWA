@@ -1,12 +1,10 @@
 import { AppBar, Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemProps, ListItemText, MenuItem, Paper, Select, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField } from "@mui/material";
-import { ReactElement, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { ReactElement, useContext, useEffect, useMemo, useState } from "react";
 import MatchDatabase from "../../util/MatchDatabase";
 import { useNavigate } from "react-router-dom";
 import matchCompare from "../../util/matchCompare";
 import SettingsContext from "../../components/context/SettingsContext";
 import useLocalStorageState from "../../components/hooks/localStorageState";
-import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
-import { StrictModeDroppable } from "../../components/StrickModeDroppable";
 import PickList from "../../components/analytics/PickList";
 
 const AnalyticsPage = () => {

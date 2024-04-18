@@ -277,8 +277,8 @@ const DataPage = () => {
                 Collect Match Data
             </DialogTitle>
             <DialogContent sx={{paddingX: 0}}>
-                <div className="w-full flex flex-col items-center">
-                    <div className="w-full max-w-lg">
+                <div className="w-full h-full flex flex-col items-center justify-center">
+                    <div className="w-full max-w-xl">
                         {scannerOpen ? <QrCodeScanner onReceiveData={onData} /> : ''}
                     </div>
                 </div>

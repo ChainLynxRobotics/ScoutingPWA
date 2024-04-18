@@ -220,8 +220,8 @@ const SettingsPage = () => {
                 Share Schedule
             </DialogTitle>
             <DialogContent sx={{scrollSnapType: "y mandatory"}}>
-                <div className="w-full flex flex-col items-center">
-                    <div className="w-full max-w-md">
+                <div className="w-full h-full flex flex-col items-center justify-center">
+                    <div className="w-full max-w-xl">
                         <p className="text-center">Scan the following QR code(s) on copy this schedule onto other devices</p>
                         {qrData && <QrCodeList data={qrData} />}
                     </div>

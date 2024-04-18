@@ -18,7 +18,6 @@ export default function QrCodeScanner({onReceiveData}: {onReceiveData: (data: QR
 
     // Decodes a fully assembled qr code and imports the match data
     const decodeFullQrCode = useCallback(async (data: string) => {
-        console.log("Decoding: ", data);
         try {
             const protos = await protobuf.load("/protobuf/data_transfer.proto");
             const DataTransfer = protos.lookupType("DataTransfer");
@@ -41,7 +40,6 @@ export default function QrCodeScanner({onReceiveData}: {onReceiveData: (data: QR
         if (isDecoding.current) return;
         isDecoding.current = true;
         try {
-            console.log("Read: ", data);
             const regexData = QR_PROTOCOL_REGEX.exec(data.data); // The regex to match the qr code protocol
             if (regexData === null) throw new Error("Invalid QR Code Data");
             const chunk = parseInt(regexData[1]); // The chunk number (1 indexed)

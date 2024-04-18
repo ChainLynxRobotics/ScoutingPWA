@@ -3,15 +3,18 @@ syntax = "proto3";
 message DataTransfer {
     QrCodeType qrType = 1;
     string version = 2;
+
     repeated MatchData matches = 3;
     repeated MatchEventData events = 4;
     repeated ScheduledMatch schedule = 5;
     optional ScheduleData scheduleData = 6;
+    optional PickListData pickListData = 7;
 }
 
 enum QrCodeType {
-    MatchDataType = 0;
-    ScheduleType = 1;
+    MatchData = 0;
+    Schedule = 1;
+    PickList = 2;
 }
 
 message MatchEventData {
@@ -83,4 +86,9 @@ message ScheduleData {
     bool fieldRotated = 1;
     string competitionId = 2;
     int32 currentMatch = 3;
+}
+
+message PickListData {
+    repeated int32 pickList = 1;
+    string competitionId = 2;
 }

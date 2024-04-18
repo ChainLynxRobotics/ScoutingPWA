@@ -13,4 +13,8 @@ export type QRCodeData = {
         competitionId: string,
         currentMatch: number
     }
+    pickListData?: {
+        pickList: number[],
+        competitionId: string
+    }
 };
