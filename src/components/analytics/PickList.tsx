@@ -28,14 +28,14 @@ export default function PickList() {
     const pickList = useMemo(() => {
         if (!settings) return [];
         return pickListIndex[settings.competitionId] || [];
-    }, [pickListIndex, settings?.competitionId]);
+    }, [pickListIndex, settings]);
     
     const setPickList = useCallback((teams: number[]) => {
         if (!settings) return;
         const newPickListIndex = {...pickListIndex};
         newPickListIndex[settings.competitionId] = teams;
         setPickListIndex(newPickListIndex);
-    }, [pickListIndex, settings?.competitionId]);
+    }, [pickListIndex, setPickListIndex, settings]);
 
 
     const hasUpdatedPickListIndex = useRef(false);
@@ -45,13 +45,13 @@ export default function PickList() {
         async function updatePickListIndexTeams() {
             if (!settings) return;
 
-            var teams = await MatchDatabase.getUniqueTeams(settings.competitionId);
+            const teams = await MatchDatabase.getUniqueTeams(settings.competitionId);
             
             const combinedList = [...new Set([...(pickListIndex[settings.competitionId] || []), ...teams])];
             setPickList(combinedList);
         }
         updatePickListIndexTeams()
-    }, [settings?.competitionId, pickListIndex]);
+    }, [settings, settings?.competitionId, pickListIndex, setPickList]);
 
     function onDragEnd(result: DropResult) {
         // dropped outside the list
@@ -101,7 +101,7 @@ export default function PickList() {
         <>
             <DragDropContext onDragEnd={onDragEnd}>
                 <StrictModeDroppable droppableId="droppable">
-                    {(provided, snapshot) => (
+                    {(provided) => (
                         <List ref={provided.innerRef} {...provided.droppableProps}>
                             {pickList.map((team, index) => (
                                 <DraggableTeamListItem team={team} index={index} key={team} />
@@ -237,4 +237,4 @@ function reorder<T>(list: T[], startIndex: number, endIndex: number): T[] {
     result.splice(endIndex, 0, removed);
   
     return result;
-};
+}

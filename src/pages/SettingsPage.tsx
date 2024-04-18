@@ -65,20 +65,20 @@ const SettingsPage = () => {
         setScannerOpen(false);
     }
 
-    const downloadMatches = () => {
+    const downloadMatches = async () => {
         if (!settings) return;
 
         setLoading(true);
-        getSchedule(settings.competitionId).then((matches) => {
+        try {
+            const matches = await getSchedule(settings.competitionId)
             settings.setMatches(matches);
             settings.setCurrentMatchIndex(Math.min(settings.currentMatchIndex, matches.length));
             enqueueSnackbar("Schedule downloaded from blue alliance", {variant: "success"});
-        }).catch((err) => {
+        } catch (err) {
             console.error("Failed to get schedule from blue alliance", err);
-            enqueueSnackbar(err, {variant: "error"});
-        }).finally(() => {
-            setLoading(false);
-        });
+            enqueueSnackbar(err+"", {variant: "error"});
+        }
+        setLoading(false);
     }
 
     const deleteAllMatches = () => {
@@ -220,7 +220,7 @@ const SettingsPage = () => {
                 Share Schedule
             </DialogTitle>
             <DialogContent sx={{scrollSnapType: "y mandatory"}}>
-                <div className="w-full h-full flex flex-col items-center justify-center">
+                <div className="w-full flex flex-col items-center">
                     <div className="w-full max-w-xl">
                         <p className="text-center">Scan the following QR code(s) on copy this schedule onto other devices</p>
                         {qrData && <QrCodeList data={qrData} />}
@@ -243,7 +243,7 @@ const SettingsPage = () => {
                 Collect Schedule Data
             </DialogTitle>
             <DialogContent sx={{paddingX: 0}}>
-                <div className="w-full flex flex-col items-center">
+                <div className="">
                     <div className="w-full max-w-xl">
                         <QrCodeScanner onReceiveData={onQrData} />
                     </div>
