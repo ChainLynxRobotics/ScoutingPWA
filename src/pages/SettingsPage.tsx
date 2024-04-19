@@ -223,7 +223,7 @@ const SettingsPage = () => {
                 <div className="w-full flex flex-col items-center">
                     <div className="w-full max-w-xl">
                         <p className="text-center">Scan the following QR code(s) on copy this schedule onto other devices</p>
-                        {qrData && <QrCodeList data={qrData} />}
+                        {qrData && <QrCodeList data={qrData} allowTextCopy />}
                     </div>
                 </div>
             </DialogContent>
@@ -245,7 +245,7 @@ const SettingsPage = () => {
             <DialogContent sx={{paddingX: 0}}>
                 <div className="">
                     <div className="w-full max-w-xl">
-                        <QrCodeScanner onReceiveData={onQrData} />
+                        <QrCodeScanner onReceiveData={onQrData} allowTextPaste />
                     </div>
                 </div>
             </DialogContent>

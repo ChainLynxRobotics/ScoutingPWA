@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { QRCodeData } from "../../types/QRCodeData";
 import protobuf from "protobufjs";
 import { compressBytes, toBase64 } from "../../util/compression";
 import QRCode from "react-qr-code";
 import { QR_CHUNK_SIZE } from "../../constants";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, FormControl, FormHelperText, IconButton, InputAdornment, InputLabel, OutlinedInput, Tooltip } from "@mui/material";
 
-export default function QrCodeList({data}: {data: QRCodeData}) {
+export default function QrCodeList({data, allowTextCopy}: {data: QRCodeData, allowTextCopy?: boolean}) {
 
     const [qrCodes, setQrCodes] = useState<string[]>();
+    const [textCode, setTextCode] = useState<string>("");
+
+    const textArea = useRef<HTMLTextAreaElement>(null);
 
     const generateQrCodes = useCallback(async (data: QRCodeData) => {
         const protos = await protobuf.load("/protobuf/data_transfer.proto");
@@ -30,12 +33,26 @@ export default function QrCodeList({data}: {data: QRCodeData}) {
             outData[i] = 'scoutingdata:'+(i+1)+'/'+outData.length+':'+base64.slice(i*QR_CHUNK_SIZE, (i+1)*QR_CHUNK_SIZE);
         }
 
+        if (allowTextCopy) {
+            setTextCode(`scoutingdata:1/1:${base64}`);
+        }
+
         setQrCodes(outData);
     }, []);
 
     useEffect(() => {
         generateQrCodes(data);
     }, [data, generateQrCodes]);
+
+    const copyText = useCallback(async () => {
+        try {
+            textArea.current?.select();
+            textArea.current?.setSelectionRange(0, 99999); /* For mobile devices */
+            await navigator.clipboard.writeText(textCode);
+        } catch (e) {
+            console.error("Error copying text to clipboard", e);
+        }
+    }, [textCode]);
 
     return (
         <div className="flex flex-col w-full items-center">
@@ -53,6 +70,36 @@ export default function QrCodeList({data}: {data: QRCodeData}) {
                 <div className="text-center mt-8">
                     <CircularProgress color="inherit" />
                     <p className="opacity-75">Generating QR Codes...</p>
+                </div>
+            }
+            {allowTextCopy && textCode && 
+                <div className="mt-12 w-full snap-center">
+                    <FormControl variant="outlined" fullWidth>
+                        <InputLabel htmlFor="data-transfer-code">Data Transfer Code</InputLabel>
+                        <OutlinedInput
+                            id="data-transfer-code"
+                            label="Data Transfer Code"
+                            aria-describedby="data-transfer-code-helper-text"
+                            type="text"
+                            value={textCode}
+                            readOnly
+                            inputRef={textArea}
+                            endAdornment={
+                                <InputAdornment position="end">
+                                    <Tooltip title="Copy Data Transfer Code" arrow>
+                                        <IconButton
+                                            aria-label="copy data transfer code"
+                                            edge="end"
+                                            onClick={copyText}
+                                        >
+                                            <span className="material-symbols-outlined">content_copy</span>
+                                        </IconButton>
+                                    </Tooltip>
+                                </InputAdornment>
+                            }
+                        />
+                        <FormHelperText id="data-transfer-code-helper-text">If you don't want use QR codes, you can copy and message this code to the receiver instead.</FormHelperText>
+                    </FormControl>
                 </div>
             }
         </div>

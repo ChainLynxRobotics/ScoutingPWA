@@ -39,8 +39,8 @@ export default function PickList() {
         if (!settings) return;
         const newPickListIndex = {...pickListIndex};
         newPickListIndex[settings.competitionId] = {
-            pickList: data.pickList || pickListIndex[settings.competitionId]?.pickList || [], // Keep the old pick list if not provided
-            crossedOut: data.crossedOut || pickListIndex[settings.competitionId]?.crossedOut || [] // Keep the old crossed out list if not provided
+            pickList: data.pickList || (pickListIndex[settings.competitionId]?.pickList || []), // Keep the old pick list if not provided
+            crossedOut: data.crossedOut || (pickListIndex[settings.competitionId]?.crossedOut || []) // Keep the old crossed out list if not provided
         };
         setPickListIndex(newPickListIndex);
     }, [pickListIndex, setPickListIndex, settings]);
@@ -80,7 +80,8 @@ export default function PickList() {
             qrType: QrCodeType.PickList,
             version: APP_VERSION,
             pickListData: {
-                ...pickListData,
+                pickList: pickListData.pickList,
+                crossedOut: pickListData.crossedOut,
                 competitionId: settings.competitionId
             }
         };
@@ -92,8 +93,8 @@ export default function PickList() {
         if (data.qrType === QrCodeType.PickList && data.pickListData) {
             const newPickListIndex = {...pickListIndex};
             newPickListIndex[data.pickListData.competitionId] = {
-                pickList: data.pickListData.pickList,
-                crossedOut: data.pickListData.crossedOut
+                pickList: data.pickListData.pickList || [],
+                crossedOut: data.pickListData.crossedOut || []
             }
             setPickListIndex(newPickListIndex);
             setScannerOpen(false);
@@ -135,7 +136,7 @@ export default function PickList() {
             </DragDropContext>
             <div className="w-fill flex flex-col items-center">
                 <span className="text-secondary">PickList for competition: <i>{settings?.competitionId}</i></span>
-                <div className="flex flex-wrap gap-2 my-4">
+                <div className="flex flex-wrap gap-2 mt-4 mb-8">
                     <Button variant="contained" onClick={openQrCodes} startIcon={<span className="material-symbols-outlined">qr_code_2</span>}>Share</Button>
                     <Button variant="contained" color="secondary" onClick={()=>setScannerOpen(true)} startIcon={<span className="material-symbols-outlined">photo_camera</span>}>Scan</Button>
                 </div>
@@ -156,7 +157,7 @@ export default function PickList() {
                     <div className="w-full flex flex-col items-center">
                         <div className="w-full max-w-md">
                             <p className="text-center">Scan the following QR code(s) on copy this pick list onto other devices</p>
-                            {qrData && <QrCodeList data={qrData} />}
+                            {qrData && <QrCodeList data={qrData} allowTextCopy />}
                         </div>
                     </div>
                 </DialogContent>
@@ -178,7 +179,7 @@ export default function PickList() {
                 <DialogContent sx={{paddingX: 0}}>
                     <div className="w-full h-full flex flex-col items-center justify-center">
                         <div className="w-full max-w-xl">
-                            <QrCodeScanner onReceiveData={onQrData} />
+                            <QrCodeScanner onReceiveData={onQrData} allowTextPaste />
                         </div>
                     </div>
                 </DialogContent>
