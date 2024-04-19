@@ -1,6 +1,8 @@
 import { SnackbarProvider, SnackbarProviderProps } from "notistack";
 import { Outlet, NavLink } from "react-router-dom";
 import SnackbarCloseButton from "../components/SnackbarCloseButton";
+import { ErrorBoundary } from "react-error-boundary";
+import ErrorFallback from "../components/ErrorFallback";
 
 const snackbarProps: SnackbarProviderProps = {
     maxSnack: 3,
@@ -18,7 +20,9 @@ const Layout = () => {
         <SnackbarProvider {...snackbarProps}>
             <div className="w-full h-dvh relative flex flex-col overflow-hidden">
                 <div className="w-full h-full overflow-y-auto">
-                    <Outlet />
+                    <ErrorBoundary FallbackComponent={ErrorFallback}>
+                        <Outlet />
+                    </ErrorBoundary>
                 </div>
                 <div className={"w-full text-center flex bg-background-secondary text-secondary py-1"} style={{paddingBottom: getComputedStyle(document.documentElement).getPropertyValue("--sab")}}>                
                     <NavLink to="/scout" className={s=>"flex-grow flex flex-col"+(s.isActive ? ' text-primary' : '')}>
