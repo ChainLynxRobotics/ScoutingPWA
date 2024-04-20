@@ -6,6 +6,15 @@ import QRCode from "react-qr-code";
 import { QR_CHUNK_SIZE } from "../../constants";
 import { CircularProgress, FormControl, FormHelperText, IconButton, InputAdornment, InputLabel, OutlinedInput, Tooltip } from "@mui/material";
 
+/**
+ * Displays a list of QR codes generated from the given data.
+ * 
+ * Handles compression and chunking of data to fit into QR codes.
+ * 
+ * @param data - The data to be encoded into QR codes
+ * @param allowTextCopy - Whether to allow the user to copy the code in a text format (default: false)
+ * @returns 
+ */
 export default function QrCodeList({data, allowTextCopy}: {data: QRCodeData, allowTextCopy?: boolean}) {
 
     const [qrCodes, setQrCodes] = useState<string[]>();
@@ -44,6 +53,7 @@ export default function QrCodeList({data, allowTextCopy}: {data: QRCodeData, all
         generateQrCodes(data);
     }, [data, generateQrCodes]);
 
+    // Copy the text code to the clipboard
     const copyText = useCallback(async () => {
         try {
             textArea.current?.select();

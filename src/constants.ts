@@ -6,6 +6,13 @@
  */
 export const DEFAULT_COMPETITION_ID = "2024wasam";
 
+/**
+ * The competition id expire time, in milliseconds.
+ * The reason this exists is because old competition ids would be saved in the local storage and the app would try to use them.
+ * Instead, if the competition id is older than this time, it will be reset to the default id set above.
+ */
+export const COMPETITION_ID_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7; // 7 days
+
 /** 
  * The number of seconds in a match
  */

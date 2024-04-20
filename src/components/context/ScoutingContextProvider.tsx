@@ -322,7 +322,8 @@ function useScoutingContextData(matchId: string, teamNumber: number, allianceCol
 }
 
 /**
- * This function is used to create a new ScoutingContextProvider object, which is used to store/update all the data that is collected during a match.
+ * This function is used to create a new `ScoutingContextProvider` object, which gives its children access to the `ScoutingContext` 
+ * to store/update all the data that is collected during a match.
  * 
  * @param matchId - The match id that this data is for, will be used to identify the match in the database later
  * @param teamNumber - The team number that this data is for

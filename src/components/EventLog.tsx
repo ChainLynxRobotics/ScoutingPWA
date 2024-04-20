@@ -3,6 +3,15 @@ import ScoutingContext from "./context/ScoutingContext";
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import MatchEvent, { MatchEventNames, NonEditableEvents, NonRemovableEvents } from "../enums/MatchEvent";
 
+/**
+ * A component that displays a table of all the events saved in the current match, grabbed from the `ScoutingContext`.
+ * 
+ * Allows for creating, editing, and deleting events via buttons and modals.
+ * 
+ * The table is sorted by time in descending order.
+ * 
+ * @returns The table component with its buttons and modals.
+ */
 const EventLog = () => {
 
     const context = useContext(ScoutingContext);
@@ -186,7 +195,7 @@ const EventLog = () => {
                                 value={editTimeMinutes}
                                 onChange={(e)=>setEditTimeMinutes(Math.min(Math.max(parseInt(e.target.value), 0), 59))}
                                 inputProps={{min: "0", max: "59"}}
-                                sx={{maxWidth: "50px"}}
+                                sx={{width: "50px"}}
                             />
                             <span className="text-2xl px-1 font-bold">:</span>
                             <TextField
@@ -198,7 +207,7 @@ const EventLog = () => {
                                 value={editTimeSeconds}
                                 onChange={(e)=>setEditTimeSeconds(Math.min(Math.max(parseInt(e.target.value), 0), 59))}
                                 inputProps={{min: "0", max: "59"}}
-                                sx={{maxWidth: "50px"}}
+                                sx={{width: "50px"}}
                             />
                         </div>
                     </div>
@@ -244,6 +253,12 @@ const EventLog = () => {
     );
 };
 
+/**
+ * Takes a time and returns it as a human readable string.
+ * 
+ * @param matchTime - The milliseconds since the start of the match.
+ * @returns A string in the format of `mm:ss`.
+ */
 function matchTimeAsString(matchTime: number) {
     return Math.floor(matchTime / 1000 / 60)+":"+(Math.floor(matchTime / 1000 % 60)+"").padStart(2, '0')
 }

@@ -11,6 +11,11 @@ export type PerMatchGraph = {
     plots: PlotDefinition[],
 }
 
+/**
+ * Displays a scatter plot displaying all the matches in a bunch of horizontal lines, with the x axis being the time and points representing different events.
+ * 
+ * The list of events is gathered from the `matchTimes` function in the plot definitions.
+ */
 export default function PerMatchGraph(props: PerMatchGraph) {
 
     // Gets an object with the key being the matchId and the value being an array of auto events for that match
@@ -87,10 +92,12 @@ export default function PerMatchGraph(props: PerMatchGraph) {
     )
 }
 
+// Converts a time in milliseconds to a string in the format `mm:ss` time from the start of the match
 function matchTimeAsStr(time: number) {
     return Math.floor(time/1000 / 60)+":"+(time/1000 % 60).toFixed(0).padStart(2, '0');
 }
 
+// Removes the matchId prefix from a full matchId string, for example 2024wasno_qm1 -> qm1
 function matchIdAsStr(fullMatchId: string) {
     return fullMatchId?.match(/[^_]+$/)?.join('') || '';
 }

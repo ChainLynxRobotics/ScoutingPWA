@@ -4,6 +4,13 @@ import SettingsContext from "./context/SettingsContext";
 import ErrorPage from "../pages/ErrorPage";
 import { useSnackbar } from "notistack";
 
+/**
+ * A component for the match schedule, the schedule of matches is grabbed from the settings context.
+ * 
+ * The schedule is displayed in a table, with each row containing the match ID, the teams in the match, and buttons to manually add, edit, or delete the match.
+ * 
+ * @returns The component for the match schedule page
+ */
 const MatchSchedule = () => {
 
     const settings = useContext(SettingsContext);
@@ -250,7 +257,7 @@ const MatchSchedule = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Confirm match popup */}
+            {/* Confirm delete match popup */}
             <Dialog 
                 open={matchToDelete !== undefined} 
                 onClose={()=>setMatchToDelete(undefined)}
@@ -274,6 +281,9 @@ const MatchSchedule = () => {
     );
 };
 
+/**
+ * A helper component for the alliance input in the match schedule modals.
+ */
 const AllianceField = (props: {id: string, label: string, red?: boolean, value: number, setValue: (value: number)=>void}) => {
     return (<TextField 
         id={props.id}

@@ -17,6 +17,9 @@ type PickListData = {
     crossedOut: number[],
 }
 
+/**
+ * A pick list component that allows the user to drag and drop teams into a list, and share the list with other devices.
+ */
 export default function PickList() {
     const settings = useContext(SettingsContext);
 
@@ -191,6 +194,9 @@ export default function PickList() {
     )
 }
 
+/**
+ * A single draggable list item for a team in the pick list.
+ */
 const DraggableTeamListItem = (props: {team: number, index: number, crossedOut: boolean, setCrossedOut: (value: boolean)=>void}) => {
     
     const navigate = useNavigate();
@@ -248,6 +254,13 @@ const DraggableTeamListItem = (props: {team: number, index: number, crossedOut: 
     )
 }
 
+/**
+ * Reorder the list of items when they are dragged and dropped.
+ * @param list - The list of items to reorder
+ * @param startIndex - The index of the item being dragged
+ * @param endIndex - The index of the item being dropped
+ * @returns The reordered list
+ */
 function reorder<T>(list: T[], startIndex: number, endIndex: number): T[] {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);

@@ -5,13 +5,25 @@ import { alpha } from '@mui/material/styles';
 import useLocalStorageState from "./hooks/localStorageState";
 
 interface DataListProps {
+    /** The list of matches to be displayed, can be large in size as this table uses pages */
     matches: MatchIdentifier[]|undefined, 
+    /** The matches that have been marked as scanned */
     scanned: MatchIdentifier[], 
+    /** The user has selected these matches to be deleted */
     deleteItems: (match: MatchIdentifier[]) => void,
+    /** The user has selected these matches to be marked as scanned. (These should be ADDED to the `scanned` array passed to this component) */
     markScanned: (match: MatchIdentifier[]) => void,
+    /** The user has selected these matches to be marked as new. (These should be REMOVED from to the `scanned` array passed to this component) */
     markNew: (match: MatchIdentifier[]) => void,
 }
 
+/**
+ * The data list component is used to display the stored list of matches that can be selected for deletion, marking as scanned, or marking as new.
+ * The selected matches are handled in this component and the actions are passed back to the parent component.
+ * 
+ * @param DataListProps
+ * @returns An mui Table of matches that can be selected, deleted, and marked as scanned or new
+ */
 export default function DataList({ matches, scanned, deleteItems, markScanned, markNew }: DataListProps) {
 
     const [selected, setSelected] = useState<MatchIdentifier[]>([]);

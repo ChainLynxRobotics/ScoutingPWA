@@ -2,13 +2,19 @@ import { useContext, useEffect, useState } from 'react';
 import Confetti from 'react-confetti'
 import CurrentMatchContext from './context/CurrentMatchContext';
 
-export default function ConfettiWrapper() {
+/**
+ * Controls a fixed full screen confetti display that will show when `showConfetti` is true in the `CurrentMatchContext`.
+ * 
+ * @returns The confetti display component.
+ */
+export default function ConfettiDisplay() {
 
     const currentMatchContext = useContext(CurrentMatchContext);
     
     const [width, setWidth] = useState(0)
     const [height, setHeight] = useState(0)
     
+    // Update the width and height of the confetti display when the window resizes
     useEffect(() => {
         const handleResize = () => {
             setWidth(window.innerWidth)

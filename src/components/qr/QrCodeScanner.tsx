@@ -8,6 +8,13 @@ import { Backdrop, CircularProgress, TextField } from "@mui/material";
 
 export const QR_PROTOCOL_REGEX = /scoutingdata:(\d+)\/(\d+):([-A-Za-z0-9+\/]*={0,3})/g;
 
+/**
+ * A QR code scanner component that can decode QR codes and assemble them into a full data transfer object.
+ * 
+ * @param onReceiveData - The function to call when a full QR code is received
+ * @param allowTextPaste - Whether to allow the user to paste text data generated from the QrCodeList `allowTextCopy` (default: false)
+ * @returns The QR code scanner component and a text input for pasting data if `allowTextPaste` is true
+ */
 export default function QrCodeScanner({onReceiveData, allowTextPaste}: {onReceiveData: (data: QRCodeData) => void, allowTextPaste?: boolean}) {
 
     const {enqueueSnackbar} = useSnackbar();

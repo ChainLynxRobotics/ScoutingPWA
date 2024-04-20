@@ -3,6 +3,11 @@ import { useEffect, useRef } from "react";
 import { FallbackProps } from "react-error-boundary";
 import { useLocation } from "react-router-dom";
 
+/**
+ * A fallback component for when an error occurs in a component wrapped in an `ErrorBoundary`.
+ * 
+ * Displays the error message and provides buttons to try again or reload the page.
+ */
 export default function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 
     const location = useLocation();

@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Droppable, DroppableProps } from "react-beautiful-dnd";
 
 /**
- * Fix for StrictMode errors in react-beautiful-dnd.
+ * Wrapper for the `Droppable` component from `react-beautiful-dnd` that fixes React StrictMode errors.
+ * 
  * https://github.com/atlassian/react-beautiful-dnd/issues/2399#issuecomment-1175638194
  */
 export const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
