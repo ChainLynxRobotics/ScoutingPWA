@@ -2,7 +2,7 @@
 
 A Progressive Web App (PWA) built with React to scout FIRST robotics competition matches.
 
-![A screenshot showing the scouting application in-use](../main/repo/scout_match.png?raw=true)
+<img src="./repo/scout_match.png?raw=true" alt="A screenshot showing the scouting application in-use" width="250px" /> <img src="./repo/analytics_graph.png?raw=true" alt="A screenshot showing the analytics section scouting application in-use" width="250px" /> <img src="./repo/analytics_picklist.png?raw=true" alt="A screenshot showing the pick list" width="250px" />
 
 ## Features
 - Once installed, it can work <u>fully</u>
