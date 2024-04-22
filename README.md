@@ -2,8 +2,14 @@
 
 ![Vercel](https://vercelbadge.vercel.app/api/ChainLynxRobotics/ScoutingPWA?style=for-the-badge)
 
-### A Progressive Web App (PWA) built with React to scout FIRST robotics competition matches.
+### *A Progressive Web App (PWA) built with React to scout FIRST robotics competition matches.*
+
 ---
+### ⚠️ Note: This application is only to be used by FRC Team 8248 ⚠️
+This may change in the future, but for now we ask that usage of this app is closed to other teams.
+
+
+## Screenshots:
 <img src="./repo/scout_match.png?raw=true" alt="A screenshot showing the scouting application in-use" width="200px" /> <img src="./repo/analytics_graph.png?raw=true" alt="A screenshot showing the analytics section of the scouting application in-use" width="200px" /> <img src="./repo/analytics_picklist.png?raw=true" alt="A screenshot showing the pick list" width="200px" />
 
 ## Features
