@@ -1,7 +1,7 @@
 {
   "name": "chainlynx-scouting",
   "private": true,
-  "version": "2024.2.2",
+  "version": "2024.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
