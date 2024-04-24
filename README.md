@@ -23,7 +23,7 @@ This may change in the future, but for now we ask that usage of this app is clos
   - They can also be exported into excel/json files for easy data transfer and custom statistic calculations
 - Team Pick List with easy data viewing
   - Draggable teams for the current competition
-  - The Pick List can be 
+  - The Pick List can be shared with others via a QR code for collaborative ranking.
 - If Internet is available, match schedule and team rankings can be pulled from [TBA API](https://www.thebluealliance.com/apidocs)
 
 ### Limitations
