@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "r
 import SettingsContext from "../context/SettingsContext";
 import { DragDropContext, Draggable, DropResult } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "../StrickModeDroppable";
-import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import MatchDatabase from "../../util/MatchDatabase";
 import useLocalStorageState from "../hooks/localStorageState";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,8 @@ import QrCodeType from "../../enums/QrCodeType";
 import QrCodeList from "../qr/QrCodeList";
 import QrCodeScanner from "../qr/QrCodeScanner";
 import { useSnackbar } from "notistack";
+import { getEventRankings } from "../../util/blueAllianceApi";
+import LoadingBackdrop from "../LoadingBackdrop";
 
 type PickListData = {
     pickList: number[],
@@ -29,7 +31,13 @@ export default function PickList() {
     const [qrData, setQrData] = useState<QRCodeData>();
     const [scannerOpen, setScannerOpen] = useState(false);
 
+    // Popup for syncing picklist with TBA rankings
+    const [rankingSyncOpen, setRankingSyncOpen] = useState(false);
 
+    // Loading spinner
+    const [loading, setLoading] = useState(false);
+
+    // Local storage for pick list data
     const [pickListIndex, setPickListIndex] = useLocalStorageState<{[key: string]: PickListData}>({}, "analyticsPickListIndex"); // Store picklist for each competition id separately
 
     // Deal with the picklist for the current competition
@@ -120,6 +128,20 @@ export default function PickList() {
         }
     }
 
+    const rankingsSync = async () => {
+        if (!settings) return;
+        try {
+            setLoading(true);
+            const rankings = await getEventRankings(settings.competitionId);
+            setPickListData({pickList: rankings, crossedOut: []});
+        } catch (e) {
+            console.error(e);
+            enqueueSnackbar("Failed to sync with rankings: "+e, {variant: "error"});
+        }
+        setLoading(false);
+        setRankingSyncOpen(false);
+    }
+
     return (
         <>
             <DragDropContext onDragEnd={onDragEnd}>
@@ -139,9 +161,12 @@ export default function PickList() {
             </DragDropContext>
             <div className="w-fill flex flex-col items-center">
                 <span className="text-secondary">PickList for competition: <i>{settings?.competitionId}</i></span>
-                <div className="flex flex-wrap gap-2 mt-4 mb-8">
+                <div className="flex gap-2 my-4">
                     <Button variant="contained" onClick={openQrCodes} startIcon={<span className="material-symbols-outlined">qr_code_2</span>}>Share</Button>
                     <Button variant="contained" color="secondary" onClick={()=>setScannerOpen(true)} startIcon={<span className="material-symbols-outlined">photo_camera</span>}>Scan</Button>
+                </div>
+                <div className="flex gap-2 mb-8">
+                    <Button variant="outlined" onClick={()=>setRankingSyncOpen(true)} startIcon={<span className="material-symbols-outlined">cloud_sync</span>}>Sync with TBA rankings</Button>
                 </div>
             </div>
 
@@ -190,6 +215,29 @@ export default function PickList() {
                     <Button size="large" onClick={() => {setScannerOpen(false)}}>Close</Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Confirm sync popup popup */}
+            <Dialog 
+                open={rankingSyncOpen} 
+                onClose={()=>setRankingSyncOpen(false)}
+                aria-labelledby="delete-dialog-title"
+                fullWidth
+                maxWidth="sm"
+            >
+                <DialogTitle id="delete-dialog-title">Warning</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        This will delete your current pick list and replace it with the current competition rankings from The Blue Alliance.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button color="inherit" size="large" onClick={()=>setRankingSyncOpen(false)}>Cancel</Button>
+                    <Button color="warning" size="large" onClick={rankingsSync}>Sync With Rankings</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Loading spinner */}
+            <LoadingBackdrop open={loading} onClick={()=>setLoading(false)} /> {/* Close loading spinner on click in case there is no connection */}
         </>
     )
 }

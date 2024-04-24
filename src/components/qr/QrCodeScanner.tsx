@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { decompressBytes, fromBase64 } from "../../util/compression";
 import { QRCodeData } from "../../types/QRCodeData";
 import { useSnackbar } from "notistack";
-import { Backdrop, CircularProgress, TextField } from "@mui/material";
+import { TextField } from "@mui/material";
+import LoadingBackdrop from "../LoadingBackdrop";
 
 export const QR_PROTOCOL_REGEX = /scoutingdata:(\d+)\/(\d+):([-A-Za-z0-9+\/]*={0,3})/g;
 
@@ -132,12 +133,7 @@ export default function QrCodeScanner({onReceiveData, allowTextPaste}: {onReceiv
                     />
                 </div>
             }
-            <Backdrop
-                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                open={loading}
-            >
-                <CircularProgress color="inherit" />
-            </Backdrop>
+            <LoadingBackdrop open={loading} />
         </>
     );
 }

@@ -3,19 +3,18 @@ import { useContext, useState } from "react";
 import SettingsContext from "../components/context/SettingsContext";
 import MatchSchedule from "../components/MatchSchedule";
 import QrCodeType from "../enums/QrCodeType";
-import { Backdrop, Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormHelperText, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormHelperText, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import Divider from "../components/Divider";
 import { QRCodeData } from "../types/QRCodeData";
 import QrCodeList from "../components/qr/QrCodeList";
 import QrCodeScanner from "../components/qr/QrCodeScanner";
 import { useSnackbar } from "notistack";
 import { getSchedule } from "../util/blueAllianceApi";
+import LoadingBackdrop from "../components/LoadingBackdrop";
 
 const SettingsPage = () => {
 
     const settings = useContext(SettingsContext);
-
-    const [loading, setLoading] = useState(false);
     const {enqueueSnackbar} = useSnackbar();
 
     // QR code sending and receiving
@@ -23,8 +22,9 @@ const SettingsPage = () => {
     const [scannerOpen, setScannerOpen] = useState(false);
 
     const [infoOpen, setInfoOpen] = useState(false);
-
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
+    const [loading, setLoading] = useState(false);
 
 
     function nextMatch() {
@@ -273,14 +273,8 @@ const SettingsPage = () => {
             </DialogActions>
         </Dialog>
 
-
-        <Backdrop
-            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-            open={loading}
-            onClick={()=>setLoading(false)} /* clicking will close the long loading indicator, but it will still continue to download matches in the background */
-        >
-            <CircularProgress color="inherit" />
-        </Backdrop>
+        {/* Loading spinner */}
+        <LoadingBackdrop open={loading} onClick={()=>setLoading(false)} /> {/* Allow clicking to close backdrop in case there is no connection */}
     </div>
     );
 };

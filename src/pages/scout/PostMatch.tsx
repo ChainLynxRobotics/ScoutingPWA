@@ -1,22 +1,15 @@
-import Button from "@mui/material/Button/Button";
 import { useContext, useState } from "react";
 import { NavLink } from "react-router-dom";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
-import InputLabel from "@mui/material/InputLabel/InputLabel";
-import FormControl from "@mui/material/FormControl/FormControl";
-import Select from "@mui/material/Select/Select";
-import MenuItem from "@mui/material/MenuItem/MenuItem";
-import Rating from "@mui/material/Rating/Rating";
-import TextField from "@mui/material/TextField/TextField";
 import EventLog from "../../components/EventLog";
-import Alert from "@mui/material/Alert/Alert";
 import { MAX_NOTE_LENGTH } from "../../constants";
 import MatchResult from "../../enums/MatchResult";
 import ClimbResult from "../../enums/ClimbResult";
 import Divider from "../../components/Divider";
-import { Backdrop, CircularProgress } from "@mui/material";
 import { useSnackbar } from "notistack";
+import LoadingBackdrop from "../../components/LoadingBackdrop";
+import { Button, Alert, FormControl, InputLabel, Select, MenuItem, Rating, TextField } from "@mui/material";
 
 const PostMatch = () => {
     const context = useContext(ScoutingContext);
@@ -169,12 +162,7 @@ const PostMatch = () => {
         </div>
 
         {/* Loading spinner */}
-        <Backdrop
-                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                open={loading}
-        >
-            <CircularProgress color="inherit" />
-        </Backdrop>
+        <LoadingBackdrop open={loading} />
         </>
     );
 };

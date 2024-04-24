@@ -5,7 +5,8 @@ import matchCompare from './matchCompare';
 export async function getSchedule(competitionId: string): Promise<ScheduledMatch[]> {
     const res = await fetch(`${TBA_API_BASE}/event/${competitionId}/matches/simple`, {
         headers: {
-            'X-TBA-Auth-Key': TBA_API_KEY
+            'X-TBA-Auth-Key': TBA_API_KEY,
+            'accept': 'application/json',
         }
     })
     const json = await res.json();
@@ -37,4 +38,34 @@ export async function getSchedule(competitionId: string): Promise<ScheduledMatch
         }
     );
     return matches;
+}
+
+export async function getEventRankings(competitionId: string): Promise<number[]> {
+    const res = await fetch(`${TBA_API_BASE}/event/${competitionId}/rankings`, {
+        headers: {
+            'X-TBA-Auth-Key': TBA_API_KEY,
+            'accept': 'application/json',
+        }
+    })
+    const json = await res.json();
+
+    if (json.Error) {
+        throw new Error("TBA returned error: "+json.Error);
+    }
+
+    const rankings = json.rankings;
+
+    if (!Array.isArray(rankings)) {
+        throw new Error("TBA returned an unexpected response: "+JSON.stringify(json));
+    }
+
+    if (rankings.length === 0) {
+        throw new Error("TBA returned no teams");
+    }
+
+    const teams = rankings
+        .sort((a: any, b: any) => a.rank - b.rank)
+        .map((team: any) => team.team_key.substring(3));
+
+    return teams;
 }

@@ -1,4 +1,4 @@
-import { Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import { useContext, useEffect, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchIdentifier } from "../types/MatchData";
@@ -13,6 +13,7 @@ import QrCodeList from "../components/qr/QrCodeList";
 import QrCodeScanner from "../components/qr/QrCodeScanner";
 import DataList from "../components/DataList";
 import { useSnackbar } from "notistack";
+import LoadingBackdrop from "../components/LoadingBackdrop";
 
 const DataPage = () => {
 
@@ -288,12 +289,7 @@ const DataPage = () => {
             </DialogActions>
         </Dialog>
 
-        <Backdrop
-            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-            open={loading}
-        >
-            <CircularProgress color="inherit" />
-        </Backdrop>
+        <LoadingBackdrop open={loading} />
     </div>
     );
 };
