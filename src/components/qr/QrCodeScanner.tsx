@@ -7,7 +7,7 @@ import { useSnackbar } from "notistack";
 import { TextField } from "@mui/material";
 import LoadingBackdrop from "../LoadingBackdrop";
 
-export const QR_PROTOCOL_REGEX = /scoutingdata:(\d+)\/(\d+):([-A-Za-z0-9+\/]*={0,3})/g;
+export const QR_PROTOCOL_REGEX = /scoutingdata:(\d+)\/(\d+):([-A-Za-z0-9+/]*={0,3})/g;
 
 /**
  * A QR code scanner component that can decode QR codes and assemble them into a full data transfer object.
@@ -95,7 +95,7 @@ export default function QrCodeScanner({onReceiveData, allowTextPaste}: {onReceiv
             decodeQrCodeChunk(res.toString())
                 .then(()=>{
                      // Remove the qr code from the text area
-                    setText(text.replace(res.toString(), ""));
+                    setText(text=>text.replace(res.toString(), ""));
                 }); 
         }
     }, [decodeQrCodeChunk]);

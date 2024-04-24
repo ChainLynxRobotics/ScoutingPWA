@@ -47,7 +47,7 @@ export default function QrCodeList({data, allowTextCopy}: {data: QRCodeData, all
         }
 
         setQrCodes(outData);
-    }, []);
+    }, [allowTextCopy]);
 
     useEffect(() => {
         generateQrCodes(data);

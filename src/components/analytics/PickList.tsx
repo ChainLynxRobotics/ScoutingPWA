@@ -70,7 +70,7 @@ export default function PickList() {
             setPickListData({pickList: combinedList});
         }
         updatePickListIndexTeams()
-    }, [settings, settings?.competitionId, pickListIndex, setPickListData]);
+    }, [settings, settings?.competitionId, pickListIndex, pickListData.pickList, setPickListData]);
 
     function onDragEnd(result: DropResult) {
         // dropped outside the list

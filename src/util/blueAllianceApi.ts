@@ -64,8 +64,8 @@ export async function getEventRankings(competitionId: string): Promise<number[]>
     }
 
     const teams = rankings
-        .sort((a: any, b: any) => a.rank - b.rank)
-        .map((team: any) => team.team_key.substring(3));
+        .sort((a: any, b: any) => a.rank - b.rank) // eslint-disable-line @typescript-eslint/no-explicit-any
+        .map((team: any) => team.team_key.substring(3)); // eslint-disable-line @typescript-eslint/no-explicit-any
 
     return teams;
 }
