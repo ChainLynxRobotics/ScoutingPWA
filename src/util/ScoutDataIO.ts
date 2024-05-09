@@ -3,7 +3,7 @@ import { MatchData, MatchEventData } from "../types/MatchData";
 import { stringify } from 'csv-stringify/browser/esm/sync';
 import MatchEvent from "../enums/MatchEvent";
 import AllianceColor from "../enums/AllianceColor";
-import { MatchDataFieldInformation, MatchDataFields } from "../DataValues";
+import { MatchDataFieldInformation, MatchDataFields } from "../MatchDataValues";
 
 /**
  * Takes saved data and returns it as a blob zip file to be downloaded to a users computer. Includes both csv and json forms of the data.

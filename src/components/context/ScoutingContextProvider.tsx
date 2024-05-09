@@ -7,7 +7,7 @@ import MatchDatabase from "../../util/MatchDatabase";
 import CurrentMatchContext from "./CurrentMatchContext";
 import { useNavigate } from "react-router-dom";
 import SettingsContext from "./SettingsContext";
-import { MatchDataFieldInformation, MatchDataFields } from "../../DataValues";
+import { MatchDataFieldInformation, MatchDataFields } from "../../MatchDataValues";
 
 /**
  * Gets the ScoutingContextProvider data.
