@@ -167,25 +167,6 @@ const DuringMatch = () => {
                         Pickup fail ({numOfEvents(MatchEvent.acquireFail)})
                     </Button>
                 </div>
-                {/* Climb & Trap buttons */}
-                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-3 items-center" style={{top: !reverseY ? '50%' : '50%', left: !reverseX ? '35%' : '65%'}}>
-                    <div className="flex gap-3">
-                        <Button variant="contained" color="success" size="small" disabled={isDisabled} onClick={onTrapScore}>
-                            Trap Score ({numOfEvents(MatchEvent.scoreHigh)})
-                        </Button>
-                        <Button variant="contained" color="error" size="small" disabled={isDisabled} onClick={onTrapMiss}>
-                            Trap Miss ({numOfEvents(MatchEvent.scoreHighFail)})
-                        </Button>
-                    </div>
-                </div>
-                {/* Is being defended on buttons */}
-                <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-3 items-center" style={{top: !reverseY ? '25%' : '75%', left: !reverseX ? '25%' : '75%'}}>
-                    <div className="flex gap-2">
-                        <Button variant="contained" color="primary" size="small" disabled={isDisabled} onClick={toggleDefendedOn} className={context.custom.isBeingDefendedOn ? 'glow-primary' : ''}>
-                            Is being defended
-                        </Button>
-                    </div>
-                </div>
             </div>
 
             <FormControlLabel label="Left Zone in Autonomous Mode" 

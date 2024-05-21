@@ -5,6 +5,8 @@ import Divider from "../components/Divider";
 const IndexPage = () => {
 
     const navigate = useNavigate();
+
+    navigate('/scout');
     
     return (
         <div className="w-full h-dvh relative overflow-hidden">

@@ -2,6 +2,7 @@ import { ReactElement, useEffect } from "react";
 import useLocalStorageState from "../hooks/localStorageState";
 import SettingsContext from "./SettingsContext";
 import { COMPETITION_ID_EXPIRE_TIME } from "../../constants";
+import { getSchedule } from "../../util/blueAllianceApi";
 
 // The following types are used to define the value of the SettingsContext.Provider
 
@@ -65,6 +66,17 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
             console.log("CompetitionId was old, setting to the default: "+defaultCompetitionId);
         }
     }, [competitionIdLastUpdated, setCompetitionId, defaultCompetitionId, setCompetitionIdLastUpdated]);
+
+    // Auto-download the matches for the current competition
+    useEffect(() => {
+        if (!competitionId || matches.length > 0) return;
+        async function downloadSchedule() {
+            const matches = await getSchedule(competitionId)
+            setMatches(matches);
+            setCurrentMatchIndex(Math.min(currentMatchIndex, matches.length));
+        }
+        downloadSchedule();
+    }, [matches, competitionId, setMatches, setCurrentMatchIndex, currentMatchIndex]);
     
 
     // helper functions to manipulate the match schedule

@@ -84,22 +84,6 @@ const PreMatch = () => {
                 </FormControl>
             </h1>
             <span className="mb-8 max-w-md text-center text-secondary">If this is the wrong match, use the select menu above or the settings to make sure it is correct!</span>
-            <FormControl sx={{ m: 1, minWidth: 224 }}>
-                <InputLabel id="human-player-location-label">
-                    {context.teamNumber != 8248 ? `${context.teamNumber}'s Human Player Location` : `Soren's Location`}
-                </InputLabel>
-                <Select
-                    labelId="human-player-location-label"
-                    id="human-player-location"
-                    value={context.fields.humanPlayerLocation+""}
-                    onChange={handleHumanPlayerLocationChange}
-                    label="Human Player Location"
-                >
-                    <MenuItem value={HumanPlayerLocation.None}>Not on field</MenuItem>
-                    <MenuItem value={HumanPlayerLocation.Source}>Source</MenuItem>
-                    <MenuItem value={HumanPlayerLocation.Amp}>Amp</MenuItem>
-                </Select>
-            </FormControl>
             <div className="h-4"></div> {/* Spacer */}
             <FormGroup>
                 <FormControlLabel 
@@ -120,18 +104,6 @@ const PreMatch = () => {
                 onChange={handleNotesChange}
             />
             <div className="h-4"></div> {/* Spacer */}
-            { settings.scoutName === "" &&
-                <Alert severity="warning">
-                    <div className="text-lg mb-1"><b>You have not set your name!</b></div>
-                    <div>Set your name in <Link to='/settings'><u>settings</u></Link> to track your contributions!</div>
-                </Alert>
-            }
-            <span className="my-4 max-w-md text-center text-secondary">
-                Reminder that it is ok to make mistakes! The data is collected by humans and read by humans, 
-                they know if there was a slight error or if something is accidentally recorded at the wrong 
-                time. Whats important is the scores and count of events. Everything else like timing, pickup data, amplify, 
-                and defended-on, isn't super important, and its ok if you forget to record that stuff.
-            </span>
         </div>
         </>
     );
