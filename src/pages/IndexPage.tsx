@@ -1,12 +1,19 @@
 import Button from "@mui/material/Button/Button";
 import { useNavigate } from "react-router-dom";
 import Divider from "../components/Divider";
+import { useEffect } from "react";
 
 const IndexPage = () => {
 
     const navigate = useNavigate();
 
-    navigate('/scout');
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            console.log("Redirecting to /scout");
+            navigate('/scout');
+        }, 500);
+        return () => clearTimeout(timeout);
+    }, [navigate]);
     
     return (
         <div className="w-full h-dvh relative overflow-hidden">

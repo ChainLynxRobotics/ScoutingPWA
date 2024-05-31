@@ -55,7 +55,7 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
     const [matches, setMatches] = useLocalStorageState<ScheduledMatch[]>([], "matches");
     const [currentMatchIndex, setCurrentMatchIndex] = useLocalStorageState<number>(0, "nextMatch"); // The current match being, used to determine what match to show on the main page
 
-    const [starredTeams, setStarredTeams] = useLocalStorageState<number[]>([], "starredTeams"); // Special teams we want to know about, used on the analytics page
+    const [starredTeams, setStarredTeams] = useLocalStorageState<number[]>([8248], "starredTeams"); // Special teams we want to know about, used on the analytics page
     const [analyticsCurrentCompetitionOnly, setAnalyticsCurrentCompetitionOnly] = useLocalStorageState<boolean>(true, "analyticsCurrentCompetitionOnly"); // Whether or not to only show data from the current competition
 
     useEffect(() => {

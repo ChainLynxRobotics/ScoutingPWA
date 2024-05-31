@@ -88,7 +88,28 @@ async function importDataFromZip(file: File) {
     return {matches: matchData, events};
 }
 
+/**
+ * Reads data from a url that was exported using downloadDataAsZip function and imports it.
+ * 
+ * @param file - A File object, such as one you would get from a file input element
+ */
+async function importDataFromUrl(url: string) {
+    const response = await fetch(url);
+    const zip = await JSZip.loadAsync(response.blob());
+
+    const rawMatchData = zip.file("raw/MatchData.json");
+    if (!rawMatchData) throw new Error("Could not find match data in zip folder!");
+    const matchData = JSON.parse(await rawMatchData.async("string"));
+
+    const rawEventData = zip.file("raw/MatchEvents.json");
+    if (!rawEventData) throw new Error("Could not find match data in zip folder!");
+    const events = JSON.parse(await rawEventData.async("string"));
+
+    return {matches: matchData, events};
+}
+
 export default {
     exportDataAsZip,
-    importDataFromZip
+    importDataFromZip,
+    importDataFromUrl
 }

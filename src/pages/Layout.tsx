@@ -3,6 +3,9 @@ import { Outlet, NavLink } from "react-router-dom";
 import SnackbarCloseButton from "../components/SnackbarCloseButton";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorFallback from "../components/ErrorFallback";
+import { useEffect, useRef } from "react";
+import MatchDataIO from "../util/MatchDataIO";
+import MatchDatabase from "../util/MatchDatabase";
 
 const snackbarProps: SnackbarProviderProps = {
     maxSnack: 3,
@@ -16,6 +19,26 @@ const snackbarProps: SnackbarProviderProps = {
 };
 
 const Layout = () => {
+
+    const importing = useRef(false);
+
+    useEffect(() => {
+        if (!importing.current) {
+            importing.current = true;
+
+            const importData = async () => {
+                try {
+                    const data = await MatchDataIO.importDataFromUrl("/dummydata_2024wasam.zip");
+                    await MatchDatabase.importData(data.matches, data.events);
+                } catch (e) {
+                    console.error(e);
+                    importing.current = false;
+                }
+            };
+            importData();
+        }
+    }, []);
+
     return (
         <SnackbarProvider {...snackbarProps}>
             <div className="w-full h-dvh relative flex flex-col overflow-hidden">
@@ -48,3 +71,4 @@ const Layout = () => {
 };
 
 export default Layout;
+
