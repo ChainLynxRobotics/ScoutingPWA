@@ -7,7 +7,7 @@ import { useSnackbar } from "notistack";
 import { TextField } from "@mui/material";
 import LoadingBackdrop from "../LoadingBackdrop";
 
-export const QR_PROTOCOL_REGEX = /^scoutingdata:(\d+)\/(\d+):(.+)$/g;
+export const QR_PROTOCOL_REGEX = /scoutingdata:(\d+)\/(\d+):(.+)/g;
 
 /**
  * A QR code scanner component that can decode QR codes and assemble them into a full data transfer object.
@@ -57,7 +57,8 @@ export default function QrCodeScanner({onReceiveData, allowTextPaste}: {onReceiv
         if (isDecoding.current) return;
         isDecoding.current = true;
         try {
-            const regexData = QR_PROTOCOL_REGEX.exec(data); // The regex to match the qr code protocol
+            console.log("Decoding QR Code: ", data);
+            const regexData = data.match(QR_PROTOCOL_REGEX); // The regex to match the qr code protocol
             if (regexData === null) throw new Error("Invalid QR Code Data");
             const chunk = parseInt(regexData[1]); // The chunk number (1 indexed)
             const totalChunks = parseInt(regexData[2]); // The total number of chunks
@@ -92,10 +93,10 @@ export default function QrCodeScanner({onReceiveData, allowTextPaste}: {onReceiv
 
     const decodeTextInput = useCallback((value: string) => {
         for (const res of value.matchAll(QR_PROTOCOL_REGEX)) {
-            decodeQrCodeChunk(res.toString())
+            decodeQrCodeChunk(res[0])
                 .then(()=>{
                      // Remove the qr code from the text area
-                    setText(text=>text.replace(res.toString(), ""));
+                    setText(text=>text.replace(res[0], ""));
                 }); 
         }
     }, [decodeQrCodeChunk]);
