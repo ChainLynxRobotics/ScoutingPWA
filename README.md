@@ -13,7 +13,7 @@ This may change in the future, but for now we ask that usage of this app is clos
 <img src="./repo/scout_match.png?raw=true" alt="A screenshot showing the scouting application in-use" width="200px" /> <img src="./repo/analytics_graph.png?raw=true" alt="A screenshot showing the analytics section of the scouting application in-use" width="200px" /> <img src="./repo/analytics_picklist.png?raw=true" alt="A screenshot showing the pick list" width="200px" />
 
 ## Features
-- Once installed, it can work <u>fully</u> offline
+- Once installed, it can work **fully** offline
 - Everything can be done on a phone, built for mobile compatibility
 - Scouts with time based data for more information (such as time of button presses being recorded)
 - All data can be sent via QR codes 
