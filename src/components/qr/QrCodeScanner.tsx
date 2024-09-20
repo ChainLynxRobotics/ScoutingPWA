@@ -7,7 +7,7 @@ import { useSnackbar } from "notistack";
 import { TextField } from "@mui/material";
 import LoadingBackdrop from "../LoadingBackdrop";
 
-export const QR_PROTOCOL_REGEX = /^scoutingdata:(\d+)\/(\d+):([\-A-Za-z0-9\+\/=]*)$/g;
+export const QR_PROTOCOL_REGEX = /^scoutingdata:(\d+)\/(\d+):(.+)$/g;
 
 /**
  * A QR code scanner component that can decode QR codes and assemble them into a full data transfer object.
@@ -53,11 +53,11 @@ export default function QrCodeScanner({onReceiveData, allowTextPaste}: {onReceiv
     }, [onReceiveData, enqueueSnackbar]);
 
     // Decodes a single qr code, must start with "scoutingdata:"
-    const decodeQrCodeChunk = useCallback(async (data: QrScanner.ScanResult|string) => {
+    const decodeQrCodeChunk = useCallback(async (data: string) => {
         if (isDecoding.current) return;
         isDecoding.current = true;
         try {
-            const regexData = QR_PROTOCOL_REGEX.exec(typeof data == 'string' ? data : data.data); // The regex to match the qr code protocol
+            const regexData = QR_PROTOCOL_REGEX.exec(data); // The regex to match the qr code protocol
             if (regexData === null) throw new Error("Invalid QR Code Data");
             const chunk = parseInt(regexData[1]); // The chunk number (1 indexed)
             const totalChunks = parseInt(regexData[2]); // The total number of chunks
@@ -111,7 +111,7 @@ export default function QrCodeScanner({onReceiveData, allowTextPaste}: {onReceiv
     return (
         <>
             <div className="relative shadow">
-                <InternalQrCodeScanner onDecode={decodeQrCodeChunk} />
+                <InternalQrCodeScanner onDecode={(data)=>decodeQrCodeChunk(data.data)} />
                 {inQrStatus.total ? 
                     <div className="absolute bottom-0 right-0 text-white bg-black bg-opacity-50 px-4 py-2">
                         {inQrStatus.count}/{inQrStatus.total || '?'} scanned {inQrMissingChunks.length ? `(Missing ${inQrMissingChunks.join(", ")})` : ''}
