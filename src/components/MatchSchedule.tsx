@@ -60,6 +60,7 @@ const MatchSchedule = () => {
         if (!settings) return;
         if (!modelId) return enqueueSnackbar("Match ID cannot be empty", {variant: "error"});
         if (settings.matches.find((m)=>m.matchId === modelId)) return enqueueSnackbar("Match ID already exists", {variant: "error"});
+        if (!modelBlue1 || !modelBlue2 || !modelBlue3 || !modelRed1 || !modelRed2 || !modelRed3) return enqueueSnackbar("Alliance numbers cannot be empty", {variant: "error"});
         
         settings.addMatch({
             matchId: modelId,
@@ -76,7 +77,9 @@ const MatchSchedule = () => {
     const editMatch = () => {
         if (!settings) return;
         if (!matchToEdit) return;
+        if (!modelId) return enqueueSnackbar("Match ID cannot be empty", {variant: "error"});
         if (matchToEdit != modelId && settings.matches.find((m)=>m.matchId === modelId)) return enqueueSnackbar("Match ID already exists", {variant: "error"});
+        if (!modelBlue1 || !modelBlue2 || !modelBlue3 || !modelRed1 || !modelRed2 || !modelRed3) return enqueueSnackbar("Alliance numbers cannot be empty", {variant: "error"});
         
         settings.editMatch(matchToEdit, {
             matchId: modelId,
