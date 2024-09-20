@@ -144,6 +144,17 @@ export default function PickList() {
 
     return (
         <>
+            <div className="w-fill flex flex-col items-center gap-4 my-4">
+                <span className="text-secondary">PickList for competition: <i>{settings?.competitionId}</i></span>
+                <div className="flex gap-2">
+                    <Button variant="contained" onClick={openQrCodes} startIcon={<span className="material-symbols-outlined">qr_code_2</span>}>Share</Button>
+                    <Button variant="contained" color="secondary" onClick={()=>setScannerOpen(true)} startIcon={<span className="material-symbols-outlined">photo_camera</span>}>Scan</Button>
+                </div>
+                <div className="flex gap-2">
+                    <Button variant="outlined" onClick={()=>setRankingSyncOpen(true)} startIcon={<span className="material-symbols-outlined">cloud_sync</span>}>Sync with TBA rankings</Button>
+                </div>
+            </div>
+
             <DragDropContext onDragEnd={onDragEnd}>
                 <StrictModeDroppable droppableId="droppable">
                     {(provided) => (
@@ -159,16 +170,6 @@ export default function PickList() {
                     )}
                 </StrictModeDroppable>
             </DragDropContext>
-            <div className="w-fill flex flex-col items-center">
-                <span className="text-secondary">PickList for competition: <i>{settings?.competitionId}</i></span>
-                <div className="flex gap-2 my-4">
-                    <Button variant="contained" onClick={openQrCodes} startIcon={<span className="material-symbols-outlined">qr_code_2</span>}>Share</Button>
-                    <Button variant="contained" color="secondary" onClick={()=>setScannerOpen(true)} startIcon={<span className="material-symbols-outlined">photo_camera</span>}>Scan</Button>
-                </div>
-                <div className="flex gap-2 mb-8">
-                    <Button variant="outlined" onClick={()=>setRankingSyncOpen(true)} startIcon={<span className="material-symbols-outlined">cloud_sync</span>}>Sync with TBA rankings</Button>
-                </div>
-            </div>
 
 
             {/* Share pick list popup */}
