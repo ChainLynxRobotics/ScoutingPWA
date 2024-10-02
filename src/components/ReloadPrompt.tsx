@@ -21,7 +21,7 @@ function ReloadPrompt() {
   const [offlineReadyPopupDismissed, setOfflineReadyPopupDismissed] = useLocalStorageState(false, 'offlineReadyPopupDismissed');
 
   const {
-    offlineReady: [offlineReady, setOfflineReady], // offlineReady is a boolean that indicates if the app is ready to work offline, but only directly after the service worker is installed
+    offlineReady: [offlineReady], // offlineReady is a boolean that indicates if the app is ready to work offline, but only directly after the service worker is installed
     needRefresh: [needRefresh, setNeedRefresh], // needRefresh is a boolean that indicates if the app has new content available and needs to be refreshed
     updateServiceWorker,
   } = useRegisterSW({
@@ -36,13 +36,11 @@ function ReloadPrompt() {
 
   // This is basically a useEffect that runs when the service worker is first installed
   useEffect(() => {
-    if (offlineReady && !hasDownloaded) activateServiceWorker();
+    if (offlineReady && !hasDownloaded) {
+      setHasDownloaded(true);
+      window.location.reload(); // Reload the page to make sure the new service worker is active, this makes sure offline content is available immediately
+    }
   }, [offlineReady, hasDownloaded, setHasDownloaded])
-
-  function activateServiceWorker() {
-    setHasDownloaded(true);
-    window.location.reload(); // Reload the page to make sure the new service worker is active, this makes sure offline content is available immediately
-  }
 
   return (
     <div className='fixed left-0 z-[999] bottom-0'>
