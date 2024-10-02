@@ -3,7 +3,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchIdentifier } from "../types/MatchData";
 import QrCodeType from "../enums/QrCodeType";
-import MatchDataIO from "../util/MatchDataIO";
+import MatchDataIO from "../util/ScoutDataIO";
 import useLocalStorageState from "../components/hooks/localStorageState";
 import matchCompare, { matchIncludes } from "../util/matchCompare";
 import FileSaver from "file-saver";
@@ -50,7 +50,7 @@ const DataPage = () => {
             if (matches.length === 0 && events.length === 0) throw new Error("No new data to share");
             
             const data = {
-                qrType: QrCodeType.MatchData,
+                qrType: QrCodeType.ScoutData,
                 version: APP_VERSION,
                 matches: matches,
                 events: events,
@@ -66,16 +66,16 @@ const DataPage = () => {
 
     // Decodes a fully assembled qr code and imports the match data
     async function onData(data: QRCodeData) {
-        if (data.qrType !== QrCodeType.MatchData || !data.matches || !data.events) throw new Error("QR Codes do not contain match data");
+        if (data.qrType !== QrCodeType.ScoutData || !data.scoutData) throw new Error("QR Codes do not contain match data");
         setScannerOpen(false);
         
         setLoading(true);
         try {
             let matchCount = matches?.length || 0;
-            await MatchDatabase.importData(data.matches, data.events);
+            await MatchDatabase.importData(data.scoutData.matches, data.scoutData.events);
             const newMatches = await updateMatches();
             matchCount = newMatches.length - matchCount;
-            enqueueSnackbar(`Imported ${matchCount} matches ${data.matches.length !== matchCount ? `(${data.matches.length-matchCount} duplicates were omitted)` : ''}`, {variant: "success"});
+            enqueueSnackbar(`Imported ${matchCount} matches ${data.scoutData.matches.length !== matchCount ? `(${data.scoutData.matches.length-matchCount} duplicates were omitted)` : ''}`, {variant: "success"});
         } catch (e) {
             console.error(e);
             enqueueSnackbar(e+"", {variant: "error"});

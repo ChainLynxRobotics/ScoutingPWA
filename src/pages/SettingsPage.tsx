@@ -41,8 +41,8 @@ const SettingsPage = () => {
         const data = {
             qrType: QrCodeType.Schedule,
             version: APP_VERSION,
-            schedule: settings.matches,
             scheduleData: {
+                schedule: settings.matches,
                 fieldRotated: settings.fieldRotated,
                 competitionId: settings.competitionId,
                 currentMatch: settings.currentMatchIndex
@@ -52,16 +52,13 @@ const SettingsPage = () => {
     }
 
     function onQrData(data: QRCodeData) {
-        if (data.qrType !== QrCodeType.Schedule || !data.schedule || !data.scheduleData) 
+        if (data.qrType !== QrCodeType.Schedule || !data.scheduleData) 
             throw new Error("QR Codes do not contain schedule data");
         if (!settings) return;
-        settings.setMatches(data.schedule);
-        const scheduleData = data.scheduleData;
-        if (scheduleData) {
-            settings.setFieldRotated(scheduleData.fieldRotated);
-            settings.setCompetitionId(scheduleData.competitionId);
-            settings.setCurrentMatchIndex(scheduleData.currentMatch);
-        } else console.warn("No schedule meta data found in qr code");
+        settings.setMatches(data.scheduleData.schedule);
+        settings.setFieldRotated(data.scheduleData.fieldRotated);
+        settings.setCompetitionId(data.scheduleData.competitionId);
+        settings.setCurrentMatchIndex(data.scheduleData.currentMatch);
         setScannerOpen(false);
     }
 

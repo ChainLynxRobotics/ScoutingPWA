@@ -1,4 +1,4 @@
-import { MatchDataFields } from "../DataValues";
+import { MatchDataFields } from "../MatchDataValues";
 import AllianceColor from "../enums/AllianceColor";
 import MatchEvent from "../enums/MatchEvent";
 
