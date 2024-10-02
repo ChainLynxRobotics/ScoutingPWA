@@ -2,7 +2,7 @@
  * Enum for 
  */
 enum QrCodeType {
-    ScoutData = 0,
+    MatchData = 0,
     Schedule = 1,
     PickList = 2,
 }

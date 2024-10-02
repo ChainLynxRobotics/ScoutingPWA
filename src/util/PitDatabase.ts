@@ -1,10 +1,9 @@
 import { DBSchema, IDBPDatabase, openDB } from "idb";
-import { MatchData } from "../types/MatchData";
 
 interface PitDatabaseSchema extends DBSchema {
     pit: {
         key: number;
-        value: MatchData;
+        value: any; // TODO: Define the value type
         indexes: {
             'by-team': number;
             'by-matchId': string;
@@ -34,6 +33,7 @@ async function openDatabase() {
     const db = await openDB<PitDatabaseSchema>('pit-database', 1, {
         upgrade(db) {
             
+            // TODO: Define the object store
             
         },
         terminated() {
@@ -47,7 +47,7 @@ async function openDatabase() {
     return db;
 }
 
-
+//TODO: Write and export functions to interact with the database
 
 export default {
     

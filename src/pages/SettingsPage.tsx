@@ -38,7 +38,7 @@ const SettingsPage = () => {
 
     const openQrCodes = () => {
         if (!settings) return;
-        const data = {
+        const data: QRCodeData = {
             qrType: QrCodeType.Schedule,
             version: APP_VERSION,
             scheduleData: {

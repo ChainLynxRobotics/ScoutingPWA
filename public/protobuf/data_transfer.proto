@@ -4,7 +4,7 @@ message DataTransfer {
     QrCodeType qrType = 1;
     string version = 2;
 
-    optional ScoutData scoutData = 3;
+    optional MatchData matchData = 3;
     optional ScheduleData scheduleData = 4;
     optional PickListData pickListData = 5;
 }
@@ -17,7 +17,7 @@ enum QrCodeType {
 
 // Scouting Data
 
-message ScoutData {
+message MatchData {
     repeated MatchData matches = 1;
     repeated MatchEventData events = 2;
 }

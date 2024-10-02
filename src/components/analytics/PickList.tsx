@@ -87,7 +87,7 @@ export default function PickList() {
 
     const openQrCodes = () => {
         if (!settings) return;
-        const data = {
+        const data: QRCodeData = {
             qrType: QrCodeType.PickList,
             version: APP_VERSION,
             pickListData: {
