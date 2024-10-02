@@ -44,9 +44,6 @@ function ReloadPrompt() {
     window.location.reload(); // Reload the page to make sure the new service worker is active, this makes sure offline content is available immediately
   }
 
-  console.log('offlineReady', offlineReady)
-  console.log('needRefresh', needRefresh)
-
   return (
     <div className='fixed left-0 z-[999] bottom-0'>
       { (!hasDownloaded && !hasDismissedDownloadingPopup) &&
