@@ -2,9 +2,15 @@ import { useContext, useEffect, useState } from "react";
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, TextField, FormHelperText, InputAdornment } from "@mui/material";
 import SettingsContext from "./context/SettingsContext";
 import ErrorPage from "../pages/ErrorPage";
-import { getSchedule } from "../util/blueAllianceApi";
-import Divider from "./Divider";
+import { useSnackbar } from "notistack";
 
+/**
+ * A component for the match schedule, the schedule of matches is grabbed from the settings context.
+ * 
+ * The schedule is displayed in a table, with each row containing the match ID, the teams in the match, and buttons to manually add, edit, or delete the match.
+ * 
+ * @returns The component for the match schedule page
+ */
 const MatchSchedule = () => {
 
     const settings = useContext(SettingsContext);
@@ -12,6 +18,8 @@ const MatchSchedule = () => {
     const [matchToEdit, setMatchToEdit] = useState<string|undefined>(undefined); // id of match to edit for the modal, -1 if none
     const [matchToDelete, setMatchToDelete] = useState<string|undefined>(undefined); // id of match to delete for the modal, -1 if none
     const [matchCreateOpen, setMatchCreateOpen] = useState<boolean>(false); // if the create match modal is open
+
+    const {enqueueSnackbar} = useSnackbar();
 
     const [modelId, setModelId] = useState<string>("");
     const [modelBlue1, setModelBlue1] = useState<number>(0);
@@ -46,12 +54,13 @@ const MatchSchedule = () => {
                 setModelRed3(match.red3);
             }
         }
-    }, [matchToEdit]);
+    }, [matchToEdit, settings?.matches]);
 
     const createMatch = () => {
         if (!settings) return;
-        if (!modelId) return alert("Match ID cannot be empty");
-        if (settings.matches.find((m)=>m.matchId === modelId)) return alert("Match ID already exists");
+        if (!modelId) return enqueueSnackbar("Match ID cannot be empty", {variant: "error"});
+        if (settings.matches.find((m)=>m.matchId === modelId)) return enqueueSnackbar("Match ID already exists", {variant: "error"});
+        if (!modelBlue1 || !modelBlue2 || !modelBlue3 || !modelRed1 || !modelRed2 || !modelRed3) return enqueueSnackbar("Alliance numbers cannot be empty", {variant: "error"});
         
         settings.addMatch({
             matchId: modelId,
@@ -68,7 +77,9 @@ const MatchSchedule = () => {
     const editMatch = () => {
         if (!settings) return;
         if (!matchToEdit) return;
-        if (matchToEdit != modelId && settings.matches.find((m)=>m.matchId === modelId)) return alert("Match ID already exists");
+        if (!modelId) return enqueueSnackbar("Match ID cannot be empty", {variant: "error"});
+        if (matchToEdit != modelId && settings.matches.find((m)=>m.matchId === modelId)) return enqueueSnackbar("Match ID already exists", {variant: "error"});
+        if (!modelBlue1 || !modelBlue2 || !modelBlue3 || !modelRed1 || !modelRed2 || !modelRed3) return enqueueSnackbar("Alliance numbers cannot be empty", {variant: "error"});
         
         settings.editMatch(matchToEdit, {
             matchId: modelId,
@@ -100,25 +111,6 @@ const MatchSchedule = () => {
         if (!settings) return;
         if (!matchToEdit) return;
         settings.moveMatchDown(matchToEdit);
-    }
-
-    const downloadMatches = () => {
-        if (!settings) return;
-
-        getSchedule(settings.competitionId).then((matches) => {
-            settings.setMatches(matches);
-            settings.setCurrentMatchIndex(Math.min(settings.currentMatchIndex, matches.length));
-        }).catch((err) => {
-            console.error("Failed to get schedule from blue alliance", err);
-            alert(err);
-        });
-    }
-
-    const deleteAll = () => {
-        if (!settings) return;
-
-        settings.setMatches([]);
-        settings.setCurrentMatchIndex(0);
     }
 
     if (!settings) return (<ErrorPage msg="Settings context not found?!?!?!" />);
@@ -163,17 +155,8 @@ const MatchSchedule = () => {
                 <div className="w-full mt-1 text-secondary text-center">No matches scheduled</div>
             }
 
-            <Divider style={{marginTop: "64px"}}/>
-
-            <span className="mt-4 mb-4 italic">Only the host should be pressing the buttons below!</span>
-
-            <div className="flex mt-2 gap-4">
-                <Button variant="outlined" color="primary" size="small" onClick={downloadMatches}>BlueAlliance Download</Button>
+            <div className="flex mt-4">
                 <Button variant="outlined" color="secondary" size="small" onClick={()=>setMatchCreateOpen(true)}>Manual Add</Button>
-            </div>
-
-            <div className="flex mt-4 gap-4">
-                <Button variant="contained" color="error" size="small" onClick={deleteAll}>Delete all scheduled matches</Button>
             </div>
 
             {/* Create match popup */}
@@ -277,7 +260,7 @@ const MatchSchedule = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Confirm match popup */}
+            {/* Confirm delete match popup */}
             <Dialog 
                 open={matchToDelete !== undefined} 
                 onClose={()=>setMatchToDelete(undefined)}
@@ -301,6 +284,9 @@ const MatchSchedule = () => {
     );
 };
 
+/**
+ * A helper component for the alliance input in the match schedule modals.
+ */
 const AllianceField = (props: {id: string, label: string, red?: boolean, value: number, setValue: (value: number)=>void}) => {
     return (<TextField 
         id={props.id}

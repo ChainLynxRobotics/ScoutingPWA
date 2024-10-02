@@ -7,7 +7,7 @@ import CountUp from "../../components/CountUp";
 import AllianceColor from "../../enums/AllianceColor";
 import CurrentMatchContext from "../../components/context/CurrentMatchContext";
 import SettingsContext from "../../components/context/SettingsContext";
-import ConfettiWrapper from "../../components/ConfettiWrapper";
+import ConfettiDisplay from "../../components/ConfettiDisplay";
 
 const ScoutPage = () => {
     
@@ -56,7 +56,7 @@ const ScoutPage = () => {
     }
     
     function skipAuto() {
-        context?.match.setIsAuto(false);
+        context?.match.setInAuto(false);
     }
 
     function endMatch() {
@@ -70,8 +70,10 @@ const ScoutPage = () => {
                 <div className="w-full bg-background-secondary shadow">
                     <h1 className="text-lg m-2 flex-1 flex items-center">
                         <span className={`flex-1 flex items-center gap-2`}>
-                            <span className={`font-bold ${context.meta.allianceColor == AllianceColor.Red ? 'text-red-400' : 'text-blue-400'}`}>{context.meta.teamNumber}</span>
-                            <span className="text-sm italic">({context.meta.matchId})</span>
+                            <span className={`font-bold ${context.allianceColor == AllianceColor.Red ? 'text-red-400' : 'text-blue-400'}`}>
+                                {context.teamNumber}
+                            </span>
+                            <span className="text-sm italic">({context.matchId})</span>
                         </span>
                         <div className="flex-1 text-center whitespace-nowrap">
                             {!context.match.matchStart ?
@@ -111,7 +113,7 @@ const ScoutPage = () => {
                 <NoMatchAvailable />
             }
             {currentMatchContext?.showConfetti && 
-                <ConfettiWrapper />
+                <ConfettiDisplay />
             }
             {currentMatchContext?.hasUpdate && !(settings.matches.length == 0 || settings.currentMatchIndex >= settings.matches.length) &&
                 <div className={"fixed bottom-16 right-0 pr-2 transition-transform "+(warningDismissed ? 'translate-x-[90%]' : '')} onClick={()=>setWarningDismissed(false)}>

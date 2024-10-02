@@ -1,3 +1,5 @@
+import { MatchIdentifier } from "../types/MatchData";
+
 const MATCH_TYPE_ORDER = ['p', 'qm', 'sf', 'f']
 const TYPE_REGEX = /^[^\d]*/
 const TYPE_NUMBER_REGEX = /([\d]+)(?=.)/
@@ -13,4 +15,12 @@ export default function matchCompare(a: string, b: string): number {
         (parseInt(idA.match(MATCH_NUMBER_REGEX)?.[0] || '0') - parseInt(idB.match(MATCH_NUMBER_REGEX)?.[0] || '0')) ||
         0
     );
+}
+
+export function matchEquals(a: MatchIdentifier, b: MatchIdentifier): boolean {
+    return a.matchId === b.matchId && a.teamNumber === b.teamNumber;
+}
+
+export function matchIncludes(matches: MatchIdentifier[], match: MatchIdentifier): boolean {
+    return matches.some(m => matchEquals(m, match));
 }

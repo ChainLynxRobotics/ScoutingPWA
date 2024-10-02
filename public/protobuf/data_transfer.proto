@@ -1,46 +1,55 @@
 syntax = "proto3";
 
+// Make sure this file is up to date with src/types/QRCodeData.ts
+
 message DataTransfer {
     QrCodeType qrType = 1;
-    repeated MatchData matches = 2;
-    repeated MatchEventData events = 3;
-    repeated ScheduledMatch schedule = 4;
-    optional ScheduleData scheduleData = 5;
+    string version = 2;
+
+    optional MatchScoutingData matchScoutingData = 3;
+    optional ScheduleData scheduleData = 4;
+    optional PickListData pickListData = 5;
 }
 
 enum QrCodeType {
-    MatchDataType = 0;
-    ScheduleType = 1;
+    MatchData = 0;
+    Schedule = 1;
+    PickList = 2;
 }
 
+// Scouting Data
 
+message MatchScoutingData {
+    repeated MatchData matches = 1;
+    repeated MatchEventData events = 2;
+}
+
+message MatchData {
+    // header
+    string matchId = 1;
+    int32 teamNumber = 2;
+    AllianceColor allianceColor = 3;
+
+    // fields ## EDIT THESE ##
+    HumanPlayerLocation humanPlayerLocation = 4;
+    bool preload = 5;
+    ClimbResult climb = 6;
+    float defense = 7;
+    int32 humanPlayerPerformance = 8;
+    MatchResult matchResult = 9;
+    string notes = 10;
+
+    // footer
+    string scoutName = 11;
+    int64 matchStart = 12;
+    int64 submitTime = 13;
+}
 
 message MatchEventData {
     string matchId = 1;
     int32 teamNumber = 2;
     int32 event = 3;
     int64 time = 4;
-}
-
-message MatchData {
-    string matchId = 1;
-    int32 teamNumber = 2;
-    AllianceColor allianceColor = 3;
-    // pre
-    HumanPlayerLocation humanPlayerLocation = 4;
-    bool preload = 5;
-    // during
-    
-    // post
-    ClimbResult climb = 6;
-    float defense = 7;
-    int32 humanPlayerPerformance = 8;
-    MatchResult matchResult = 9;
-    // meta
-    string notes = 10;
-    string scoutName = 11;
-    int64 matchStart = 12;
-    int64 submitTime = 13;
 }
 
 enum AllianceColor {
@@ -66,7 +75,14 @@ enum MatchResult {
     Win = 2;
 }
 
+// Schedule Data
 
+message ScheduleData {
+    repeated ScheduledMatch schedule = 1;
+    bool fieldRotated = 2;
+    string competitionId = 3;
+    int32 currentMatch = 4;
+}
 
 message ScheduledMatch {
     string matchId = 1;
@@ -78,8 +94,10 @@ message ScheduledMatch {
     int32 red3 = 7;
 }
 
-message ScheduleData {
-    bool fieldRotated = 1;
-    string competitionId = 2;
-    int32 currentMatch = 3;
+// Pick List Data
+
+message PickListData {
+    repeated int32 pickList = 1;
+    repeated int32 crossedOut = 2;
+    string competitionId = 3;
 }

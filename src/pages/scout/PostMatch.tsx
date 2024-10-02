@@ -1,23 +1,22 @@
-import Button from "@mui/material/Button/Button";
 import { useContext, useState } from "react";
 import { NavLink } from "react-router-dom";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
-import InputLabel from "@mui/material/InputLabel/InputLabel";
-import FormControl from "@mui/material/FormControl/FormControl";
-import Select from "@mui/material/Select/Select";
-import MenuItem from "@mui/material/MenuItem/MenuItem";
-import Rating from "@mui/material/Rating/Rating";
-import TextField from "@mui/material/TextField/TextField";
 import EventLog from "../../components/EventLog";
-import Alert from "@mui/material/Alert/Alert";
 import { MAX_NOTE_LENGTH } from "../../constants";
 import MatchResult from "../../enums/MatchResult";
 import ClimbResult from "../../enums/ClimbResult";
 import Divider from "../../components/Divider";
+import { useSnackbar } from "notistack";
+import LoadingBackdrop from "../../components/LoadingBackdrop";
+import { Button, Alert, FormControl, InputLabel, Select, MenuItem, Rating, TextField } from "@mui/material";
 
 const PostMatch = () => {
     const context = useContext(ScoutingContext);
+
+    const {enqueueSnackbar} = useSnackbar();
+    const [loading, setLoading] = useState<boolean>(false);
+    
     const [defenseHover, setDefenseHover] = useState<number>(-1);
 
     const ratings: { [index: number]: string } = {
@@ -31,7 +30,18 @@ const PostMatch = () => {
     function handleNotesChange(event: React.ChangeEvent<HTMLInputElement>) {
         if (!context) return;
         if (event.target.value.length <= MAX_NOTE_LENGTH) {
-            context.pre.setNotes(event.target.value);
+            context.fields.set("notes", event.target.value);
+        }
+    }
+
+    function submit() {
+        if (context) {
+            setLoading(true);
+            context.submit().catch((e) => {
+                enqueueSnackbar(e.message, {variant: "error"});
+            }).finally(() => {
+                setLoading(false);
+            });
         }
     }
 
@@ -69,8 +79,8 @@ const PostMatch = () => {
                     id="climb-result" 
                     label="Climb Result" 
                     variant="outlined"
-                    value={context.post.climb}
-                    onChange={(e) => context.post.setClimb(e.target.value as number)}
+                    value={context.fields.climb}
+                    onChange={(e) => context.fields.set("climb", e.target.value as ClimbResult)}
                 >
                     <MenuItem value={ClimbResult.None}>None</MenuItem>
                     <MenuItem value={ClimbResult.Parked}>Parked (in triangle zone)</MenuItem>
@@ -81,16 +91,16 @@ const PostMatch = () => {
                 <span className="text-lg">Defense:</span>
                 <Rating
                     name="defense-quality"
-                    value={context.post.defense}
+                    value={context.fields.defense}
                     onChange={(_e, newValue) => {
-                        if(newValue !== null) context.post.setDefense(newValue);
+                        if(newValue !== null) context.fields.set("defense", newValue);
                     }}
                     onChangeActive={(_e, newHover) => {
                         setDefenseHover(newHover);
                     }}
                     precision={1}
                 ></Rating>
-                <span>{ratings[defenseHover !== -1 ? defenseHover : context.post.defense]}</span>
+                <span>{ratings[defenseHover !== -1 ? defenseHover : context.fields.defense]}</span>
             </div>
             <FormControl sx={{maxWidth: "256px"}}>
                 <InputLabel>Human player notes scored</InputLabel>
@@ -98,8 +108,8 @@ const PostMatch = () => {
                     id="human-player-notes" 
                     label="Human player notes scored" 
                     variant="outlined"
-                    value={context.post.humanPlayerPerformance}
-                    onChange={(e) => context.post.setHumanPlayerPerformance(e.target.value as number)}
+                    value={context.fields.humanPlayerPerformance}
+                    onChange={(e) => context.fields.set("humanPlayerPerformance", e.target.value as number)}
                 >
                     <MenuItem value={0}>0</MenuItem>
                     <MenuItem value={1}>1</MenuItem>
@@ -113,8 +123,8 @@ const PostMatch = () => {
                     id="match-result" 
                     label="Match Result" 
                     variant="outlined"
-                    value={context.post.matchResult}
-                    onChange={(e) => context.post.setMatchResult(e.target.value as number)}
+                    value={context.fields.matchResult}
+                    onChange={(e) => context.fields.set("matchResult", e.target.value as MatchResult)}
                 >
                     <MenuItem value={MatchResult.Loss}>Loss</MenuItem>
                     <MenuItem value={MatchResult.Tie}>Tie</MenuItem>
@@ -127,7 +137,7 @@ const PostMatch = () => {
                 multiline
                 rows={6}
                 fullWidth
-                value={context.pre.notes}
+                value={context.fields.notes}
                 onChange={handleNotesChange}
             />
 
@@ -136,7 +146,7 @@ const PostMatch = () => {
                     variant="contained" 
                     color="success" 
                     size="large" 
-                    onClick={context.post.submit} 
+                    onClick={submit} 
                     disabled={!(context.match.matchStart > 0 && !context.match.matchActive)}
                 >
                     Submit
@@ -150,6 +160,9 @@ const PostMatch = () => {
                 <EventLog />
             </div>
         </div>
+
+        {/* Loading spinner */}
+        <LoadingBackdrop open={loading} />
         </>
     );
 };

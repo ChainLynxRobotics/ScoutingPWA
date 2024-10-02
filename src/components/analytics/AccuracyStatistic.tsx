@@ -1,5 +1,13 @@
 import Statistic, { StatisticProps } from "./Statistic";
 
+/**
+ * A statistic element wrapper that displays the accuracy of a data value, as a fraction and percentage.
+ * 
+ * For example `{value: 2, total: 5}` that will be displayed as `2/5 (40%)`
+ * 
+ * @param props - Traditional Statistic props, plus a value and total prop.
+ * @returns 
+ */
 export default function AccuracyStatistic(props: StatisticProps & {value: number, total: number}) {
     return (
         <Statistic {...props}>

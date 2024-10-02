@@ -27,7 +27,7 @@ const DuringMatch = () => {
     }
 
     function onAmpBoost() {
-        context?.match.setIsBoostActive(!context.match.isBoostActive);
+        context?.custom.setIsBoostActive(!context.custom.isBoostActive);
     }
 
     function onSpeakerScore() {
@@ -59,15 +59,15 @@ const DuringMatch = () => {
     }
 
     function toggleDefendedOn() {
-        context?.match.setIsBeingDefendedOn(!context.match.isBeingDefendedOn);
+        context?.custom.setIsBeingDefendedOn(!context.custom.isBeingDefendedOn);
     }
 
     function toggleAttemptedCooperation() {
-        context?.match.setAttemptedCooperation(!context.match.attemptedCooperation);
+        context?.custom.setAttemptedCooperation(!context.custom.attemptedCooperation);
     }
 
     function toggleAutoSpecial() {
-        context?.match.setSpecialAuto(!context.match.specialAuto);
+        context?.custom.setSpecialAuto(!context.custom.specialAuto);
     }
 
     /**
@@ -80,7 +80,7 @@ const DuringMatch = () => {
     }
 
     const rotateField = settings?.fieldRotated || false;
-    const isBlue = context.meta.allianceColor == AllianceColor.Blue;
+    const isBlue = context.allianceColor == AllianceColor.Blue;
     const reverseX = ( rotateField && !isBlue ) || ( !rotateField && isBlue );
     const reverseY = rotateField;
     const isDisabled = !context.match.matchActive;
@@ -116,7 +116,7 @@ const DuringMatch = () => {
             }
             
             <div className="max-w-md relative my-12 whitespace-nowrap">
-                <img src={`/imgs/crescendo_field_render_${context.meta.allianceColor == AllianceColor.Red ? "red" : "blue"}.png`} 
+                <img src={`/imgs/crescendo_field_render_${context.allianceColor == AllianceColor.Red ? "red" : "blue"}.png`} 
                     alt="Crescendo Field Render" className={`w-full ${rotateField ? '-scale-100' : ''}`} />
                 
                 {/* Allows the field to be rotated depending on the pov of the scouter */}
@@ -135,11 +135,11 @@ const DuringMatch = () => {
                 </div>
                 {/* Amp boost button */}
                 <div className="absolute -translate-y-1/2 -translate-x-1/2 flex" style={{top: !reverseY ? '38px' : 'calc(100% - 38px)', left: !reverseX ? '66%' : '34%'}}>
-                    <Button variant="contained" color="warning" size="small" disabled={isDisabled} onClick={onAmpBoost} className={context.match.isBoostActive ? 'glow-warning' : ''}>
+                    <Button variant="contained" color="warning" size="small" disabled={isDisabled} onClick={onAmpBoost} className={context.custom.isBoostActive ? 'glow-warning' : ''}>
                         Amplify
-                        {context.match.isBoostActive && 
+                        {context.custom.isBoostActive && 
                             <span className="text-xs">
-                                &nbsp;(<CountDown end={context.match.matchStart + context.match.boostEnd} />)
+                                &nbsp;(<CountDown end={context.match.matchStart + context.custom.boostEnd} />)
                             </span>
                         }
                     </Button>
@@ -181,7 +181,7 @@ const DuringMatch = () => {
                 {/* Is being defended on buttons */}
                 <div className="absolute -translate-y-1/2 -translate-x-1/2 flex flex-col gap-3 items-center" style={{top: !reverseY ? '25%' : '75%', left: !reverseX ? '25%' : '75%'}}>
                     <div className="flex gap-2">
-                        <Button variant="contained" color="primary" size="small" disabled={isDisabled} onClick={toggleDefendedOn} className={context.match.isBeingDefendedOn ? 'glow-primary' : ''}>
+                        <Button variant="contained" color="primary" size="small" disabled={isDisabled} onClick={toggleDefendedOn} className={context.custom.isBeingDefendedOn ? 'glow-primary' : ''}>
                             Is being defended
                         </Button>
                     </div>
@@ -189,10 +189,10 @@ const DuringMatch = () => {
             </div>
 
             <FormControlLabel label="Left Zone in Autonomous Mode" 
-                control={<Checkbox checked={context.match.specialAuto} onClick={toggleAutoSpecial} disabled={isDisabled}/>} />
+                control={<Checkbox checked={context.custom.specialAuto} onClick={toggleAutoSpecial} disabled={isDisabled}/>} />
 
             <FormControlLabel label="Alliance Attempted to Cooperate" 
-                control={<Checkbox checked={context.match.attemptedCooperation} onClick={toggleAttemptedCooperation} disabled={isDisabled}/>} />
+                control={<Checkbox checked={context.custom.attemptedCooperation} onClick={toggleAttemptedCooperation} disabled={isDisabled}/>} />
             
             <Divider />
             

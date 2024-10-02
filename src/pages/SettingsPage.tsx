@@ -2,22 +2,29 @@ import ErrorPage from "./ErrorPage";
 import { useContext, useState } from "react";
 import SettingsContext from "../components/context/SettingsContext";
 import MatchSchedule from "../components/MatchSchedule";
-import QrCodeDataTransfer from "../components/QrCodeDataTransfer";
 import QrCodeType from "../enums/QrCodeType";
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormHelperText, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import Divider from "../components/Divider";
+import { QRCodeData } from "../types/QRCodeData";
+import QrCodeList from "../components/qr/QrCodeList";
+import QrCodeScanner from "../components/qr/QrCodeScanner";
+import { useSnackbar } from "notistack";
+import { getSchedule } from "../util/blueAllianceApi";
+import LoadingBackdrop from "../components/LoadingBackdrop";
 
 const SettingsPage = () => {
 
     const settings = useContext(SettingsContext);
-    if (!settings) return (<ErrorPage msg="Settings context not found?!?!?!" />)
+    const {enqueueSnackbar} = useSnackbar();
 
     // QR code sending and receiving
-    const { generateQrCodes, QRCodeList, QRCodeScanner } = QrCodeDataTransfer(onQrData);
-    const [qrOpen, setQrOpen] = useState(false);
+    const [qrData, setQrData] = useState<QRCodeData>();
     const [scannerOpen, setScannerOpen] = useState(false);
 
     const [infoOpen, setInfoOpen] = useState(false);
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
+    const [loading, setLoading] = useState(false);
 
 
     function nextMatch() {
@@ -31,32 +38,57 @@ const SettingsPage = () => {
 
     const openQrCodes = () => {
         if (!settings) return;
-        const data = {
+        const data: QRCodeData = {
             qrType: QrCodeType.Schedule,
-            schedule: settings.matches,
+            version: APP_VERSION,
             scheduleData: {
+                schedule: settings.matches,
                 fieldRotated: settings.fieldRotated,
                 competitionId: settings.competitionId,
                 currentMatch: settings.currentMatchIndex
             }
         };
-        generateQrCodes(data);
-        setQrOpen(true);
+        setQrData(data);
     }
 
-    function onQrData(data: any) {
-        if (data.qrType !== QrCodeType.Schedule) throw new Error("QR Codes do not contain schedule data");
+    function onQrData(data: QRCodeData) {
+        if (data.qrType !== QrCodeType.Schedule || !data.scheduleData) 
+            throw new Error("QR Codes do not contain schedule data");
         if (!settings) return;
-        settings.setMatches(data.schedule);
-        const scheduleData = data.scheduleData;
-        if (scheduleData) {
-            settings.setFieldRotated(scheduleData.fieldRotated);
-            settings.setCompetitionId(scheduleData.competitionId);
-            settings.setCurrentMatchIndex(scheduleData.currentMatch);
-        } else console.warn("No schedule meta data found in qr code");
+        settings.setMatches(data.scheduleData.schedule);
+        settings.setFieldRotated(data.scheduleData.fieldRotated);
+        settings.setCompetitionId(data.scheduleData.competitionId);
+        settings.setCurrentMatchIndex(data.scheduleData.currentMatch);
         setScannerOpen(false);
     }
 
+    const downloadMatches = async () => {
+        if (!settings) return;
+
+        setLoading(true);
+        try {
+            const matches = await getSchedule(settings.competitionId)
+            settings.setMatches(matches);
+            settings.setCurrentMatchIndex(Math.min(settings.currentMatchIndex, matches.length));
+            enqueueSnackbar("Schedule downloaded from blue alliance", {variant: "success"});
+        } catch (err) {
+            console.error("Failed to get schedule from blue alliance", err);
+            enqueueSnackbar(err+"", {variant: "error"});
+        }
+        setLoading(false);
+    }
+
+    const deleteAllMatches = () => {
+        if (!settings) return;
+
+        settings.setMatches([]);
+        settings.setCurrentMatchIndex(0);
+
+        setDeleteConfirmOpen(false);
+        enqueueSnackbar("All scheduled matches have been deleted", {variant: "success"});
+    }
+
+    if (!settings) return (<ErrorPage msg="Settings context not found?!?!?!" />)
     return (
     <div className="w-full flex flex-col items-center gap-5 px-4">
         <h1 className="text-2xl font-bold mt-4">Settings</h1>
@@ -116,6 +148,9 @@ const SettingsPage = () => {
                 <span className="material-symbols-outlined">info</span>
             </IconButton>
         </div>
+        <div className="flex flex-wrap gap-4">
+            <Button variant="outlined" color="primary" onClick={downloadMatches}>Download from BlueAlliance</Button>
+        </div>
         <div className="flex flex-col items-center w-full mb-4 mt-4">
             <div className="flex items-center gap-2 mb-2">
                 <div>Current Match: </div>
@@ -140,6 +175,12 @@ const SettingsPage = () => {
             </div>
             <div className="max-w-sm mb-2 text-center text-secondary text-sm">Tap on the ID column below or use the buttons above to switch to the current match.</div>
             <MatchSchedule />
+
+            <Divider style={{marginTop: "64px"}}/>
+
+            <div className="flex mt-4 mb-12 gap-4">
+                <Button variant="outlined" color="error" size="small" onClick={()=>setDeleteConfirmOpen(true)}>Delete Schedule</Button>
+            </div>
         </div>
 
         {/* Info popup */}
@@ -167,8 +208,8 @@ const SettingsPage = () => {
         
         {/* Share match popup */}
         <Dialog
-            open={qrOpen}
-            onClose={() => {setQrOpen(false)}}
+            open={qrData !== undefined}
+            onClose={() => {setQrData(undefined)}}
             aria-labelledby="share-dialog-title"
             fullScreen
         >
@@ -177,14 +218,14 @@ const SettingsPage = () => {
             </DialogTitle>
             <DialogContent sx={{scrollSnapType: "y mandatory"}}>
                 <div className="w-full flex flex-col items-center">
-                    <div className="w-full max-w-md">
+                    <div className="w-full max-w-xl">
                         <p className="text-center">Scan the following QR code(s) on copy this schedule onto other devices</p>
-                        <QRCodeList />
+                        {qrData && <QrCodeList data={qrData} allowTextCopy />}
                     </div>
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => {setQrOpen(false)}}>Close</Button>
+                <Button size="large" onClick={() => {setQrData(undefined)}}>Close</Button>
             </DialogActions>
         </Dialog>
 
@@ -198,17 +239,39 @@ const SettingsPage = () => {
             <DialogTitle id="scan-dialog-title">
                 Collect Schedule Data
             </DialogTitle>
-            <DialogContent>
-                <div className="w-full flex flex-col items-center">
-                    <div className="w-full max-w-md">
-                        <QRCodeScanner />
+            <DialogContent sx={{paddingX: 0}}>
+                <div className="">
+                    <div className="w-full max-w-xl">
+                        <QrCodeScanner onReceiveData={onQrData} allowTextPaste />
                     </div>
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => {setScannerOpen(false)}}>Close</Button>
+                <Button size="large" onClick={() => {setScannerOpen(false)}}>Close</Button>
             </DialogActions>
         </Dialog>
+
+        {/* Delete all matches confirmation */}
+        <Dialog
+            open={deleteConfirmOpen}
+            onClose={() => {setDeleteConfirmOpen(false)}}
+            aria-labelledby="delete-confirm-title"
+        >
+            <DialogTitle id="delete-confirm-title">
+                Reset Match Schedule?
+            </DialogTitle>
+            <DialogContent>
+                <p>Are you sure you want to delete the schedule?</p>
+                <i>(This does not delete the scouting data for those matches)</i>
+            </DialogContent>
+            <DialogActions>
+                <Button size="large" color="error" onClick={deleteAllMatches}>Delete</Button>
+                <Button size="large" color="secondary" onClick={() => {setDeleteConfirmOpen(false)}}>Cancel</Button>
+            </DialogActions>
+        </Dialog>
+
+        {/* Loading spinner */}
+        <LoadingBackdrop open={loading} onClick={()=>setLoading(false)} /> {/* Allow clicking to close backdrop in case there is no connection */}
     </div>
     );
 };

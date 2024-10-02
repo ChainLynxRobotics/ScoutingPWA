@@ -1,6 +1,12 @@
 /**
  * The events that can happen during a match.
- * all have a number value that is used to identify them
+ * All have a number value (their index) that is used to identify them
+ * 
+ * They have weird names because they are make to work across multiple years of games, 
+ * and you can set the actual names of the events in the MatchEventNames array.
+ * 
+ * Unused events are kept in the enum for compatibility with old data, but are not used in the UI.
+ * To make an event unused, add it to the `NonEditableEvents` array.
  */
 enum MatchEvent {
     matchStart, // When the match starts, always at time 0

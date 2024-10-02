@@ -6,6 +6,13 @@
  */
 export const DEFAULT_COMPETITION_ID = "2024wasam";
 
+/**
+ * The competition id expire time, in milliseconds.
+ * The reason this exists is because old competition ids would be saved in the local storage and the app would try to use them.
+ * Instead, if the competition id is older than this time, it will be reset to the default id set above.
+ */
+export const COMPETITION_ID_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7; // 7 days
+
 /** 
  * The number of seconds in a match
  */
@@ -37,3 +44,9 @@ export const TBA_API_BASE = "https://www.thebluealliance.com/api/v3";
  * The API key for the blue alliance, YES I KNOW THIS IS PUBLIC, i have to finish this project by tomorrow and i need sleep
  */
 export const TBA_API_KEY = "LDcEXFW8I1T9JKMmfMCog29Ilyw45pdHgKUY7dNosZmoxOjs1MIO7B7yG8IMHDRQ";
+
+/**
+ * The max size of each chunk of data in the qr code, in characters of base64 data.
+ * Larger number means less chunks, but more data per chunk (larger qr codes, harder to scan).
+ */
+export const QR_CHUNK_SIZE = 256;

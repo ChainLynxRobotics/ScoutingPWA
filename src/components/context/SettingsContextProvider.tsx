@@ -1,8 +1,46 @@
 import { ReactElement, useEffect } from "react";
-import useLocalStorageState from "../../util/localStorageState";
+import useLocalStorageState from "../hooks/localStorageState";
 import SettingsContext from "./SettingsContext";
+import { COMPETITION_ID_EXPIRE_TIME } from "../../constants";
 
+// The following types are used to define the value of the SettingsContext.Provider
 
+export type SettingsStateData = {
+    competitionId: string;
+    setCompetitionId: (competitionId: string) => void;
+    competitionIdLastUpdated: number;
+    setCompetitionIdLastUpdated: (competitionIdLastUpdated: number) => void;
+
+    clientId: number;
+    setClientId: (clientId: number) => void;
+    scoutName: string;
+    setScoutName: (scoutName: string) => void;
+    fieldRotated: boolean;
+    setFieldRotated: (fieldRotated: boolean) => void;
+
+    matches: ScheduledMatch[];
+    setMatches: (matches: ScheduledMatch[]) => void;
+    currentMatchIndex: number;
+    setCurrentMatchIndex: (nextMatch: number) => void;
+    addMatch: (match: ScheduledMatch) => void;
+    editMatch: (oldId: string, match: ScheduledMatch) => void;
+    removeMatch: (matchId: string) => void;
+    moveMatchUp: (matchId: string) => void;
+    moveMatchDown: (matchId: string) => void;
+
+    starredTeams: number[];
+    setStarredTeams: (starredTeams: number[]) => void;
+    analyticsCurrentCompetitionOnly: boolean;
+    setAnalyticsCurrentCompetitionOnly: (analyticsCurrentCompetitionOnly: boolean) => void;
+}
+
+/**
+ * Wraps the children in a `SettingsContext.Provider` and gives access to the `SettingsContext` to the children. This includes all the values in `SettingsStateData` type.
+ * 
+ * @param defaultCompetitionId The default competitionId to use if the user has not set one
+ * @param children The children to wrap in the SettingsContext.Provider and give access to the `SettingsContext`
+ * @returns The children wrapped in the SettingsContext.Provider
+ */
 export default function SettingsContextProvider({defaultCompetitionId, children}: {defaultCompetitionId: string, children: ReactElement}) {
 
     const [competitionId, setCompetitionId] = useLocalStorageState<string>(defaultCompetitionId, "competitionId");
@@ -21,13 +59,16 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
 
     useEffect(() => {
         // If the competitionId is over 7 days old, set it to the default
-        if (competitionIdLastUpdated < Date.now() - 1000 * 60 * 60 * 24 * 7) {
+        if (competitionIdLastUpdated < Date.now() - COMPETITION_ID_EXPIRE_TIME) {
             setCompetitionId(defaultCompetitionId);
             setCompetitionIdLastUpdated(Date.now());
             console.log("CompetitionId was old, setting to the default: "+defaultCompetitionId);
         }
-    }, [competitionIdLastUpdated, setCompetitionId, defaultCompetitionId]);
+    }, [competitionIdLastUpdated, setCompetitionId, defaultCompetitionId, setCompetitionIdLastUpdated]);
     
+
+    // helper functions to manipulate the match schedule
+
     const addMatch = (match: ScheduledMatch) => {
         setMatches([...matches, match]);
     }
@@ -60,6 +101,7 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
         }
     }
 
+    // Assemble the value object to pass to the context provider
     const value = {
         competitionId,
         setCompetitionId,
@@ -96,37 +138,9 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
     );
 }
 
-// The following types are used to define the value of the SettingsContext.Provider
-
-export type SettingsStateData = {
-    competitionId: string;
-    setCompetitionId: (competitionId: string) => void;
-    competitionIdLastUpdated: number;
-    setCompetitionIdLastUpdated: (competitionIdLastUpdated: number) => void;
-
-    clientId: number;
-    setClientId: (clientId: number) => void;
-    scoutName: string;
-    setScoutName: (scoutName: string) => void;
-    fieldRotated: boolean;
-    setFieldRotated: (fieldRotated: boolean) => void;
-
-    matches: ScheduledMatch[];
-    setMatches: (matches: ScheduledMatch[]) => void;
-    currentMatchIndex: number;
-    setCurrentMatchIndex: (nextMatch: number) => void;
-    addMatch: (match: ScheduledMatch) => void;
-    editMatch: (oldId: string, match: ScheduledMatch) => void;
-    removeMatch: (matchId: string) => void;
-    moveMatchUp: (matchId: string) => void;
-    moveMatchDown: (matchId: string) => void;
-
-    starredTeams: number[];
-    setStarredTeams: (starredTeams: number[]) => void;
-    analyticsCurrentCompetitionOnly: boolean;
-    setAnalyticsCurrentCompetitionOnly: (analyticsCurrentCompetitionOnly: boolean) => void;
-}
-
+/**
+ * A match that is scheduled to be played, with the team numbers for each alliance.
+ */
 export type ScheduledMatch = {
     matchId: string;
     blue1: number;

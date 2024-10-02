@@ -13,7 +13,7 @@ import ClimbResult from "../../enums/ClimbResult";
 import { autoEvents, numOfEvents, perMatchStats, teleopEvents } from "../../util/analytics/analyticsUtil";
 import matchCompare from "../../util/matchCompare";
 import PerMatchGraph from "../../components/analytics/PerMatchGraph";
-import useLocalStorageState from "../../util/localStorageState";
+import useLocalStorageState from "../../components/hooks/localStorageState";
 import plotFunctions, { PlotDefinition } from "../../util/analytics/analyticsPlotFunctions";
 import PerMatchScatterPlot from "../../components/analytics/PerMatchScatterPlot";
 import SettingsContext from "../../components/context/SettingsContext";
@@ -44,7 +44,10 @@ const AnalyticsPage = () => {
     const [notesOpen, setNotesOpen] = useState(false);
 
 
-    const [plotsEnabled, setPlotsEnabled] = useLocalStorageState<string[]>([], "analyticsPlotsEnabled");
+    const [plotsEnabled, setPlotsEnabled] = useLocalStorageState<string[]>(
+        ["Auto Pickup","Auto Speaker","Auto Amp","Teleop Pickup","Teleop Speaker","Teleop Amp"], // Some default values to start with
+        "analyticsPlotsEnabled"
+    );
 
     useEffect(() => {
         if (hasLoaded===team) return;
@@ -60,10 +63,10 @@ const AnalyticsPage = () => {
             setHasLoaded(team);
         }
         loadMatches();
-    }, [team, analyticsCompetition]);
+    }, [team, analyticsCompetition, hasLoaded]);
 
     function humanPlayerPerformancePerMatch(): {avg: number, min: number, max: number} {
-        var sum = 0, min = 0, max = 0, total = 0;
+        let sum = 0, min = 0, max = 0, total = 0;
         matches.filter(m=>m.humanPlayerLocation===HumanPlayerLocation.Amp).forEach(match=> {
             const count = match.humanPlayerPerformance;
             sum += count;
@@ -367,7 +370,7 @@ const AnalyticsPage = () => {
                     </div>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={()=>setNotesOpen(false)}>Close</Button>
+                    <Button size="large" onClick={()=>setNotesOpen(false)}>Close</Button>
                 </DialogActions>
             </Dialog>
             </>

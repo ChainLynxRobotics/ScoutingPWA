@@ -1,5 +1,6 @@
 import { DBSchema, IDBPDatabase, openDB } from "idb";
 import { MatchData, MatchEventData, MatchIdentifier } from "../types/MatchData";
+import { matchIncludes } from "./matchCompare";
 
 interface MatchDatabaseSchema extends DBSchema {
     matches: {
@@ -22,9 +23,9 @@ interface MatchDatabaseSchema extends DBSchema {
     };
 }
 
-var dbCache: IDBPDatabase<MatchDatabaseSchema> | null = null;
+let dbCache: IDBPDatabase<MatchDatabaseSchema> | null = null;
 
-var dbOpenCallback: null|Promise<IDBPDatabase<MatchDatabaseSchema>> = null;
+let dbOpenCallback: null|Promise<IDBPDatabase<MatchDatabaseSchema>> = null;
 /**
  * Tries to open the database, if it is already open it will return the cached database
  * If a database open is already in effect, will return the promise to the already existing open operation
@@ -296,6 +297,26 @@ async function deleteMatch(matchId: string, teamNumber: number) {
     );
 }
 
+async function deleteMatches(matches: MatchIdentifier[]) {
+    const db = await tryOpenDatabase();
+    
+    const tx = db.transaction(['matches', 'events'], 'readwrite');
+    const matchStore = tx.objectStore('matches');
+    const eventStore = tx.objectStore('events');
+    
+    for await (const cursor of matchStore.iterate()) {
+        if (matchIncludes(matches, cursor.value)) {
+            matchStore.delete(cursor.primaryKey);
+        }
+    }
+    for await (const cursor of eventStore.iterate()) {
+        if (matchIncludes(matches, cursor.value)) {
+            eventStore.delete(cursor.primaryKey);
+        }
+    }
+    await tx.done;
+}
+
 /**
  * Gets the number of matches each scout has submitted
  * 
@@ -312,7 +333,7 @@ async function getContributions(competitionId?: string) {
     for await (const cursor of store.iterate()) {
         if (competitionId && !cursor.value.matchId.startsWith(competitionId)) continue;
         
-        let name = (cursor.value.scoutName||'').trim()
+        const name = (cursor.value.scoutName||'').trim()
         if (name) {
             if (!people[cursor.value.scoutName]) people[cursor.value.scoutName] = 0;
             people[cursor.value.scoutName]++;
@@ -337,5 +358,6 @@ export default {
     getEventsByMatch,
     getEventsByTeam,
     deleteMatch,
+    deleteMatches,
     getContributions,
 }

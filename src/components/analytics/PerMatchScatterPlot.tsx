@@ -11,6 +11,11 @@ export type PerMatchGraph = {
     plots: PlotDefinition[],
 }
 
+/**
+ * Displays a scatter plot displaying all the matches in a bunch of horizontal lines, with the x axis being the time and points representing different events.
+ * 
+ * The list of events is gathered from the `matchTimes` function in the plot definitions.
+ */
 export default function PerMatchGraph(props: PerMatchGraph) {
 
     // Gets an object with the key being the matchId and the value being an array of auto events for that match
@@ -42,15 +47,6 @@ export default function PerMatchGraph(props: PerMatchGraph) {
     }, [props.matches, props.teleopEvents]);
 
 
-    function matchTimeAsStr(time: number) {
-        return Math.floor(time/1000 / 60)+":"+(time/1000 % 60).toFixed(0).padStart(2, '0');
-    }
-    
-    function matchIdAsStr(i: number) {
-        return props.matches[i]?.matchId.match(/[^_]+$/)?.join('') || '';
-    }
-
-
     // Formats and executes the list of data functions into a database for the graph
     const series: ScatterSeriesType[] = useMemo(() => {
         const series = props.plots.filter(plot=>plot.matchTimes!==undefined).map((plot): ScatterSeriesType => {
@@ -64,12 +60,12 @@ export default function PerMatchGraph(props: PerMatchGraph) {
                     return acc;
                 }, []),
                 valueFormatter(value) {
-                    return `${matchTimeAsStr(value.x)} ${matchIdAsStr(value.y)}`;
+                    return `${matchTimeAsStr(value.x)} ${matchIdAsStr(props.matches[value.y].matchId)}`;
                 }
             }
         });
         return series;
-    }, [props]);
+    }, [props, autoEventsByMatch, teleopEventsByMatch]);
 
     const labelHeight = Math.floor(props.plots.filter(plot=>plot.matchTimes!==undefined).length / 3) * 32 + 64;
 
@@ -77,7 +73,7 @@ export default function PerMatchGraph(props: PerMatchGraph) {
         <ScatterChart
             yAxis={[{ 
                 data: props.matches.map((match, i)=>i), 
-                valueFormatter: matchIdAsStr,
+                valueFormatter: (i)=>matchIdAsStr(props.matches[i].matchId),
                 scaleType: "point",
                 reverse: true,
             }]}
@@ -94,4 +90,14 @@ export default function PerMatchGraph(props: PerMatchGraph) {
             margin={{ top: labelHeight }}
         />
     )
+}
+
+// Converts a time in milliseconds to a string in the format `mm:ss` time from the start of the match
+function matchTimeAsStr(time: number) {
+    return Math.floor(time/1000 / 60)+":"+(time/1000 % 60).toFixed(0).padStart(2, '0');
+}
+
+// Removes the matchId prefix from a full matchId string, for example 2024wasno_qm1 -> qm1
+function matchIdAsStr(fullMatchId: string) {
+    return fullMatchId?.match(/[^_]+$/)?.join('') || '';
 }

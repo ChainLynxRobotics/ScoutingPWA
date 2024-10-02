@@ -23,7 +23,7 @@ export default function AnalyticsMatchPage() {
 
     const [hasLoaded, setHasLoaded] = useState(false);
     const [matches, setMatches] = useState<MatchData[]>([]);
-    const [_events, setEvents] = useState<MatchEventData[]>([]);
+    const [events, setEvents] = useState<MatchEventData[]>([]); // eslint-disable-line @typescript-eslint/no-unused-vars
 
     useEffect(() => {
         if (hasLoaded) return;
@@ -38,7 +38,7 @@ export default function AnalyticsMatchPage() {
             setHasLoaded(true);
         }
         loadMatches();
-    }, [matchId]);
+    }, [matchId, hasLoaded]);
     
     return (
         <>

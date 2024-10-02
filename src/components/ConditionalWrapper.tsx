@@ -6,7 +6,7 @@ import { ReactElement, ReactNode } from "react";
  * @returns The children wrapped in the wrapper function or as it is.
  */
 const ConditionalWrapper = ({ condition, wrapper, children }: 
-        { condition: any, wrapper: (children: ReactElement) => ReactNode, children: ReactElement }
+        { condition: boolean, wrapper: (children: ReactElement) => ReactNode, children: ReactElement }
     ) => condition ? wrapper(children) : children;
 
 export default ConditionalWrapper;

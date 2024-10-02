@@ -38,8 +38,7 @@ const manifest: Partial<ManifestOptions> = {
   ]
 }
 
-const includeAssets = ['index.html', '*.{js,css,html}', '**/*.{js,css,html}', 'fonts/*.woff2', 'imgs/*.png', 'protobuf/*.proto']
-const ignoreAssets = ['**/*.map']
+const includeAssets = ['**/*']
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -49,8 +48,7 @@ export default defineConfig({
     minify: false, 
     includeAssets, 
     workbox: {
-      globPatterns: includeAssets, 
-      globIgnores: ignoreAssets
+      globPatterns: includeAssets,
     }
   })],
   define: {
