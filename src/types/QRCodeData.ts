@@ -5,7 +5,7 @@ import { MatchData, MatchEventData } from "./MatchData"
 export type QRCodeData = {
     qrType: QrCodeType,
     version: string,
-    matchData?: {
+    matchScoutingData?: {
         matches: MatchData[],
         events: MatchEventData[],
     }

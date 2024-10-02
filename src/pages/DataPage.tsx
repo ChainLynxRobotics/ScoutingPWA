@@ -52,7 +52,7 @@ const DataPage = () => {
             const data: QRCodeData = {
                 qrType: QrCodeType.MatchData,
                 version: APP_VERSION,
-                matchData: {
+                matchScoutingData: {
                     matches: _matches,
                     events: _events,
                 }
@@ -68,16 +68,16 @@ const DataPage = () => {
 
     // Decodes a fully assembled qr code and imports the match data
     async function onData(data: QRCodeData) {
-        if (data.qrType !== QrCodeType.MatchData || !data.matchData) throw new Error("QR Codes do not contain match data");
+        if (data.qrType !== QrCodeType.MatchData || !data.matchScoutingData) throw new Error("QR Codes do not contain match data");
         setScannerOpen(false);
         
         setLoading(true);
         try {
             let matchCount = matches?.length || 0;
-            await MatchDatabase.importData(data.matchData.matches, data.matchData.events);
+            await MatchDatabase.importData(data.matchScoutingData.matches, data.matchScoutingData.events);
             const newMatches = await updateMatches();
             matchCount = newMatches.length - matchCount;
-            enqueueSnackbar(`Imported ${matchCount} matches ${data.matchData.matches.length !== matchCount ? `(${data.matchData.matches.length-matchCount} duplicates were omitted)` : ''}`, {variant: "success"});
+            enqueueSnackbar(`Imported ${matchCount} matches ${data.matchScoutingData.matches.length !== matchCount ? `(${data.matchScoutingData.matches.length-matchCount} duplicates were omitted)` : ''}`, {variant: "success"});
         } catch (e) {
             console.error(e);
             enqueueSnackbar(e+"", {variant: "error"});
