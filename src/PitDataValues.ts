@@ -1,7 +1,3 @@
-import ClimbResult from "./enums/ClimbResult"
-import HumanPlayerLocation from "./enums/HumanPlayerLocation"
-import MatchResult from "./enums/MatchResult"
-
 /**
  * This is the data that is stored in the PitDataContext
  * 
