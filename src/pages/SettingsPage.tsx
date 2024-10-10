@@ -11,6 +11,7 @@ import QrCodeScanner from "../components/qr/QrCodeScanner";
 import { useSnackbar } from "notistack";
 import { getSchedule } from "../util/blueAllianceApi";
 import LoadingBackdrop from "../components/LoadingBackdrop";
+import { Link } from "react-router-dom";
 
 const SettingsPage = () => {
 
@@ -96,6 +97,7 @@ const SettingsPage = () => {
         <div className="mb-2 flex flex-col items-center">
             <div className="text-secondary">App Version: <i>{APP_VERSION}</i></div>
             <div className="text-secondary">Build Date: <i>{new Date(BUILD_DATE).toLocaleString()}</i></div>
+            <div><Link to="/" className="text-blue-400 underline hover:text-blue-500 transition">Install Instructions</Link></div>
         </div>
 
         <FormControl className="max-w-96">
