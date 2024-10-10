@@ -48,7 +48,7 @@ function ReloadPrompt() {
       setHasDownloaded(true);
       setOfflineReadyPopupDismissed(true);
     }
-  }, [setHasDownloaded]);
+  }, [setHasDownloaded, setOfflineReadyPopupDismissed]);
 
   return (
     <div className='fixed left-0 z-[999] bottom-0'>

@@ -2,7 +2,8 @@ import Button from "@mui/material/Button/Button";
 import { useNavigate } from "react-router-dom";
 import Divider from "../components/Divider";
 import { useCallback, useEffect, useState } from "react";
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Modal } from "@mui/material";
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import { BeforeInstallPromptEvent } from "../types/beforeInstallPromptEvent";
 
 const IndexPage = () => {
 
@@ -17,7 +18,7 @@ const IndexPage = () => {
 
     useEffect(() => {
         // This event fires when the browser is ready to prompt the user to install the app
-        const handler = (e: Event) => {
+        const handler = (e: BeforeInstallPromptEvent) => {
             e.preventDefault();
             setInstallPrompt(e);
         };
@@ -34,10 +35,10 @@ const IndexPage = () => {
         }
         window.addEventListener('appinstalled', handler);
         return () => window.removeEventListener('appinstalled', handler);
-    }, []);
+    }, [navigate, setDesktopInstallModalOpen, setMobileInstallModalOpen]);
 
     const tryInstall = useCallback(() => {
-        if (installPrompt) (installPrompt as any).prompt();
+        if (installPrompt) (installPrompt as BeforeInstallPromptEvent).prompt();
     }, [installPrompt]);
     
     return (
