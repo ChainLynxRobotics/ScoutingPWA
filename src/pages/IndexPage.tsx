@@ -45,23 +45,20 @@ const IndexPage = () => {
             <div className="w-full h-full overflow-y-auto">
                 <div className="">
                     <div className="w-full h-full max-w-lg mx-auto px-8 py-16 flex flex-col items-center justify-center text-center">
-                        <h1 className="text-3xl">Welcome to the ChainLynx Scouting App</h1>
+                        <h1 className="text-3xl sm:text-5xl font-bold">Welcome to C.L.A.W.</h1>
+                        <p className="mt-4">The <b>C</b>hain <b>L</b>ynx <b>A</b>nalytics <b>W</b>ebtool</p>
 
                         <Divider />
 
                         <p className="mt-4 mb-2">
-                            This was created by <a href="https://chainlynx8248.com/" target="_blank" className="underline">FRC Team 8248</a> to help scout matches at competitions.
-                            Once you see a notification telling you the app is ready to work offline, you can use every feature without an internet connection, including transferring data with QR codes.
+                            This was created by FRC team <a href="https://chainlynx8248.com/" target="_blank" className="underline">ChainLynx 8248</a> to help scout matches at FIRST competitions.
                             Click a button below to continue to the scouting page.
                         </p>
-                        <p className="italic">
-                            The source code is available on <a href="https://github.com/ChainLynxRobotics/ScoutingPWA" target="_blank" className="underline">GitHub</a>.
-                        </p>
 
-                        <div className="mt-16">
+                        <div className="mt-12">
                             <div className="flex flex-col items-center gap-4 standalone:hidden">
                                 <Button
-                                    variant="outlined" 
+                                    variant="contained" 
                                     color="secondary" 
                                     className="" 
                                     onClick={() => {navigate('/scout')}}
@@ -111,6 +108,7 @@ const IndexPage = () => {
                         <div className="mt-16 flex flex-col items-center">
                             <div className="text-secondary">App Version: <i>{APP_VERSION}</i></div>
                             <div className="text-secondary">Build Date: <i>{new Date(BUILD_DATE).toLocaleString()}</i></div>
+                            <div className="text-secondary"><a href="https://github.com/ChainLynxRobotics/ScoutingPWA" target="_blank" className="underline">GitHub</a></div>
                         </div>
                     </div>
                 </div>
