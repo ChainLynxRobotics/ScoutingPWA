@@ -40,7 +40,15 @@ function ReloadPrompt() {
       setHasDownloaded(true);
       window.location.reload(); // Reload the page to make sure the new service worker is active, this makes sure offline content is available immediately
     }
-  }, [offlineReady, hasDownloaded, setHasDownloaded])
+  }, [offlineReady, hasDownloaded, setHasDownloaded]);
+
+  useEffect(() => {
+    // For development, there is no need to wait for the service worker to download
+    if (import.meta.env.DEV) {
+      setHasDownloaded(true);
+      setOfflineReadyPopupDismissed(true);
+    }
+  }, [setHasDownloaded]);
 
   return (
     <div className='fixed left-0 z-[999] bottom-0'>
