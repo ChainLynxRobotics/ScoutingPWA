@@ -6,15 +6,15 @@ import useLocalStorageState from "./hooks/localStorageState";
 
 interface DataListProps {
     /** The list of matches to be displayed, can be large in size as this table uses pages */
-    matches: MatchIdentifier[]|undefined, 
+    entries: MatchIdentifier[]|undefined, 
     /** The matches that have been marked as scanned */
-    scanned: MatchIdentifier[], 
+    readEntries: number[], 
     /** The user has selected these matches to be deleted */
-    deleteItems: (match: MatchIdentifier[]) => void,
-    /** The user has selected these matches to be marked as scanned. (These should be ADDED to the `scanned` array passed to this component) */
-    markScanned: (match: MatchIdentifier[]) => void,
-    /** The user has selected these matches to be marked as new. (These should be REMOVED from to the `scanned` array passed to this component) */
-    markNew: (match: MatchIdentifier[]) => void,
+    deleteItems: (entries: number[]) => void,
+    /** The user has selected these entries to be marked as scanned. (These should be ADDED to the `readEntries` array passed to this component) */
+    markRead: (entries: number[]) => void,
+    /** The user has selected these entries to be marked as new. (These should be REMOVED from to the `readEntries` array passed to this component) */
+    markNew: (entries: number[]) => void,
 }
 
 /**
@@ -24,9 +24,9 @@ interface DataListProps {
  * @param DataListProps
  * @returns An mui Table of matches that can be selected, deleted, and marked as scanned or new
  */
-export default function DataList({ matches, scanned, deleteItems, markScanned, markNew }: DataListProps) {
+export default function DataList({ entries, readEntries, deleteItems, markRead, markNew }: DataListProps) {
 
-    const [selected, setSelected] = useState<MatchIdentifier[]>([]);
+    const [selected, setSelected] = useState<number[]>([]);
     const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = useLocalStorageState(10, "dataPageSize");
 
@@ -34,17 +34,17 @@ export default function DataList({ matches, scanned, deleteItems, markScanned, m
 
     const handleSelectAll = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            setSelected(matches || []);
+            setSelected(entries?.map(e=>e.id) || []);
         } else {
             setSelected([]);
         }
     }
 
-    const handleSelect = (match: MatchIdentifier) => {
-        if (!selected.some(m => match.matchId === m.matchId && match.teamNumber === m.teamNumber)) {
+    const handleSelect = (match: number) => {
+        if (!selected.includes(match)) {
             setSelected([...selected, match]);
         } else {
-            setSelected(selected.filter(m => match.matchId !== m.matchId || match.teamNumber !== m.teamNumber));
+            setSelected(selected.filter(m => m !== match));
         }
     }
 
@@ -63,8 +63,8 @@ export default function DataList({ matches, scanned, deleteItems, markScanned, m
         setConfirmDelete(false);
     }
 
-    const handleMarkScanned = () => {
-        markScanned(selected);
+    const handleMarkRead = () => {
+        markRead(selected);
         setSelected([]);
     }
 
@@ -75,20 +75,20 @@ export default function DataList({ matches, scanned, deleteItems, markScanned, m
 
     // Util stuff
 
-    const isSelected = (match: MatchIdentifier) => {
-        return selected.some(m => match.matchId === m.matchId && match.teamNumber === m.teamNumber);
+    const isSelected = (match: number) => {
+        return selected.includes(match);
     }
-    const isScanned = (match: MatchIdentifier) => {
-        return scanned.some(m => match.matchId === m.matchId && match.teamNumber === m.teamNumber);
+    const isScanned = (match: number) => {
+        return readEntries.includes(match);
     }
 
-    const visibleMatches = useMemo(()=>
-        matches?.slice(page * pageSize, (page + 1) * pageSize) || []
-    , [matches, page, pageSize]);
+    const visibleEntries = useMemo(()=>
+        entries?.map(m=>m.id).slice(page * pageSize, (page + 1) * pageSize) || []
+    , [entries, page, pageSize]);
 
-    const emptyRows = Math.max(0, (1 + page) * pageSize - (matches?.length||0));
+    const emptyRows = Math.max(0, (1 + page) * pageSize - (entries?.length||0));
 
-    if (matches===undefined) {
+    if (entries===undefined) {
         return <CircularProgress color="inherit" />
     }
     return (
@@ -126,7 +126,7 @@ export default function DataList({ matches, scanned, deleteItems, markScanned, m
                 {selected.length > 0 ? (
                     <>
                         <Tooltip title="Mark as already scanned">
-                            <IconButton onClick={handleMarkScanned}>
+                            <IconButton onClick={handleMarkRead}>
                                 <span className="material-symbols-outlined">mark_email_read</span>
                             </IconButton>
                         </Tooltip>
@@ -149,8 +149,8 @@ export default function DataList({ matches, scanned, deleteItems, markScanned, m
                         <TableRow>
                             <TableCell padding="checkbox">
                                 <Checkbox
-                                    indeterminate={selected.length > 0 && selected.length < matches.length}
-                                    checked={matches.length > 0 && selected.length === matches.length}
+                                    indeterminate={selected.length > 0 && selected.length < entries.length}
+                                    checked={entries.length > 0 && selected.length === entries.length}
                                     onChange={handleSelectAll}
                                 />
                             </TableCell>
@@ -160,16 +160,16 @@ export default function DataList({ matches, scanned, deleteItems, markScanned, m
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {visibleMatches.map((match) => {
-                            const isItemSelected = isSelected(match);
-                            const isItemScanned = isScanned(match);
+                        {visibleEntries.map((entryId) => {
+                            const isItemSelected = isSelected(entryId);
+                            const isItemScanned = isScanned(entryId);
                             return (
                                 <TableRow
-                                    onClick={() => handleSelect(match)}
+                                    onClick={() => handleSelect(entryId)}
                                     role="checkbox"
                                     aria-checked={isItemSelected}
                                     tabIndex={-1}
-                                    key={match.matchId + match.teamNumber}
+                                    key={entryId}
                                     selected={isItemSelected}
                                     {...(!isItemScanned && { sx: { bgcolor: (theme) => theme.palette.action.hover }})}
                                 >
@@ -183,8 +183,8 @@ export default function DataList({ matches, scanned, deleteItems, markScanned, m
                                             ''
                                         }
                                     </TableCell>
-                                    <TableCell>{match.matchId}</TableCell>
-                                    <TableCell>{match.teamNumber}</TableCell>
+                                    <TableCell>{entries.find(e=>e.id===entryId)?.matchId}</TableCell>
+                                    <TableCell>{entries.find(e=>e.id===entryId)?.teamNumber}</TableCell>
                                 </TableRow>
                             )
                         })}
@@ -199,7 +199,7 @@ export default function DataList({ matches, scanned, deleteItems, markScanned, m
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={matches.length}
+                count={entries.length}
                 rowsPerPage={pageSize}
                 labelRowsPerPage="Per page"
                 page={page}

@@ -20,12 +20,12 @@ enum QrCodeType {
 // Scouting Data
 
 message MatchScoutingData {
-    repeated MatchData matches = 1;
-    repeated MatchEventData events = 2;
+    repeated MatchData entries = 1;
 }
 
 message MatchData {
     // header
+    int32 id = 0;
     string matchId = 1;
     int32 teamNumber = 2;
     AllianceColor allianceColor = 3;
@@ -43,13 +43,6 @@ message MatchData {
     string scoutName = 11;
     int64 matchStart = 12;
     int64 submitTime = 13;
-}
-
-message MatchEventData {
-    string matchId = 1;
-    int32 teamNumber = 2;
-    int32 event = 3;
-    int64 time = 4;
 }
 
 enum AllianceColor {

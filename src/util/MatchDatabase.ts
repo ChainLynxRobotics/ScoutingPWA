@@ -1,24 +1,15 @@
 import { DBSchema, IDBPDatabase, openDB } from "idb";
-import { MatchData, MatchEventData, MatchIdentifier } from "../types/MatchData";
-import { matchIncludes } from "./matchCompare";
+import { MatchData, MatchDataHeader } from "../types/MatchData";
 
 interface MatchDatabaseSchema extends DBSchema {
-    matches: {
+    entries: {
         key: number;
         value: MatchData;
         indexes: {
             'by-team': number;
             'by-matchId': string;
             'by-both': [number, string];
-        };
-    };
-    events: {
-        key: number;
-        value: MatchEventData;
-        indexes: { 
-            'by-team': number; 
-            'by-matchId': string;
-            'by-both': [number, string];
+            'by-id': number;
         };
     };
 }
@@ -41,21 +32,15 @@ async function openDatabase() {
     if (dbCache) {
         return dbCache;
     }
-    const db = await openDB<MatchDatabaseSchema>('match-database', 1, {
+    const db = await openDB<MatchDatabaseSchema>('match-database-2024', 1, {
         upgrade(db) {
-            const matchStore = db.createObjectStore('matches', {
+            const matchStore = db.createObjectStore('entries', {
                 autoIncrement: true,
             });
             matchStore.createIndex('by-team', 'teamNumber');
             matchStore.createIndex('by-matchId', 'matchId');
-            matchStore.createIndex('by-both', ['teamNumber', 'matchId'], { unique: true });
-
-            const eventStore = db.createObjectStore('events', {
-                autoIncrement: true,
-            });
-            eventStore.createIndex('by-team', 'teamNumber');
-            eventStore.createIndex('by-matchId', 'matchId');
-            eventStore.createIndex('by-both', ['teamNumber', 'matchId']);
+            matchStore.createIndex('by-both', ['teamNumber', 'matchId']);
+            matchStore.createIndex('by-id', 'id');
         },
         terminated() {
             dbCache = null;
@@ -69,67 +54,58 @@ async function openDatabase() {
 }
 
 /**
- * Saves the match data and match events to the database
+ * Saves the match data to the database
  * 
- * @param matchData - The data to save to the match data store
- * @param matchEvents - The data to save to the match events store
+ * @param entry MatchData object
  */
-async function saveToDatabase(matchData: MatchData, matchEvents: MatchEventData[]) {
+async function put(entry: MatchData) {
     const db = await tryOpenDatabase();
-    await db.put('matches', matchData);
-    
-    const tx = db.transaction('events', 'readwrite');
+    await db.put('entries', entry);
+}
+
+/**
+ * Imports data from another source into the database
+ * 
+ * @param entries - List of entries to import
+ */
+async function putAll(entries: MatchData[]) {
+    const db = await tryOpenDatabase();
+
+    const store = db.transaction('entries', 'readwrite').objectStore('entries')
+
     await Promise.all(
-        [
-            ...matchEvents.map(event => tx.store.add(event)),
-            tx.done
-        ]
+        entries.map(match => store.add(match))
     );
+
+    await store.transaction.done;
 }
 
 /**
- * Imports data from another source into the database, ignores matches that are already in the database
+ * Retrieves all the entries from the database
  * 
- * @param matches - List of matches to import
- * @param events - List of events to import
+ * @returns Promise containing all the entries in the database
  */
-async function importData(matches: MatchData[], events: MatchEventData[]) {
+async function getAll() {
     const db = await tryOpenDatabase();
-
-    const originalMatches = await getAllMatchIdentifiers();
-
-    const tx = db.transaction(['matches', 'events'], 'readwrite');
-    const matchStore = tx.objectStore('matches');
-    const eventStore = tx.objectStore('events');
-    await Promise.all(
-        [
-            ...matches.filter(match=>(
-                !originalMatches.find(m=>match.matchId === m.matchId && match.teamNumber === m.teamNumber) // Filter out matches that are already in the database
-            )).map(match => matchStore.add(match)),
-            ...events.filter(match=>(
-                !originalMatches.find(m=>match.matchId === m.matchId && match.teamNumber === m.teamNumber)
-            )).map(event => eventStore.add(event)),
-            tx.done
-        ]
-    );
+    return db.getAll('entries');
 }
 
-/**
- * Retrieves all the matches from the database (does not include events)
- * 
- * @returns - All the matches in the database
- */
-async function getAllMatches() {
+async function getAllHeaders() {
     const db = await tryOpenDatabase();
-    return db.getAll('matches');
-}
+    const tx = db.transaction(['entries'], 'readonly');
+    const store = tx.objectStore('entries');
 
-/**
- * Retrieves all the events from the database (does not include matches)
- */
-async function getAllEvents() {
-    const db = await tryOpenDatabase();
-    return db.getAll('events');
+    const headers: MatchDataHeader[] = [];
+    for await (const cursor of store.iterate()) {
+        headers.push({
+            id: cursor.value.id,
+            matchId: cursor.value.matchId,
+            teamNumber: cursor.value.teamNumber,
+            allianceColor: cursor.value.allianceColor,
+        });
+    }
+    await tx.done;
+    return headers;
 }
 
 /**
@@ -140,8 +116,8 @@ async function getAllEvents() {
  */
 async function getUniqueTeams(competitionId?: string) {
     const db = await tryOpenDatabase();
-    const tx = db.transaction(['matches'], 'readonly');
-    const index = await tx.objectStore('matches').index('by-team');
+    const tx = db.transaction(['entries'], 'readonly');
+    const index = await tx.objectStore('entries').index('by-team');
 
     const teams: number[] = [];
     for await (const cursor of index.iterate()) {
@@ -153,15 +129,15 @@ async function getUniqueTeams(competitionId?: string) {
 }
 
 /**
- * Retrieves all the different matches in the database
+ * Retrieves all the different matches ids in the database
  * 
  * @param competitionId - The competition id to filter by (optional)
- * @returns - A list of all the different matches in the database
+ * @returns Array of match ids (e.x. "2024wagg_qm1")
  */
-async function getUniqueMatches(competitionId?: string) {
+async function getUniqueMatchIds(competitionId?: string) {
     const db = await tryOpenDatabase();
-    const tx = db.transaction(['matches'], 'readonly');
-    const index = await tx.objectStore('matches').index('by-matchId');
+    const tx = db.transaction(['entries'], 'readonly');
+    const index = await tx.objectStore('entries').index('by-matchId');
 
     const matches: string[] = [];
     for await (const cursor of index.iterate()) {
@@ -173,161 +149,94 @@ async function getUniqueMatches(competitionId?: string) {
 }
 
 /**
- * Retrieves a list off all the match identifiers in the database
+ * Gets an entry object by its unique id
+ * 
+ * @returns MatchData object
  */
-async function getAllMatchIdentifiers() {
+async function get(id: number) {
     const db = await tryOpenDatabase();
-    const tx = db.transaction(['matches'], 'readonly');
-    const index = await tx.objectStore('matches').index('by-both');
-
-    const matches: MatchIdentifier[] = [];
-    for await (const cursor of index.iterate()) {
-        matches.push({matchId: cursor.value.matchId, teamNumber: cursor.value.teamNumber});
-    }
-    await tx.done;
-    return matches;
+    return db.getFromIndex('entries', 'by-id', id);
 }
 
 /**
- * Gets a match by its id and team number
+ * This returns all the entries for a given match number id.
+ * There are multiple entries for a given match id because each team has their own match data
  * 
  * @param matchId - The match id to get
- * @param teamNumber - The 4 digit team number to get the match for
- * @returns The match data, or undefined if it does not exist
+ * @returns Array of MatchData objects
  */
-async function getMatchByIdentifier(matchId: string, teamNumber: number) {
+async function getAllByMatchId(matchId: string) {
     const db = await tryOpenDatabase();
-    return db.getFromIndex('matches', 'by-both', [teamNumber, matchId]);
+    return db.getAllFromIndex('entries', 'by-matchId', matchId);
 }
 
 /**
- * This returns all the matches for a given match id.
- * There are multiple matches for a given match id because each team has their own match data
+ * Gets all the entries for a given team number
  * 
- * @param matchId - The match id to get
- * @returns 
+ * @param teamNumber The team number to get the entries for
+ * @param competitionId The competition id to filter by (optional)
+ * @returns Array of MatchData objects
  */
-async function getMatchesByMatchId(matchId: string) {
-    const db = await tryOpenDatabase();
-    return db.getAllFromIndex('matches', 'by-matchId', matchId);
-}
-
-/**
- * Gets all the matches for a given team number
- * 
- * @param teamNumber - The 4 digit team number to get the matches for
- * @param competitionId - The competition id to filter by (optional)
- * @returns All the matches for the given team number, does not include events
- */
-async function getMatchesByTeam(teamNumber: number, competitionId?: string) {
+async function getAllByTeam(teamNumber: number, competitionId?: string) {
     if (!competitionId) {
         const db = await tryOpenDatabase();
-        return db.getAllFromIndex('matches', 'by-team', teamNumber);
+        return db.getAllFromIndex('entries', 'by-team', teamNumber);
     } else {
         const db = await tryOpenDatabase();
-        const tx = db.transaction(['matches'], 'readonly');
-        const index = await tx.objectStore('matches').index('by-team');
+        const tx = db.transaction(['entries'], 'readonly');
+        const index = await tx.objectStore('entries').index('by-team');
 
-        const matches: MatchData[] = [];
+        const entries: MatchData[] = [];
         for await (const cursor of index.iterate(teamNumber)) {
             if (cursor.value.matchId.startsWith(competitionId))
-                matches.push(cursor.value);
+                entries.push(cursor.value);
         }
         await tx.done;
-        return matches;
+        return entries;
     }
 }
 
 /**
- * Gets events during a specific match for an (optionally) specific team
+ * Deletes an entry from the database using its unique id
  * 
- * @param matchId - The match id to get the events for
- * @param teamNumber - The 4 digit team number to get the events for, if unspecified it will get events from all teams for that match
- * @returns - All the events for the given match id and team number
+ * @param id The unique id
+ * @returns true if the match was deleted, false if it was not found
  */
-async function getEventsByMatch(matchId: string, teamNumber?: number) {
+async function remove(id: number) {
     const db = await tryOpenDatabase();
-    if (teamNumber)
-        return db.getAllFromIndex('events', 'by-both', [teamNumber, matchId]);
-    else 
-        return db.getAllFromIndex('events', 'by-matchId', matchId);
-}
-
-/**
- * Gets all the events for a given team number
- * 
- * @param teamNumber - The 4 digit team number to get the events for
- * @param competitionId - The competition id to filter by (optional)
- * @returns - All the events for the given team number
- */
-async function getEventsByTeam(teamNumber: number, competitionId?: string) {
-    if (!competitionId) {
-        const db = await tryOpenDatabase();
-        return db.getAllFromIndex('events', 'by-team', teamNumber);
-    } else {
-        const db = await tryOpenDatabase();
-        const tx = db.transaction(['events'], 'readonly');
-        const index = await tx.objectStore('events').index('by-team');
-
-        const events: MatchEventData[] = [];
-        for await (const cursor of index.iterate(teamNumber)) {
-            if (cursor.value.matchId.startsWith(competitionId))
-                events.push(cursor.value);
-        }
-        await tx.done;
-        return events;
+    
+    const primaryKey = await db.getKeyFromIndex('entries', 'by-id', id);
+    if (primaryKey) {
+        await db.delete('entries', primaryKey);
+        return true;
     }
+    return false;
 }
 
-async function deleteMatch(matchId: string, teamNumber: number) {
+async function removeAll(ids: number[]) {
     const db = await tryOpenDatabase();
     
-    const matchKeys = await db.getAllKeysFromIndex('matches', 'by-both', [teamNumber, matchId]);
-    const eventKeys = await db.getAllKeysFromIndex('events', 'by-both', [teamNumber, matchId])
+    const tx = db.transaction('entries', 'readwrite');
+    const matchStore = tx.objectStore('entries');
     
-    const tx = db.transaction(['matches', 'events'], 'readwrite');
-    const matchStore = tx.objectStore('matches');
-    const eventStore = tx.objectStore('events');
-    await Promise.all(
-        [
-            ...matchKeys.map(key => matchStore.delete(key)),
-            ...eventKeys.map(key => eventStore.delete(key)),
-            tx.done
-        ]
-    );
-}
-
-async function deleteMatches(matches: MatchIdentifier[]) {
-    const db = await tryOpenDatabase();
-    
-    const tx = db.transaction(['matches', 'events'], 'readwrite');
-    const matchStore = tx.objectStore('matches');
-    const eventStore = tx.objectStore('events');
-    
-    for await (const cursor of matchStore.iterate()) {
-        if (matchIncludes(matches, cursor.value)) {
-            matchStore.delete(cursor.primaryKey);
-        }
-    }
-    for await (const cursor of eventStore.iterate()) {
-        if (matchIncludes(matches, cursor.value)) {
-            eventStore.delete(cursor.primaryKey);
-        }
+    for (const id of ids) {
+        const primaryKey = await matchStore.index('by-id').getKey(id)
+        if (primaryKey) await matchStore.delete(primaryKey);
     }
     await tx.done;
 }
 
 /**
- * Gets the number of matches each scout has submitted
+ * Gets the number of entries each scout has submitted
  * 
  * @param competitionId - The competition id to filter by (optional)
  * @returns - A map of scoutName to the number of matches they have scouted
  */
-async function getContributions(competitionId?: string) {
+async function getCountByScout(competitionId?: string) {
     const db = await tryOpenDatabase();
 
-    const tx = db.transaction(['matches'], 'readonly');
-    const store = await tx.objectStore('matches');
+    const tx = db.transaction(['entries'], 'readonly');
+    const store = await tx.objectStore('entries');
 
     const people: {[key: string]: number} = {};
     for await (const cursor of store.iterate()) {
@@ -345,19 +254,16 @@ async function getContributions(competitionId?: string) {
 }
 
 export default {
-    saveToDatabase,
-    importData,
-    getAllMatches,
-    getAllEvents,
+    put,
+    putAll,
+    get,
+    getAll,
+    getAllHeaders,
     getUniqueTeams,
-    getUniqueMatches,
-    getAllMatchIdentifiers,
-    getMatchByIdentifier,
-    getMatchesByMatchId,
-    getMatchesByTeam,
-    getEventsByMatch,
-    getEventsByTeam,
-    deleteMatch,
-    deleteMatches,
-    getContributions,
+    getUniqueMatchIds,
+    getAllByTeam,
+    getAllByMatchId,
+    remove,
+    removeAll,
+    getCountByScout,
 }

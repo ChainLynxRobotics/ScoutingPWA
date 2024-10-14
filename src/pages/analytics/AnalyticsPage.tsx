@@ -17,7 +17,7 @@ const AnalyticsPage = () => {
 
     const [teamList, setTeamList] = useState<number[]>([]);
     const [matchList, setMatchList] = useState<string[]>([]);
-    const [contributors, setContributors] = useState<{[key: string]: number}>({});
+    const [countByScout, setCountByScout] = useState<{[key: string]: number}>({});
 
     const [analyticsMatchIndex, setAnalyticsMatchIndex] = useLocalStorageState(settings?.currentMatchIndex||0, "analyticsMatchIndex");
     const [currentMatchOnly, setCurrentMatchOnly] = useLocalStorageState(false, "analyticsCurrentMatchOnly");
@@ -26,8 +26,8 @@ const AnalyticsPage = () => {
         const analyticsCompetition = settings?.analyticsCurrentCompetitionOnly ? settings?.competitionId : undefined;
 
         MatchDatabase.getUniqueTeams(analyticsCompetition).then(setTeamList);
-        MatchDatabase.getUniqueMatches(analyticsCompetition).then((matches)=>setMatchList(matches.sort(matchCompare)));
-        MatchDatabase.getContributions(analyticsCompetition).then((contributors)=>setContributors(contributors));
+        MatchDatabase.getUniqueMatchIds(analyticsCompetition).then((matchIds)=>setMatchList(matchIds.sort(matchCompare)));
+        MatchDatabase.getCountByScout(analyticsCompetition).then((countByScout)=>setCountByScout(countByScout));
 
     }, [settings?.analyticsCurrentCompetitionOnly, settings?.competitionId]);
 
@@ -165,7 +165,7 @@ const AnalyticsPage = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {Object.entries(contributors).sort((a, b)=>b[1]-a[1]).map((row) => (
+                            {Object.entries(countByScout).sort((a, b)=>b[1]-a[1]).map((row) => (
                                 <TableRow
                                     key={row[0]}
                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}

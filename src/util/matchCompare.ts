@@ -18,7 +18,7 @@ export default function matchCompare(a: string, b: string): number {
 }
 
 export function matchEquals(a: MatchIdentifier, b: MatchIdentifier): boolean {
-    return a.matchId === b.matchId && a.teamNumber === b.teamNumber;
+    return a.id === b.id;
 }
 
 export function matchIncludes(matches: MatchIdentifier[], match: MatchIdentifier): boolean {

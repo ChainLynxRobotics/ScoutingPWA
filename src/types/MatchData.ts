@@ -1,24 +1,14 @@
 import { MatchDataFields } from "../MatchDataValues";
 import AllianceColor from "../enums/AllianceColor";
-import MatchEvent from "../enums/MatchEvent";
 
 /**
- * This pair is used to identify any one match data object, and should be unique.
+ * This pair is used to identify any one match data object
  */
 export type MatchIdentifier = {
+    id: number; // Randomly generated ID, should be unique, allows for multiple submissions of the same match/team
     matchId: string; // This should be the full match id, including the competition id
     teamNumber: number;
 }
-
-/**
- * This is the data that is used for each event that happens in a match.
- */
-export type MatchEventData = {
-    matchId: string; // This should be the full match id, including the competition id
-    teamNumber: number;
-    event: MatchEvent;
-    time: number;
-};
 
 /**
  * This is the "header" data that is always available in the MatchDataContext.
@@ -34,7 +24,6 @@ export type MatchDataHeader = MatchIdentifier & {
  */
 export type MatchDataFooter = {
     scoutName: string, // Scout name is here because its not in MatchDataContext, but as in the SettingsContext
-    matchStart: number,
     submitTime: number,
 }
 

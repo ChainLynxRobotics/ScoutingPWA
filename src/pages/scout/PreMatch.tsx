@@ -1,7 +1,7 @@
 import InputLabel from "@mui/material/InputLabel/InputLabel";
 import MenuItem from "@mui/material/MenuItem/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select/Select";
-import { useContext, useEffect, useRef } from "react";
+import { useContext } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import FormControl from "@mui/material/FormControl/FormControl";
 import { Alert, Button, Checkbox, FormControlLabel, FormGroup, TextField } from "@mui/material";
@@ -13,8 +13,7 @@ import { MAX_NOTE_LENGTH } from "../../constants";
 
 
 const PreMatch = () => {
-
-    const navigate = useNavigate();
+    
     const settings = useContext(SettingsContext);
     if (!settings) throw new Error("Settings context not found?!?!?!");
 
@@ -35,14 +34,6 @@ const PreMatch = () => {
             context.fields.set("notes", event.target.value);
         }
     }
-
-    // Redirect to during match when the match starts
-    const wasMatchActive = useRef(context.match.matchActive);
-    useEffect(() => {
-        if (context.match.matchActive && !wasMatchActive.current) {
-            navigate("/scout/during");
-        }
-    }, [context.match.matchActive, navigate]);
 
     return (
         <>
@@ -127,10 +118,8 @@ const PreMatch = () => {
                 </Alert>
             }
             <span className="my-4 max-w-md text-center text-secondary">
-                Reminder that it is ok to make mistakes! The data is collected by humans and read by humans, 
-                they know if there was a slight error or if something is accidentally recorded at the wrong 
-                time. Whats important is the scores and count of events. Everything else like timing, pickup data, amplify, 
-                and defended-on, isn't super important, and its ok if you forget to record that stuff.
+                Reminder that it is ok to make mistakes! The data is collected by humans and read by humans,
+                it is not the end of the world if you make a mistake. Just do your best!
             </span>
         </div>
         </>

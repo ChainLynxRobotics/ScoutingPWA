@@ -5,7 +5,7 @@ import { MatchIdentifier } from "../types/MatchData";
 import QrCodeType from "../enums/QrCodeType";
 import MatchDataIO from "../util/ScoutDataIO";
 import useLocalStorageState from "../components/hooks/localStorageState";
-import matchCompare, { matchIncludes } from "../util/matchCompare";
+import matchCompare from "../util/matchCompare";
 import FileSaver from "file-saver";
 import SettingsContext from "../components/context/SettingsContext";
 import { QRCodeData } from "../types/QRCodeData";
@@ -19,8 +19,8 @@ const DataPage = () => {
 
     const settings = useContext(SettingsContext);
 
-    const [matches, setMatches] = useState<MatchIdentifier[]|undefined>(undefined);
-    const [scanned, setScanned] = useLocalStorageState<MatchIdentifier[]>([], "dataScannedMatches"); 
+    const [entries, setEntries] = useState<MatchIdentifier[]|undefined>(undefined);
+    const [readentries, setReadEntries] = useLocalStorageState<number[]>([], "dataReadMatches"); 
 
     const [qrData, setQrData] = useState<QRCodeData>(); // Signals the qr code data to be generated
     const [scannerOpen, setScannerOpen] = useState(false);
@@ -31,30 +31,28 @@ const DataPage = () => {
 
     const {enqueueSnackbar} = useSnackbar();
 
-    async function updateMatches() {
-        const matches = await MatchDatabase.getAllMatchIdentifiers();
-        setMatches(matches.sort((a, b) => -matchCompare(a.matchId, b.matchId)));
-        return matches;
+    async function updateEntries() {
+        const allEntries = await MatchDatabase.getAllHeaders();
+        setEntries(allEntries.sort((a, b) => -matchCompare(a.matchId, b.matchId)));
+        return allEntries;
     }
 
     useEffect(() => {
-        updateMatches();
+        updateEntries();
     }, []);
 
     async function openQrData() {
         setLoading(true);
         try {
-            const _matches = (await MatchDatabase.getAllMatches()).filter((match) => !matchIncludes(scanned, match));
-            const _events = (await MatchDatabase.getAllEvents()).filter((event) => !matchIncludes(scanned, event));
+            const allEntries = (await MatchDatabase.getAll()).filter((match) => !readentries.includes(match.id));
             
-            if (_matches.length === 0 && _events.length === 0) throw new Error("No new data to share");
+            if (allEntries.length === 0) throw new Error("No new data to share");
             
             const data: QRCodeData = {
                 qrType: QrCodeType.MatchData,
                 version: APP_VERSION,
                 matchScoutingData: {
-                    matches: _matches,
-                    events: _events,
+                    entries: allEntries,
                 }
             };
 
@@ -73,11 +71,11 @@ const DataPage = () => {
         
         setLoading(true);
         try {
-            let matchCount = matches?.length || 0;
-            await MatchDatabase.importData(data.matchScoutingData.matches, data.matchScoutingData.events);
-            const newMatches = await updateMatches();
-            matchCount = newMatches.length - matchCount;
-            enqueueSnackbar(`Imported ${matchCount} matches ${data.matchScoutingData.matches.length !== matchCount ? `(${data.matchScoutingData.matches.length-matchCount} duplicates were omitted)` : ''}`, {variant: "success"});
+            let currentCount = entries?.length || 0;
+            await MatchDatabase.putAll(data.matchScoutingData.entries);
+            const newEntries = await updateEntries();
+            currentCount = newEntries.length - currentCount;
+            enqueueSnackbar(`Imported ${currentCount} entries ${data.matchScoutingData.entries.length !== currentCount ? `(${data.matchScoutingData.entries.length-currentCount} duplicates were omitted)` : ''}`, {variant: "success"});
         } catch (e) {
             console.error(e);
             enqueueSnackbar(e+"", {variant: "error"});
@@ -86,14 +84,13 @@ const DataPage = () => {
     }
 
     async function exportData() {
-        if (matches?.length === 0) return enqueueSnackbar("No data to export", {variant: "error"});
+        if (entries?.length === 0) return enqueueSnackbar("No data to export", {variant: "error"});
 
         setLoading(true);
         try {
-            const _matches = await MatchDatabase.getAllMatches();
-            const _events = await MatchDatabase.getAllEvents();
+            const allEntries = await MatchDatabase.getAll();
 
-            const blob = await MatchDataIO.exportDataAsZip(_matches, _events);
+            const blob = await MatchDataIO.exportDataAsZip(allEntries);
             const date = new Date();
 
             FileSaver.saveAs(blob, 
@@ -115,12 +112,12 @@ const DataPage = () => {
 
         setLoading(true);
         try {
-            let matchCount = matches?.length || 0;
+            let currentCount = entries?.length || 0;
             const data = await MatchDataIO.importDataFromZip(file);
-            await MatchDatabase.importData(data.matches, data.events);
-            const newMatches = await updateMatches();
-            matchCount = newMatches.length - matchCount;
-            enqueueSnackbar(`Imported ${matchCount} matches ${data.matches.length !== matchCount ? `(${data.matches.length-matchCount} duplicates were omitted)` : ''}`, {variant: "success"});
+            await MatchDatabase.putAll(data.entries);
+            const newEntries = await updateEntries();
+            currentCount = newEntries.length - currentCount;
+            enqueueSnackbar(`Imported ${currentCount} entries ${data.entries.length !== currentCount ? `(${data.entries.length-currentCount} duplicates were omitted)` : ''}`, {variant: "success"});
         } catch (e) {
             console.error(e);
             enqueueSnackbar(e+"", {variant: "error"});
@@ -129,11 +126,11 @@ const DataPage = () => {
     }
 
 
-    async function deleteItems(selected: MatchIdentifier[]) {
+    async function deleteItems(selected: number[]) {
         setLoading(true);
         try {
-            await MatchDatabase.deleteMatches(selected);
-            await updateMatches();
+            await MatchDatabase.removeAll(selected);
+            await updateEntries();
         } catch (e) {
             console.error(e);
             enqueueSnackbar(e+"", {variant: "error"});
@@ -141,14 +138,14 @@ const DataPage = () => {
         setLoading(false);
     }
 
-    function markNew(selected: MatchIdentifier[]) {
-        const newScanned = scanned.filter(m => !matchIncludes(selected, m));
-        setScanned(newScanned);
+    function markNew(selected: number[]) {
+        const newRead = readentries.filter(e => !selected.includes(e));
+        setReadEntries(newRead);
     }
 
-    function markScanned(selected: MatchIdentifier[]) {
-        const newScanned = [...scanned, ...(matches||[]).filter(m=>matchIncludes(selected, m)&&!matchIncludes(scanned, m))];
-        setScanned(newScanned);
+    function markRead(selected: number[]) {
+        const newReadEntries = [...readentries, ...(entries||[]).map(e=>e.id).filter(e=>selected.includes(e)&&!readentries.includes(e))];
+        setReadEntries(newReadEntries);
     }
 
     return (
@@ -202,11 +199,11 @@ const DataPage = () => {
 
         <div className="max-w-lg w-full mb-16 px-1">
             <DataList 
-                matches={matches} 
-                scanned={scanned} 
+                entries={entries}
+                readEntries={readentries}
                 deleteItems={deleteItems}
                 markNew={markNew}
-                markScanned={markScanned}
+                markRead={markRead}
             />
         </div>
 
@@ -222,7 +219,7 @@ const DataPage = () => {
                 <ul className="text-md list-disc pl-2">
                     <li>One device is designated as the 'host' device.</li>
                     <li>When asked by the scouting lead, press the share button to generate QR codes containing your new scouting data.</li>
-                    <li>Sharing a qr code only includes the "new" of matches, to share data for other matches, select them and tap the (<span className="material-symbols-outlined inline-icon">mark_email_unread</span>) icon.</li>
+                    <li>Sharing a qr code only includes the "new" entries, to share other entries, select them and tap the (<span className="material-symbols-outlined inline-icon">mark_email_unread</span>) icon.</li>
                     <li>Exporting and importing data as a <code>.zip file</code> allows you to backup and restore match data for in between competition days, or for an alternate way of transferring data to others.</li>
                 </ul>
             </DialogContent>
@@ -253,7 +250,7 @@ const DataPage = () => {
             <DialogActions>
                 <Button 
                     size="large" 
-                    onClick={() => {setQrData(undefined); setScanned(matches||[])}} 
+                    onClick={() => {setQrData(undefined); setReadEntries(entries?.map(e=>e.id)||[])}} 
                     color="success"
                 >
                     Scan Finished

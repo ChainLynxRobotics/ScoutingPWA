@@ -20,8 +20,7 @@ export type MatchDataFields = {
     matchResult: MatchResult,
     notes: string,
 }
-// Other match data is stored in the type `MatchData` in `src/types/MatchData.ts`
-// And the event list is in the `MatchEvent` enum in `src/enums/MatchEvent.ts`
+// Other more global match data is stored in the type `MatchData` in `src/types/MatchData.ts`
 
 
 /**
@@ -61,10 +60,6 @@ export const MatchDataFieldInformation: Readonly<MatchDataFieldInformationRecord
         defaultValue: "",
     },
 }
-
-//=====================================================================================
-// Note: To edit different events, check out the {@link src/enums/MatchEvent.ts} enum
-//=====================================================================================
 
 
 // *** DO NOT EDIT BELOW THIS LINE ***

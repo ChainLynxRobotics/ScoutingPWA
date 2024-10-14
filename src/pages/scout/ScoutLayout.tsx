@@ -3,7 +3,6 @@ import { Outlet } from "react-router-dom";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
 import { Alert, Button } from "@mui/material";
-import CountUp from "../../components/CountUp";
 import AllianceColor from "../../enums/AllianceColor";
 import CurrentMatchContext from "../../components/context/CurrentMatchContext";
 import SettingsContext from "../../components/context/SettingsContext";
@@ -44,24 +43,12 @@ const ScoutPage = () => {
     }, [currentMatchContext?.hasUpdate]);
 
     useEffect(() => {
-        if (currentMatchContext?.hasUpdate && (!context || context?.match.events.length == 0)) {
+        if (currentMatchContext?.hasUpdate && !context) {
             currentMatchContext?.update();
         }
     }, [currentMatchContext, context]);
 
     const [warningDismissed, setWarningDismissed] = useState(false);
-
-    function startMatch() {
-        context?.match.startMatch();
-    }
-    
-    function skipAuto() {
-        context?.match.setInAuto(false);
-    }
-
-    function endMatch() {
-        context?.match.endMatch();
-    }
 
     return (
         <div className="w-full h-full flex flex-col relative">
@@ -75,35 +62,6 @@ const ScoutPage = () => {
                             </span>
                             <span className="text-sm italic">({context.matchId})</span>
                         </span>
-                        <div className="flex-1 text-center whitespace-nowrap">
-                            {!context.match.matchStart ?
-                                <Button variant="contained" size="small" color="success" onClick={startMatch}>Start Match</Button>
-                                :
-                                (context.match.matchActive ?
-                                    <CountUp start={context.match.matchStart}></CountUp>
-                                    :
-                                    <span></span>
-                                )
-                            }
-                        </div>
-                        <div className="flex-1 text-end">
-                            {context.match.matchActive ?
-                                (context.match.inAuto ?
-                                    <span className="">Auto <button className="text-sm text-secondary" onClick={skipAuto}>&#40;skip&#41;</button></span>
-                                    :
-                                    <div className="flex gap-2 items-center justify-end">
-                                        <span>Teleop</span>
-                                        <Button variant="contained" size="small" color="error" onClick={endMatch}>end</Button>
-                                    </div>
-                                )
-                                :
-                                (context.match.matchStart ?
-                                    <span className="text-sm text-secondary">Match Ended <button className="text-sm text-secondary" onClick={startMatch}>&#40;undo&#41;</button></span>
-                                    :
-                                    <span className="text-sm text-secondary">Not Started</span>
-                                )
-                            }
-                        </div>
                     </h1>
                 </div>
                 <Outlet />

@@ -1,13 +1,12 @@
 import { ScheduledMatch } from "../components/context/SettingsContextProvider";
 import QrCodeType from "../enums/QrCodeType"
-import { MatchData, MatchEventData } from "./MatchData"
+import { MatchData } from "./MatchData"
 
 export type QRCodeData = {
     qrType: QrCodeType,
     version: string,
     matchScoutingData?: {
-        matches: MatchData[],
-        events: MatchEventData[],
+        entries: MatchData[],
     }
     scheduleData?: {
         schedule: ScheduledMatch[],

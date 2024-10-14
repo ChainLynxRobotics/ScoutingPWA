@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { MatchData, MatchEventData } from "../../types/MatchData";
+import { MatchData } from "../../types/MatchData";
 import MatchDatabase from "../../util/MatchDatabase";
 import { FormControl, Select, MenuItem } from "@mui/material";
 import SettingsContext from "../../components/context/SettingsContext";
@@ -16,28 +16,25 @@ export default function AnalyticsMatchPage() {
     const analyticsCompetition = settings?.analyticsCurrentCompetitionOnly ? settings?.competitionId : undefined;
     useEffect(() => {
         async function loadMatches() {
-            setMatchList(await MatchDatabase.getUniqueMatches(analyticsCompetition));
+            setMatchList(await MatchDatabase.getUniqueMatchIds(analyticsCompetition));
         }
         loadMatches();
     }, [analyticsCompetition]);
 
     const [hasLoaded, setHasLoaded] = useState(false);
-    const [matches, setMatches] = useState<MatchData[]>([]);
-    const [events, setEvents] = useState<MatchEventData[]>([]); // eslint-disable-line @typescript-eslint/no-unused-vars
+    const [entries, setEntries] = useState<MatchData[]>([]);
 
     useEffect(() => {
         if (hasLoaded) return;
-        // Load matches for team
-        async function loadMatches() {
+        // Load entries for team
+        async function loadEntries() {
             if (!matchId) return;
-            const matches = await MatchDatabase.getMatchesByMatchId(matchId);
-            matches.sort((a, b) => a.matchId.localeCompare(b.matchId));
-            const events = await MatchDatabase.getEventsByMatch(matchId);
-            setMatches(matches);
-            setEvents(events);
+            const entries = await MatchDatabase.getAllByMatchId(matchId);
+            entries.sort((a, b) => a.matchId.localeCompare(b.matchId));
+            setEntries(entries);
             setHasLoaded(true);
         }
-        loadMatches();
+        loadEntries();
     }, [matchId, hasLoaded]);
     
     return (
@@ -74,7 +71,7 @@ export default function AnalyticsMatchPage() {
             <div className="w-full max-w-md px-2 flex flex-col items-start">
                 <h3 className="text-lg mt-4">Known teams in this match: </h3>
                 <ul className="list-disc pl-8">
-                    {matches.map(m => m.teamNumber).map((team) => 
+                    {entries.map(m => m.teamNumber).map((team) => 
                         <li key={team}>
                             <Link to={'/analytics/team/'+team} className="text-blue-500 underline">{team}</Link>
                         </li>

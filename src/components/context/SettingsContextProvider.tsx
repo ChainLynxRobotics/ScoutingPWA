@@ -58,7 +58,7 @@ export default function SettingsContextProvider({defaultCompetitionId, children}
     const [analyticsCurrentCompetitionOnly, setAnalyticsCurrentCompetitionOnly] = useLocalStorageState<boolean>(true, "analyticsCurrentCompetitionOnly"); // Whether or not to only show data from the current competition
 
     useEffect(() => {
-        // If the competitionId is over 7 days old, set it to the default
+        // If the competitionId is over COMPETITION_ID_EXPIRE_TIME old, set it to the default
         if (competitionIdLastUpdated < Date.now() - COMPETITION_ID_EXPIRE_TIME) {
             setCompetitionId(defaultCompetitionId);
             setCompetitionIdLastUpdated(Date.now());

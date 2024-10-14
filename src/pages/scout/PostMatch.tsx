@@ -2,14 +2,12 @@ import { useContext, useState } from "react";
 import { NavLink } from "react-router-dom";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import NoMatchAvailable from "./NoMatchAvailable";
-import EventLog from "../../components/EventLog";
 import { MAX_NOTE_LENGTH } from "../../constants";
 import MatchResult from "../../enums/MatchResult";
 import ClimbResult from "../../enums/ClimbResult";
-import Divider from "../../components/Divider";
 import { useSnackbar } from "notistack";
 import LoadingBackdrop from "../../components/LoadingBackdrop";
-import { Button, Alert, FormControl, InputLabel, Select, MenuItem, Rating, TextField } from "@mui/material";
+import { Button, FormControl, InputLabel, Select, MenuItem, Rating, TextField } from "@mui/material";
 
 const PostMatch = () => {
     const context = useContext(ScoutingContext);
@@ -65,13 +63,6 @@ const PostMatch = () => {
             <div className="flex-1 flex justify-end items-center"></div>
         </div>
         <div className="w-full max-w-xl mx-auto flex flex-col items-left px-4 gap-4">
-
-            {context.match.matchActive &&
-                <Alert severity="warning" sx={{mb: "12px"}}>
-                    <div className="text-lg mb-1"><b>Match Still Active!</b></div>
-                    <div><button onClick={context.match.endMatch}><u>Click Here</u></button> or in the top right corner to stop the timer!</div>
-                </Alert>
-            }
 
             <FormControl sx={{maxWidth: "256px"}}>
                 <InputLabel>Climb Result</InputLabel>
@@ -146,18 +137,10 @@ const PostMatch = () => {
                     variant="contained" 
                     color="success" 
                     size="large" 
-                    onClick={submit} 
-                    disabled={!(context.match.matchStart > 0 && !context.match.matchActive)}
+                    onClick={submit}
                 >
                     Submit
                 </Button>
-            </div>
-
-            <Divider />
-            
-            <div className="flex flex-col items-center">
-                <h3 className="text-xl mb-2">Event Log</h3>
-                <EventLog />
             </div>
         </div>
 
