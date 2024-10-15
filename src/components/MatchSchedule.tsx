@@ -180,7 +180,7 @@ const MatchSchedule = () => {
                                     startAdornment: <InputAdornment position="start"><span className="text-secondary">{settings.competitionId}_</span></InputAdornment>,
                                 }}
                             />
-                            <FormHelperText>Unique identifier for the match, e.x. "qm1" for qualification match 1</FormHelperText>
+                            <FormHelperText>Unique identifier for the match, e.x. &quot;qm1&quot; for qualification match 1</FormHelperText>
                         </FormControl>
                         <div className="grid grid-cols-3 gap-2">
                             <AllianceField id="blue1" label="Blue 1" value={modelBlue1} setValue={setModelBlue1} />
@@ -219,7 +219,7 @@ const MatchSchedule = () => {
                                     startAdornment: <InputAdornment position="start"><span className="text-secondary">{settings.competitionId}_</span></InputAdornment>,
                                 }}
                             />
-                            <FormHelperText>Unique identifier for the match, e.x. "qm1" for qualification match 1</FormHelperText>
+                            <FormHelperText>Unique identifier for the match, e.x. &quot;qm1&quot; for qualification match 1</FormHelperText>
                         </FormControl>
                         <div className="grid grid-cols-3 gap-2">
                             <AllianceField id="blue1" label="Blue 1" value={modelBlue1} setValue={setModelBlue1} />

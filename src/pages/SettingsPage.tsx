@@ -130,7 +130,7 @@ const SettingsPage = () => {
                 onChange={(e)=>{settings.setCompetitionId(e.target.value); settings.setCompetitionIdLastUpdated(Date.now())}} 
                 variant="outlined"
             />
-            <FormHelperText>Make sure this matches the blue alliance url and everybody else's devices!</FormHelperText>
+            <FormHelperText>Make sure this matches the blue alliance url and everybody else&apos;s devices!</FormHelperText>
         </FormControl>
 
         <FormControl className="max-w-96">
@@ -197,9 +197,9 @@ const SettingsPage = () => {
             </DialogTitle>
             <DialogContent>
                 <ul className="text-md list-disc pl-2">
-                    <li>One device is designated as the 'host' device.</li>
-                    <li>If you are NOT the host device, click on "Scan" to get the schedule from the host device.</li>
-                    <li>If you ARE the host, click the download button below to get a copy from blue alliance, then click "Share" to generate qr codes for other devices to scan.</li>
+                    <li>One device is designated as the &quot;host&quot; device.</li>
+                    <li>If you are NOT the host device, click on &quot;Scan&quot; to get the schedule from the host device.</li>
+                    <li>If you ARE the host, click the download button below to get a copy from blue alliance, then click &quot;Share&quot; to generate qr codes for other devices to scan.</li>
                     <li>Sharing the qr code also shares the Competition ID and the field rotation.</li>
                 </ul>
             </DialogContent>

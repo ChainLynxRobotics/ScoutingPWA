@@ -139,20 +139,21 @@ function InternalQrCodeScanner({onDecode}: {onDecode: (data: QrScanner.ScanResul
     const videoEl = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
-        if (!scanner.current && videoEl.current) {
-            scanner.current = new QrScanner(videoEl.current, onDecode, {
+        const video = videoEl.current;
+        if (!scanner.current && video) {
+            scanner.current = new QrScanner(video, onDecode, {
                 preferredCamera: "environment",
                 highlightScanRegion: true,
                 highlightCodeOutline: true,
                 returnDetailedScanResult: true
             });
             scanner.current?.start();
-        } else if (scanner.current && videoEl.current) {
+        } else if (scanner.current && video) {
             scanner.current.start();
         }
 
         return () => {
-            if (scanner.current && !videoEl.current) { // eslint-disable-line react-hooks/exhaustive-deps
+            if (scanner.current && !video) {
                 scanner.current.stop();
             }
         }

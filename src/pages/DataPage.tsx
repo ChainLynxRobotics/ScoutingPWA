@@ -217,9 +217,9 @@ const DataPage = () => {
             <DialogTitle id="info-dialog-title">Information</DialogTitle>
             <DialogContent>
                 <ul className="text-md list-disc pl-2">
-                    <li>One device is designated as the 'host' device.</li>
+                    <li>One device is designated as the &quot;host&quot; device.</li>
                     <li>When asked by the scouting lead, press the share button to generate QR codes containing your new scouting data.</li>
-                    <li>Sharing a qr code only includes the "new" entries, to share other entries, select them and tap the (<span className="material-symbols-outlined inline-icon">mark_email_unread</span>) icon.</li>
+                    <li>Sharing a qr code only includes the &quot;new&quot; entries, to share other entries, select them and tap the (<span className="material-symbols-outlined inline-icon">mark_email_unread</span>) icon.</li>
                     <li>Exporting and importing data as a <code>.zip file</code> allows you to backup and restore match data for in between competition days, or for an alternate way of transferring data to others.</li>
                 </ul>
             </DialogContent>

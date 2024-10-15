@@ -81,7 +81,7 @@ const AnalyticsPage = () => {
                 {entries.length}
             </Statistic>
             <div className="mt-2 flex flex-col items-center text-secondary text-sm">
-                <div>"P.M." = "Per Match"</div>
+                <div>&quot;P.M.&quot; = &quot;Per Match&quot;</div>
                 <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined">query_stats</span> = Tap to show on graph
                 </div>

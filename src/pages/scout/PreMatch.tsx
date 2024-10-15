@@ -5,7 +5,7 @@ import { useContext } from "react";
 import ScoutingContext from "../../components/context/ScoutingContext";
 import FormControl from "@mui/material/FormControl/FormControl";
 import { Alert, Button, Checkbox, FormControlLabel, FormGroup, TextField } from "@mui/material";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import HumanPlayerLocation from "../../enums/HumanPlayerLocation";
 import AllianceColor from "../../enums/AllianceColor";
 import SettingsContext from "../../components/context/SettingsContext";

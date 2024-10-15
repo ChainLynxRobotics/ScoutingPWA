@@ -52,7 +52,7 @@ const IndexPage = () => {
                         <Divider />
 
                         <p className="mt-4 mb-2">
-                            This was created by FRC team <a href="https://chainlynx8248.com/" target="_blank" className="underline">ChainLynx 8248</a> to help scout matches at FIRST competitions.
+                            This was created by FRC team <a href="https://chainlynx8248.com/" target="_blank" rel="noreferrer" className="underline">ChainLynx 8248</a> to help scout matches at FIRST competitions.
                             Click a button below to continue to the scouting page.
                         </p>
 
@@ -109,7 +109,7 @@ const IndexPage = () => {
                         <div className="mt-16 flex flex-col items-center">
                             <div className="text-secondary">App Version: <i>{APP_VERSION}</i></div>
                             <div className="text-secondary">Build Date: <i>{new Date(BUILD_DATE).toLocaleString()}</i></div>
-                            <div className="text-secondary"><a href="https://github.com/ChainLynxRobotics/ScoutingPWA" target="_blank" className="underline">GitHub</a></div>
+                            <div className="text-secondary"><a href="https://github.com/ChainLynxRobotics/ScoutingPWA" target="_blank" rel="noreferrer" className="underline">GitHub</a></div>
                         </div>
                     </div>
                 </div>
@@ -127,7 +127,7 @@ const IndexPage = () => {
                         You should now see a prompt or icon (<span className="material-symbols-outlined">install_desktop</span>) in the address bar to install the app.
                     </DialogContentText>
                     <DialogContentText>
-                        If you don't see the prompt/icon, try refreshing the page or using a different browser. (Chrome/Edge is recommended)
+                        If you don&apos;t see the prompt/icon, try refreshing the page or using a different browser. (Chrome/Edge is recommended)
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -145,10 +145,10 @@ const IndexPage = () => {
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Click the Share Button &#40;<span className="material-symbols-outlined">ios_share</span>&#41; in your browser and tap "Add to Home Screen" to install the app.
+                        Click the Share Button &#40;<span className="material-symbols-outlined">ios_share</span>&#41; in your browser and tap &quot;Add to Home Screen&quot; to install the app.
                     </DialogContentText>
                     <DialogContentText>
-                        If you don't see the button, try refreshing the page or using a different browser. (Chrome is recommended)
+                        If you don&apos;t see the button, try refreshing the page or using a different browser. (Chrome is recommended)
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

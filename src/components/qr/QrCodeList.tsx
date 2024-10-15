@@ -108,7 +108,7 @@ export default function QrCodeList({data, allowTextCopy}: {data: QRCodeData, all
                                 </InputAdornment>
                             }
                         />
-                        <FormHelperText id="data-transfer-code-helper-text">If you don't want use QR codes, you can copy and message this code to the receiver instead.</FormHelperText>
+                        <FormHelperText id="data-transfer-code-helper-text">If you don&apos;t want use QR codes, you can copy and message this code to the receiver instead.</FormHelperText>
                     </FormControl>
                 </div>
             }
