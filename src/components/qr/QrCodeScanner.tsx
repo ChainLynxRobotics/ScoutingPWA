@@ -1,11 +1,10 @@
-import protobuf from "protobufjs";
 import QrScanner from "qr-scanner";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { decompressBytes, fromBase64 } from "../../util/io/compression";
 import { QRCodeData } from "../../types/QRCodeData";
 import { useSnackbar } from "notistack";
 import { TextField } from "@mui/material";
 import LoadingBackdrop from "../LoadingBackdrop";
+import qr from "../../util/io/qr";
 
 export const QR_PROTOCOL_REGEX = /^scoutingdata:(\d+)\/(\d+):(.+)$/;
 
@@ -34,12 +33,7 @@ export default function QrCodeScanner({onReceiveData, allowTextPaste}: {onReceiv
     const decodeFullQrCode = useCallback(async (data: string) => {
         setLoading(true);
         try {
-            const protos = await protobuf.load("/protobuf/data_transfer.proto");
-            const QrCodeDataProto = protos.lookupType("QrCodeData");
-
-            const bytes = await decompressBytes(fromBase64(data));
-            const message = QrCodeDataProto.decode(bytes);
-            const object = QrCodeDataProto.toObject(message) as QRCodeData;
+            const object = await qr.decodeQrBase64(data);
             setLoading(false);
             
             await onReceiveData(object);
