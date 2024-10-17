@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QRCodeData } from "../../types/QRCodeData";
 import protobuf from "protobufjs";
-import { compressBytes, toBase64 } from "../../util/compression";
+import { compressBytes, toBase64 } from "../../util/io/compression";
 import QRCode from "react-qr-code";
 import { QR_CHUNK_SIZE } from "../../constants";
 import { CircularProgress, FormControl, FormHelperText, IconButton, InputAdornment, InputLabel, OutlinedInput, Tooltip } from "@mui/material";

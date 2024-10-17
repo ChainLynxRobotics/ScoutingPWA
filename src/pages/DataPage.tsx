@@ -1,9 +1,9 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import { useContext, useEffect, useRef, useState } from "react";
-import MatchDatabase from "../util/MatchDatabase";
+import matchDatabase from "../util/db/matchDatabase";
 import { MatchIdentifier } from "../types/MatchData";
 import QrCodeType from "../enums/QrCodeType";
-import zip from "../util/zip";
+import zip from "../util/io/zip";
 import useLocalStorageState from "../components/hooks/localStorageState";
 import matchCompare from "../util/matchCompare";
 import FileSaver from "file-saver";
@@ -32,7 +32,7 @@ const DataPage = () => {
     const {enqueueSnackbar} = useSnackbar();
 
     async function updateEntries() {
-        const allEntries = await MatchDatabase.getAllHeaders();
+        const allEntries = await matchDatabase.getAllHeaders();
         setEntries(allEntries.sort((a, b) => -matchCompare(a.matchId, b.matchId)));
         return allEntries;
     }
@@ -44,7 +44,7 @@ const DataPage = () => {
     async function openQrData() {
         setLoading(true);
         try {
-            const allEntries = (await MatchDatabase.getAll()).filter((match) => !readentries.includes(match.id));
+            const allEntries = (await matchDatabase.getAll()).filter((match) => !readentries.includes(match.id));
             
             if (allEntries.length === 0) throw new Error("No new data to share");
             
@@ -72,7 +72,7 @@ const DataPage = () => {
         setLoading(true);
         try {
             let currentCount = entries?.length || 0;
-            await MatchDatabase.putAll(data.matchScoutingData.entries);
+            await matchDatabase.putAll(data.matchScoutingData.entries);
             const newEntries = await updateEntries();
             currentCount = newEntries.length - currentCount;
             enqueueSnackbar(`Imported ${currentCount} entries ${data.matchScoutingData.entries.length !== currentCount ? `(${data.matchScoutingData.entries.length-currentCount} duplicates were omitted)` : ''}`, {variant: "success"});
@@ -88,7 +88,7 @@ const DataPage = () => {
 
         setLoading(true);
         try {
-            const allEntries = await MatchDatabase.getAll();
+            const allEntries = await matchDatabase.getAll();
 
             const blob = await zip.exportDataAsZip(allEntries);
             const date = new Date();
@@ -114,7 +114,7 @@ const DataPage = () => {
         try {
             let currentCount = entries?.length || 0;
             const data = await zip.importDataFromZip(file);
-            await MatchDatabase.putAll(data.entries);
+            await matchDatabase.putAll(data.entries);
             const newEntries = await updateEntries();
             currentCount = newEntries.length - currentCount;
             enqueueSnackbar(`Imported ${currentCount} entries ${data.entries.length !== currentCount ? `(${data.entries.length-currentCount} duplicates were omitted)` : ''}`, {variant: "success"});
@@ -129,7 +129,7 @@ const DataPage = () => {
     async function deleteItems(selected: number[]) {
         setLoading(true);
         try {
-            await MatchDatabase.removeAll(selected);
+            await matchDatabase.removeAll(selected);
             await updateEntries();
         } catch (e) {
             console.error(e);

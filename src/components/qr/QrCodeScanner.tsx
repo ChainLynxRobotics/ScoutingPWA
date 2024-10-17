@@ -1,7 +1,7 @@
 import protobuf from "protobufjs";
 import QrScanner from "qr-scanner";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { decompressBytes, fromBase64 } from "../../util/compression";
+import { decompressBytes, fromBase64 } from "../../util/io/compression";
 import { QRCodeData } from "../../types/QRCodeData";
 import { useSnackbar } from "notistack";
 import { TextField } from "@mui/material";

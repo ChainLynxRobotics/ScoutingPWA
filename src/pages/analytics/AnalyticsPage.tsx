@@ -1,6 +1,6 @@
 import { AppBar, Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemProps, ListItemText, MenuItem, Paper, Select, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField } from "@mui/material";
 import { ReactElement, useContext, useEffect, useMemo, useState } from "react";
-import MatchDatabase from "../../util/MatchDatabase";
+import matchDatabase from "../../util/db/matchDatabase";
 import { useNavigate } from "react-router-dom";
 import matchCompare from "../../util/matchCompare";
 import SettingsContext from "../../components/context/SettingsContext";
@@ -25,9 +25,9 @@ const AnalyticsPage = () => {
     useEffect(() => {
         const analyticsCompetition = settings?.analyticsCurrentCompetitionOnly ? settings?.competitionId : undefined;
 
-        MatchDatabase.getUniqueTeams(analyticsCompetition).then(setTeamList);
-        MatchDatabase.getUniqueMatchIds(analyticsCompetition).then((matchIds)=>setMatchList(matchIds.sort(matchCompare)));
-        MatchDatabase.getCountByScout(analyticsCompetition).then((countByScout)=>setCountByScout(countByScout));
+        matchDatabase.getUniqueTeams(analyticsCompetition).then(setTeamList);
+        matchDatabase.getUniqueMatchIds(analyticsCompetition).then((matchIds)=>setMatchList(matchIds.sort(matchCompare)));
+        matchDatabase.getCountByScout(analyticsCompetition).then((countByScout)=>setCountByScout(countByScout));
 
     }, [settings?.analyticsCurrentCompetitionOnly, settings?.competitionId]);
 

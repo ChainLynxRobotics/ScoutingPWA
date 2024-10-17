@@ -1,5 +1,5 @@
 import { DBSchema, IDBPDatabase, openDB } from "idb";
-import { MatchData, MatchDataHeader } from "../types/MatchData";
+import { MatchData, MatchDataHeader } from "../../types/MatchData";
 
 interface MatchDatabaseSchema extends DBSchema {
     entries: {

@@ -1,8 +1,8 @@
 import JSZip from "jszip";
-import { MatchData } from "../types/MatchData";
 import { stringify } from 'csv-stringify/browser/esm/sync';
-import AllianceColor from "../enums/AllianceColor";
-import { MatchDataFieldInformation, MatchDataFields } from "../MatchDataValues";
+import AllianceColor from "../../enums/AllianceColor";
+import { MatchDataFieldInformation, MatchDataFields } from "../../MatchDataValues";
+import { MatchData } from "../../types/MatchData";
 
 /**
  * Takes saved data and returns it as a blob zip file to be downloaded to a users computer. Includes both csv and json forms of the data.

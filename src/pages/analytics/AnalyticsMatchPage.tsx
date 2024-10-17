@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { MatchData } from "../../types/MatchData";
-import MatchDatabase from "../../util/MatchDatabase";
+import matchDatabase from "../../util/db/matchDatabase";
 import { FormControl, Select, MenuItem } from "@mui/material";
 import SettingsContext from "../../components/context/SettingsContext";
 
@@ -16,7 +16,7 @@ export default function AnalyticsMatchPage() {
     const analyticsCompetition = settings?.analyticsCurrentCompetitionOnly ? settings?.competitionId : undefined;
     useEffect(() => {
         async function loadMatches() {
-            setMatchList(await MatchDatabase.getUniqueMatchIds(analyticsCompetition));
+            setMatchList(await matchDatabase.getUniqueMatchIds(analyticsCompetition));
         }
         loadMatches();
     }, [analyticsCompetition]);
@@ -29,7 +29,7 @@ export default function AnalyticsMatchPage() {
         // Load entries for team
         async function loadEntries() {
             if (!matchId) return;
-            const entries = await MatchDatabase.getAllByMatchId(matchId);
+            const entries = await matchDatabase.getAllByMatchId(matchId);
             entries.sort((a, b) => a.matchId.localeCompare(b.matchId));
             setEntries(entries);
             setHasLoaded(true);

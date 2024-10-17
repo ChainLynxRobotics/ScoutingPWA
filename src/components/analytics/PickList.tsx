@@ -3,7 +3,7 @@ import SettingsContext from "../context/SettingsContext";
 import { DragDropContext, Draggable, DropResult } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "../StrictModeDroppable";
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import MatchDatabase from "../../util/MatchDatabase";
+import matchDatabase from "../../util/db/matchDatabase";
 import useLocalStorageState from "../hooks/localStorageState";
 import { useNavigate } from "react-router-dom";
 import { QRCodeData } from "../../types/QRCodeData";
@@ -64,7 +64,7 @@ export default function PickList() {
         async function updatePickListIndexTeams() {
             if (!settings) return;
 
-            const teams = await MatchDatabase.getUniqueTeams(settings.competitionId);
+            const teams = await matchDatabase.getUniqueTeams(settings.competitionId);
             
             const combinedList = [...new Set([...(pickListData.pickList), ...teams])];
             setPickListData({pickList: combinedList});

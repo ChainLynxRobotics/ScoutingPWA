@@ -1,7 +1,7 @@
 import { ReactElement, useContext, useState } from "react"
 import AllianceColor from "../../enums/AllianceColor";
 import ScoutingContext from "./ScoutingContext";
-import MatchDatabase from "../../util/MatchDatabase";
+import matchDatabase from "../../util/db/matchDatabase";
 import CurrentMatchContext from "./CurrentMatchContext";
 import { useNavigate } from "react-router-dom";
 import SettingsContext from "./SettingsContext";
@@ -40,7 +40,7 @@ function useScoutingContextData(matchId: string, teamNumber: number, allianceCol
 
     // Submit the match data to the database
     const submit = async () => {
-        await MatchDatabase.put(
+        await matchDatabase.put(
             {
                 // Header data
                 id: generateRandomId(),
