@@ -24,13 +24,13 @@ export default function QrCodeList({data, allowTextCopy}: {data: QRCodeData, all
 
     const generateQrCodes = useCallback(async (data: QRCodeData) => {
         const protos = await protobuf.load("/protobuf/data_transfer.proto");
-        const DataTransfer = protos.lookupType("DataTransfer");
+        const qrCodeDataProto = protos.lookupType("QrCodeData");
 
-        const errMsg = DataTransfer.verify(data);
+        const errMsg = qrCodeDataProto.verify(data);
         if (errMsg) throw Error(errMsg);
 
-        const protoData = DataTransfer.create(data);
-        const compressed = await compressBytes(DataTransfer.encode(protoData).finish());
+        const protoData = qrCodeDataProto.create(data);
+        const compressed = await compressBytes(qrCodeDataProto.encode(protoData).finish());
         const base64 = toBase64(compressed);
 
         console.log("Compressed Length: ", base64.length, "Chunks: ", Math.ceil(base64.length / QR_CHUNK_SIZE));

@@ -90,6 +90,48 @@ async function getAll() {
     return db.getAll('entries');
 }
 
+/**
+ * Gets all the ids for match data entries in the database
+ * 
+ * @returns Promise containing all the ids in the database
+ */
+async function getAllIds() {
+    const db = await tryOpenDatabase();
+    const tx = db.transaction(['entries'], 'readonly');
+    const store = tx.objectStore('entries');
+
+    const ids: number[] = [];
+    for await (const cursor of store.iterate()) {
+        ids.push(cursor.value.id);
+    }
+    await tx.done;
+    return ids;
+}
+
+/**
+ * Gets all the ids for match data entries in the database that are part of a given competition, e.g. their matchId starts with the competitionId
+ * 
+ * @param competitionId The competition id to filter by
+ * @returns Promise containing all the ids in the database that are part of the given competition
+ */
+async function getAllIdsByCompetition(competitionId: string) {
+    const db = await tryOpenDatabase();
+    const tx = db.transaction(['entries'], 'readonly');
+    const index = tx.objectStore('entries').index('by-matchId');
+
+    const ids: number[] = [];
+    for await (const cursor of index.iterate(competitionId)) {
+        if (cursor.value.matchId.startsWith(competitionId)) ids.push(cursor.value.id);
+    }
+    await tx.done;
+    return ids;
+}
+
+/**
+ * Retrieves all the match data headers (id, matchId, teamNumber, allianceColor) from the database
+ * 
+ * @returns Promise containing all the match data headers in the database
+ */
 async function getAllHeaders() {
     const db = await tryOpenDatabase();
     const tx = db.transaction(['entries'], 'readonly');
@@ -151,11 +193,31 @@ async function getUniqueMatchIds(competitionId?: string) {
 /**
  * Gets an entry object by its unique id
  * 
+ * @param id The unique id
  * @returns MatchData object
  */
 async function get(id: number) {
     const db = await tryOpenDatabase();
     return db.getFromIndex('entries', 'by-id', id);
+}
+
+/**
+ * Retrieves all the entries from the database that match the list of given ids.
+ * 
+ * @param ids A list of ids
+ * @returns List of MatchData objects
+ */
+async function getMultiple(ids: number[]) {
+    const db = await tryOpenDatabase();
+    const tx = db.transaction(['entries'], 'readonly');
+    const store = tx.objectStore('entries');
+
+    const entries: MatchData[] = [];
+    for await (const cursor of store.iterate()) {
+        if (ids.includes(cursor.value.id)) entries.push(cursor.value);
+    }
+    await tx.done;
+    return entries;
 }
 
 /**
@@ -257,7 +319,10 @@ export default {
     put,
     putAll,
     get,
+    getMultiple,
     getAll,
+    getAllIds,
+    getAllIdsByCompetition,
     getAllHeaders,
     getUniqueTeams,
     getUniqueMatchIds,

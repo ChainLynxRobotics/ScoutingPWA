@@ -3,7 +3,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import MatchDatabase from "../util/MatchDatabase";
 import { MatchIdentifier } from "../types/MatchData";
 import QrCodeType from "../enums/QrCodeType";
-import MatchDataIO from "../util/ScoutDataIO";
+import zip from "../util/zip";
 import useLocalStorageState from "../components/hooks/localStorageState";
 import matchCompare from "../util/matchCompare";
 import FileSaver from "file-saver";
@@ -90,7 +90,7 @@ const DataPage = () => {
         try {
             const allEntries = await MatchDatabase.getAll();
 
-            const blob = await MatchDataIO.exportDataAsZip(allEntries);
+            const blob = await zip.exportDataAsZip(allEntries);
             const date = new Date();
 
             FileSaver.saveAs(blob, 
@@ -113,7 +113,7 @@ const DataPage = () => {
         setLoading(true);
         try {
             let currentCount = entries?.length || 0;
-            const data = await MatchDataIO.importDataFromZip(file);
+            const data = await zip.importDataFromZip(file);
             await MatchDatabase.putAll(data.entries);
             const newEntries = await updateEntries();
             currentCount = newEntries.length - currentCount;

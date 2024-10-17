@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-// Make sure this file is up to date with src/types/QRCodeData.ts
+// Make sure this file is up to date with src/types/QRCodeData.ts and src/types/MeshPacketData.ts
 
-message DataTransfer {
+message QrCodeData {
     QrCodeType qrType = 1;
     string version = 2;
 
@@ -93,4 +93,29 @@ message PickListData {
     repeated int32 pickList = 1;
     repeated int32 crossedOut = 2;
     string competitionId = 3;
+}
+
+
+////////////////////////
+//  Mesh Packet Data  //
+////////////////////////
+
+
+message MeshPacketData {
+    MeshPacketType packetType = 1;
+    string version = 2;
+
+    optional MatchScoutingData matchScoutingData = 3;
+    optional MatchRequestData matchRequestData = 4;
+}
+
+enum MeshPacketType {
+    MatchDataBroadcast = 0;
+    MatchDataRequest = 1;
+    MatchDataReply = 2;
+}
+
+message MatchRequestData {
+    string competitionId = 1;
+    repeated int32 knownMatches = 2;
 }

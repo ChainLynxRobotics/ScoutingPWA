@@ -50,3 +50,10 @@ export const TBA_API_KEY = "LDcEXFW8I1T9JKMmfMCog29Ilyw45pdHgKUY7dNosZmoxOjs1MIO
  * Larger number means less chunks, but more data per chunk (larger qr codes, harder to scan).
  */
 export const QR_CHUNK_SIZE = 256;
+
+
+/**
+ * The port number to use for the meshtastic connection
+ * See https://js.meshtastic.org/enums/Protobuf.Portnums.PortNum.html
+ */
+export const MESHTASTIC_PORT_NUMBER = 428;

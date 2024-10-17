@@ -35,11 +35,11 @@ export default function QrCodeScanner({onReceiveData, allowTextPaste}: {onReceiv
         setLoading(true);
         try {
             const protos = await protobuf.load("/protobuf/data_transfer.proto");
-            const DataTransfer = protos.lookupType("DataTransfer");
+            const QrCodeDataProto = protos.lookupType("QrCodeData");
 
             const bytes = await decompressBytes(fromBase64(data));
-            const message = DataTransfer.decode(bytes);
-            const object = DataTransfer.toObject(message) as QRCodeData;
+            const message = QrCodeDataProto.decode(bytes);
+            const object = QrCodeDataProto.toObject(message) as QRCodeData;
             setLoading(false);
             
             await onReceiveData(object);
