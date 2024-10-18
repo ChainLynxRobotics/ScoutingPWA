@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-// Make sure this file is up to date with src/types/QRCodeData.ts and src/types/MeshPacketData.ts
+// Make sure this file is up to date with src/types/QRCodeData.ts and src/types/RadioPacketData.ts
 
 message QrCodeData {
     QrCodeType qrType = 1;
@@ -97,19 +97,19 @@ message PickListData {
 
 
 ////////////////////////
-//  Mesh Packet Data  //
+//  Radio Packet Data //
 ////////////////////////
 
 
-message MeshPacketData {
-    MeshPacketType packetType = 1;
+message RadioPacketData {
+    RadioPacketType packetType = 1;
     string version = 2;
 
     optional MatchScoutingData matchScoutingData = 3;
     optional MatchRequestData matchRequestData = 4;
 }
 
-enum MeshPacketType {
+enum RadioPacketType {
     MatchDataBroadcast = 0;
     MatchDataRequest = 1;
     MatchDataReply = 2;
